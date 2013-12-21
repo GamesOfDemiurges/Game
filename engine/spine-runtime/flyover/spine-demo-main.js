@@ -1,35 +1,30 @@
 /**
- * Copyright (c) 2013 Flyover Games, LLC 
- *  
- * Isaac Burns isaacburns@gmail.com 
- *  
- * Permission is hereby granted, free of charge, to any person 
- * obtaining a copy of this software and associated 
- * documentation files (the "Software"), to deal in the Software 
- * without restriction, including without limitation the rights 
- * to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the 
- * following conditions: 
- *  
- * The above copyright notice and this permission notice shall 
- * be included in all copies or substantial portions of the 
- * Software. 
- *  
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY 
- * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE 
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+ * Copyright (c) 2013 Flyover Games, LLC
+ *
+ * Isaac Burns isaacburns@gmail.com
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software
+ * without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the
+ * following conditions:
+ *
+ * The above copyright notice and this permission notice shall
+ * be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+ * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-goog.provide('main.start');
-
-goog.require('fo');
-goog.require('spine');
 
 /**
  * @return {void}
@@ -92,14 +87,8 @@ main.start = function ()
 	var pose = new spine.pose();
 	var data = new spine.data();
 
-	if (single_file)
-	{
-		//var url = "data/examples/example.json";
-		//var url  = "data/examples/spineboy/spineboy.json";
+	if (single_file) {
 		var url  = "data/examples/dragon/dragon.json";
-		//var url = "data/examples/goblins/goblins.json";
-		//var url = "data/examples/powerup/skeleton.json";
-		//var url = "data/examples/spinosaurus/skeleton.json";
 
 		data_info_div.innerHTML = "Loading...";
 		main.load_data_from_url(data, url, (function (skeleton) { return function ()
@@ -113,63 +102,6 @@ main.start = function ()
 			set_camera(pose);
 		}
 		})(data));
-	}
-	else
-	{
-		//var skeleton_url = "data/examples/example-skeleton.json";
-		//var animation_urls = [ "data/examples/example-animation.json" ];
-
-		//var skeleton_url  = "data/examples/spineboy/spineboy-skeleton.json";
-		//var animation_urls = 
-		//[
-		//	"data/examples/spineboy/spineboy-walk.json",
-		//	"data/examples/spineboy/spineboy-jump.json"
-		//];
-
-		var skeleton_url  = "data/examples/dragon/dragon-skeleton.json";
-		var animation_urls = 
-		[
-			"data/examples/dragon/dragon-flying.json"
-		];
-
-		//var skeleton_url = "data/examples/goblins/goblins-skeleton.json";
-		//var animation_urls = [ "data/examples/goblins/goblins-walk.json" ];
-
-		//var skeleton_url = "data/examples/powerup/skeleton-skeleton.json";
-		//var animation_urls = [ "data/examples/powerup/skeleton-animation.json" ];
-
-		//var skeleton_url = "data/examples/spinosaurus/skeleton-skeleton.json";
-		//var animation_urls = [ "data/examples/spinosaurus/skeleton-animation.json" ];
-
-		var skeleton = data.m_skeleton;
-		skeleton_info_div.innerHTML = "Loading...";
-		main.load_skeleton_from_url(skeleton, skeleton_url, (function (skeleton) { return function ()
-		{
-			skeleton_info_div.innerHTML = "Skeleton Name: " + skeleton_url;
-
-			pose = new spine.pose(data);
-			set_camera(pose);
-
-			for (var anim_url_idx = 0; anim_url_idx < animation_urls.length; ++anim_url_idx)
-			{
-				var animation_url = animation_urls[anim_url_idx];
-				var animation = new spine.animation();
-				animation.name = animation_url;
-				if (anim_url_idx == 0) { pose.setAnim(animation.name); }
-				animation_info_div.innerHTML = "Loading...";
-				main.load_animation_from_url(animation, animation_url, (function (animation) { return function ()
-				{
-					animation_info_div.innerHTML = "Animation Name: " + animation_url;
-					if (animation.name)
-					{
-						data.m_animations[animation.name] = animation;
-					}
-					set_camera(pose);
-				}
-				})(animation));
-			}
-		}
-		})(skeleton));
 	}
 
 	var file_input = file_input_div.appendChild(document.createElement('input'));
@@ -271,7 +203,7 @@ main.start = function ()
 			}
 			})(skeleton));
 		}
-	}, 
+	},
 	false);
 
 	var cursor_x = 0;
@@ -285,12 +217,12 @@ main.start = function ()
 		cursor_down = true;
 		cursor_down_x = e.clientX;
 		cursor_down_y = e.clientY;
-	}, 
+	},
 	false);
 	canvas_div.addEventListener('mouseup', function (e)
 	{
 		cursor_down = false;
-	}, 
+	},
 	false);
 	canvas_div.addEventListener('mousemove', function (e)
 	{
@@ -333,7 +265,7 @@ main.start = function ()
 			camera_scale *= 0.9;
 			camera_scale = Math.max(camera_scale, 0.01);
 		}
-	}, 
+	},
 	false);
 
 	var canvas_2d_div = canvas_div.appendChild(document.createElement('div'));
@@ -346,17 +278,6 @@ main.start = function ()
 	canvas_2d.width = canvas_w;
 	canvas_2d.height = canvas_h;
 	var view_2d = new main.view_2d(canvas_2d);
-
-	var canvas_gl_div = canvas_div.appendChild(document.createElement('div'));
-	canvas_gl_div.style.display = 'inline-block';
-	var label = canvas_gl_div.appendChild(document.createElement('div'));
-	label.innerHTML = "WebGL Canvas";
-	var canvas_gl = /** @type {HTMLCanvasElement} */ (canvas_gl_div.appendChild(document.createElement('canvas')));
-	canvas_gl.style.display = 'inline-block';
-	canvas_gl.style.border = '1px solid black';
-	canvas_gl.width = canvas_w;
-	canvas_gl.height = canvas_h;
-	var view_gl = new main.view_gl(canvas_gl);
 
 	var time_scale = 1.0;
 
@@ -374,7 +295,7 @@ main.start = function ()
 	{
 		time_scale = parseFloat(e.target.value);
 		slider_value.innerHTML = time_scale.toFixed(2);
-	}, 
+	},
 	false);
 
 	var debug_draw = false;
@@ -387,7 +308,7 @@ main.start = function ()
 	checkbox.addEventListener('change', function (e)
 	{
 		debug_draw = e.target.checked;
-	}, 
+	},
 	false);
 
 	var update = function (tick)
@@ -439,8 +360,8 @@ main.start = function ()
 					var extent = main.get_pose_extent(pose);
 					ctx_2d.strokeStyle = 'blue';
 					ctx_2d.strokeRect(
-						extent.min.x, extent.min.y, 
-						extent.max.x - extent.min.x, 
+						extent.min.x, extent.min.y,
+						extent.max.x - extent.min.x,
 						extent.max.y - extent.min.y);
 				}
 				else
@@ -451,27 +372,6 @@ main.start = function ()
 			ctx_2d.restore();
 
 			//if (debug_draw) { main.test_draw_bezier_curves(tick, ctx_2d); }
-		}
-	}
-
-	var draw_gl = function ()
-	{
-		var ctx_gl = view_gl.ctx_gl;
-
-		if (ctx_gl)
-		{
-			ctx_gl.clear(ctx_gl.COLOR_BUFFER_BIT | ctx_gl.DEPTH_BUFFER_BIT);
-
-			// apply camera
-			var camera_mtx = new fo.m3x2();
-			camera_mtx.selfScale(1 / camera_scale, 1 / camera_scale);
-			camera_mtx.selfRotateDegrees(-camera_angle);
-			camera_mtx.selfTranslate(-camera_x, -camera_y);
-			view_gl.load_camera_mtx(camera_mtx);
-
-			view_gl.draw_pose_gl(pose);
-
-			ctx_gl.flush();
 		}
 	}
 
@@ -495,8 +395,6 @@ main.start = function ()
 		tick.time_last = time;
 
 		draw_2d();
-
-		draw_gl();
 	}
 
 	loop(tick.time_last);
@@ -518,7 +416,8 @@ main.load_data_from_url = function (data, url, callback)
 			return;
 		}
 
-		data.load(goog.global.JSON.parse(e.target.responseText));
+		data.load(JSON.parse(e.target.responseText));
+		/* data.load(goog.global.JSON.parse(e.target.responseText)); */
 
 		callback();
 
@@ -557,7 +456,7 @@ main.load_data_from_url = function (data, url, callback)
 				}
 			}
 		}
-	}, 
+	},
 	false);
 	req.send();
 
@@ -617,7 +516,7 @@ main.load_skeleton_from_url = function (skeleton, url, callback)
 				}
 			}
 		}
-	}, 
+	},
 	false);
 	req.send();
 
@@ -639,7 +538,7 @@ main.load_animation_from_url = function (animation, url, callback)
 		animation.load(goog.global.JSON.parse(e.target.responseText));
 
 		callback();
-	}, 
+	},
 	false);
 	req.send();
 
@@ -711,7 +610,7 @@ main.load_skeleton_from_input_file = function (skeleton, skeleton_file, input_fi
 				}
 			}
 		}
-	}, 
+	},
 	false);
 	skeleton_file_reader.readAsText(skeleton_file);
 }
@@ -724,15 +623,15 @@ main.load_animation_from_input_file = function (animation, animation_file, input
 		animation.load(goog.global.JSON.parse(e.target.result));
 
 		callback();
-	}, 
+	},
 	false);
 	animation_file_reader.readAsText(animation_file);
 }
 
 /**
- * @return {Object} 
- * @param {spine.pose} pose 
- * @param {Object=} extent 
+ * @return {Object}
+ * @param {spine.pose} pose
+ * @param {Object=} extent
  */
 main.get_pose_extent = function (pose, extent)
 {
@@ -833,7 +732,7 @@ main.get_pose_extent = function (pose, extent)
 
 /**
  * @constructor
- * @param {HTMLCanvasElement} canvas_2d 
+ * @param {HTMLCanvasElement} canvas_2d
  */
 main.view_2d = function (canvas_2d)
 {
@@ -841,8 +740,8 @@ main.view_2d = function (canvas_2d)
 }
 
 /**
- * @return {void} 
- * @param {spine.pose} pose 
+ * @return {void}
+ * @param {spine.pose} pose
  */
 main.view_2d.prototype.debug_draw_skeleton_2d = function (pose)
 {
@@ -904,8 +803,8 @@ main.view_2d.prototype.debug_draw_skeleton_2d = function (pose)
 }
 
 /**
- * @return {void} 
- * @param {spine.pose} pose 
+ * @return {void}
+ * @param {spine.pose} pose
  */
 main.view_2d.prototype.draw_skeleton_2d = function (pose)
 {
@@ -977,8 +876,8 @@ main.view_2d.prototype.draw_skeleton_2d = function (pose)
 }
 
 /**
- * @return {void} 
- * @param {spine.pose} pose 
+ * @return {void}
+ * @param {spine.pose} pose
  */
 main.view_2d.prototype.debug_draw_pose_2d = function (pose)
 {
@@ -1042,8 +941,8 @@ main.view_2d.prototype.debug_draw_pose_2d = function (pose)
 }
 
 /**
- * @return {void} 
- * @param {spine.pose} pose 
+ * @return {void}
+ * @param {spine.pose} pose
  */
 main.view_2d.prototype.draw_pose_2d = function (pose)
 {
@@ -1117,202 +1016,9 @@ main.view_2d.prototype.draw_pose_2d = function (pose)
 }
 
 /**
- * @constructor 
- * @param {HTMLCanvasElement} canvas_gl 
- */
-main.view_gl = function (canvas_gl)
-{
-	var opt_gl = {};
-
-	var ctx_gl = canvas_gl.getContext('webgl', opt_gl);
-	ctx_gl = ctx_gl || canvas_gl.getContext('experimental-webgl', opt_gl);
-	ctx_gl = ctx_gl || canvas_gl.getContext('webkit-3d', opt_gl);
-	ctx_gl = ctx_gl || canvas_gl.getContext('moz-webgl', opt_gl);
-	this.ctx_gl = ctx_gl;
-
-	if (!ctx_gl)
-	{
-		canvas_gl.style.backgroundColor = 'rgba(127,0,0,1.0)';
-	}
-
-	if (ctx_gl)
-	{
-		//window.console.log(ctx_gl.getSupportedExtensions());
-
-		if (!ctx_gl.getExtension('WEBKIT_WEBGL_compressed_texture_s3tc') && 
-			!ctx_gl.getExtension('MOZ_WEBGL_compressed_texture_s3tc'))
-		{
-			window.console.log("No WebGL Compressed Texture S3TC");
-		}
-	}
-
-	if (ctx_gl)
-	{
-		ctx_gl.clearColor(0.0, 0.0, 0.0, 0.0);
-		ctx_gl.clearDepth(1.0);
-
-		ctx_gl.depthFunc(ctx_gl.LEQUAL);
-		ctx_gl.enable(ctx_gl.DEPTH_TEST);
-
-		//ctx_gl.alphaTest(ctx_gl.GREATER, 0.5);
-		//ctx_gl.enable(ctx_gl.ALPHA_TEST);
-
-		ctx_gl.blendFunc(ctx_gl.ONE, ctx_gl.ONE_MINUS_SRC_ALPHA);
-		ctx_gl.enable(ctx_gl.BLEND);
-
-		ctx_gl.viewport(0, 0, ctx_gl.canvas.width, ctx_gl.canvas.height);
-
-		// matrices
-		var uMatrixP = this.uMatrixP = new Float32Array(16); // projection matrix
-		var uMatrixC = this.uMatrixC = new Float32Array(16); // camera matrix
-		var uMatrixM = this.uMatrixM = new Float32Array(16); // modelview matrix
-
-		var uGlobalAlpha = this.uGlobalAlpha = new Float32Array(1);
-
-		var mtx = new fo.m3x2();
-		mtx.selfScale(2 / ctx_gl.canvas.width, 2 / ctx_gl.canvas.height);
-		this.load_projection_mtx(mtx);
-
-		this.load_camera_mtx(fo.m3x2.IDENTITY);
-
-		this.load_modelview_mtx(fo.m3x2.IDENTITY);
-
-		var compile_shader = function (src, type)
-		{
-			var shader = ctx_gl.createShader(type);
-			ctx_gl.shaderSource(shader, src);
-			ctx_gl.compileShader(shader);
-			if (!ctx_gl.getShaderParameter(shader, ctx_gl.COMPILE_STATUS))
-			{
-				window.console.log(ctx_gl.getShaderInfoLog(shader));
-				ctx_gl.deleteShader(shader);
-				shader = null;
-			}
-			return shader;
-		}
-
-		// vertex shader
-		var vs_src = "";
-		vs_src += "uniform mat4 uMatrixP;";
-		vs_src += "uniform mat4 uMatrixC;";
-		vs_src += "uniform mat4 uMatrixM;";
-		vs_src += "attribute vec3 aVertexPosition;";
-		vs_src += "attribute vec4 aVertexColor;";
-		vs_src += "attribute vec2 aVertexTexCoord;";
-		vs_src += "varying vec4 vColor;";
-		vs_src += "varying vec2 vTexCoord;";
-		vs_src += "void main(void) {";
-		vs_src += " gl_Position = uMatrixP * uMatrixC * uMatrixM * vec4(aVertexPosition, 1.0);";
-		vs_src += " vColor = aVertexColor;";
-		vs_src += " vTexCoord = aVertexTexCoord;";
-		vs_src += "}";
-		var vs = compile_shader(vs_src, ctx_gl.VERTEX_SHADER);
-
-		// fragment shader
-		var fs_src = "";
-		fs_src += "precision mediump float;";
-		fs_src += "uniform float uGlobalAlpha;";
-		fs_src += "uniform sampler2D uSampler;";
-		fs_src += "varying vec4 vColor;";
-		fs_src += "varying vec2 vTexCoord;";
-		fs_src += "void main(void) {";
-		fs_src += " gl_FragColor = texture2D(uSampler, vTexCoord.st);";
-		fs_src += " gl_FragColor *= uGlobalAlpha;";
-		fs_src += "}";
-		var fs = compile_shader(fs_src, ctx_gl.FRAGMENT_SHADER);
-
-		var link_program = function (vs, fs)
-		{
-			var program = ctx_gl.createProgram();
-			ctx_gl.attachShader(program, vs);
-			ctx_gl.attachShader(program, fs);
-			ctx_gl.linkProgram(program);
-			if (!ctx_gl.getProgramParameter(program, ctx_gl.LINK_STATUS))
-			{
-				window.console.log("could not link shader program");
-				ctx_gl.deleteProgram(program);
-				program = null;
-			}
-			return program;
-		}
-
-		// shader program
-		var program = this.program = link_program(vs, fs);
-
-		program.uMatrixP = ctx_gl.getUniformLocation(program, "uMatrixP");
-		program.uMatrixC = ctx_gl.getUniformLocation(program, "uMatrixC");
-		program.uMatrixM = ctx_gl.getUniformLocation(program, "uMatrixM");
-
-		program.uGlobalAlpha = ctx_gl.getUniformLocation(program, "uGlobalAlpha");
-		program.uSampler = ctx_gl.getUniformLocation(program, "uSampler");
-
-		program.aVertexPosition = ctx_gl.getAttribLocation(program, "aVertexPosition");
-		program.aVertexColor = ctx_gl.getAttribLocation(program, "aVertexColor");
-		program.aVertexTexCoord = ctx_gl.getAttribLocation(program, "aVertexTexCoord");
-
-		// vertex position buffer
-		var vertex_position_array = 
-		[
-			-1.0, -1.0, 0.0, // tl
-			-1.0,  1.0, 0.0, // bl
-			 1.0,  1.0, 0.0, // br
-			 1.0, -1.0, 0.0  // tr
-		];  
-		var vertex_position_buffer = this.vertex_position_buffer = ctx_gl.createBuffer();
-		ctx_gl.bindBuffer(ctx_gl.ARRAY_BUFFER, vertex_position_buffer);
-		ctx_gl.bufferData(ctx_gl.ARRAY_BUFFER, new Float32Array(vertex_position_array), ctx_gl.STATIC_DRAW);
-		vertex_position_buffer.itemType = ctx_gl.FLOAT;
-		vertex_position_buffer.itemSize = 3; // floats per position
-		vertex_position_buffer.numItems = vertex_position_array.length / vertex_position_buffer.itemSize;
-
-		// vertex color buffer
-		var vertex_color_array = 
-		[
-			1.0, 0.0, 0.0, 0.5, // tl
-			0.0, 1.0, 0.0, 0.5, // bl
-			0.0, 0.0, 1.0, 0.5, // br
-			1.0, 1.0, 1.0, 0.5  // tr
-		];  
-		var vertex_color_buffer = this.vertex_color_buffer = ctx_gl.createBuffer();
-		ctx_gl.bindBuffer(ctx_gl.ARRAY_BUFFER, vertex_color_buffer);
-		ctx_gl.bufferData(ctx_gl.ARRAY_BUFFER, new Float32Array(vertex_color_array), ctx_gl.STATIC_DRAW);
-		vertex_color_buffer.itemType = ctx_gl.FLOAT;
-		vertex_color_buffer.itemSize = 4; // floats per color
-		vertex_color_buffer.numItems = vertex_color_array.length / vertex_color_buffer.itemSize;
-
-		// vertex texture coordinate buffer
-		var vertex_texcoord_array = 
-		[
-			0.0, 0.0, // tl
-			0.0, 1.0, // bl
-			1.0, 1.0, // br
-			1.0, 0.0  // tr
-		];  
-		var vertex_texcoord_buffer = this.vertex_texcoord_buffer = ctx_gl.createBuffer();
-		ctx_gl.bindBuffer(ctx_gl.ARRAY_BUFFER, vertex_texcoord_buffer);
-		ctx_gl.bufferData(ctx_gl.ARRAY_BUFFER, new Float32Array(vertex_texcoord_array), ctx_gl.STATIC_DRAW);
-		vertex_texcoord_buffer.itemType = ctx_gl.FLOAT;
-		vertex_texcoord_buffer.itemSize = 2; // floats per texture coordinate
-		vertex_texcoord_buffer.numItems = vertex_texcoord_array.length / vertex_texcoord_buffer.itemSize;
-
-		// vertex index buffer
-		var vertex_index_array = 
-		[
-			0, 1, 2, 3
-		];
-		var vertex_index_buffer = this.vertex_index_buffer = ctx_gl.createBuffer();
-		ctx_gl.bindBuffer(ctx_gl.ELEMENT_ARRAY_BUFFER, vertex_index_buffer);
-		ctx_gl.bufferData(ctx_gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertex_index_array), ctx_gl.STATIC_DRAW);
-		vertex_index_buffer.itemType = ctx_gl.UNSIGNED_SHORT;
-		vertex_index_buffer.itemSize = 1; // unsigned short per index
-		vertex_index_buffer.numItems = vertex_index_array.length / vertex_index_buffer.itemSize;
-	}
-}
-
-/**
- * @return {void} 
- * @param {Float32Array} dst 
- * @param {fo.m3x2} src 
+ * @return {void}
+ * @param {Float32Array} dst
+ * @param {fo.m3x2} src
  */
 main.set_a16_from_m3x2 = function (dst, src)
 {
@@ -1320,154 +1026,6 @@ main.set_a16_from_m3x2 = function (dst, src)
 	dst[ 4] = src.b_x; dst[ 5] = src.b_y; dst[ 6] = 0; dst[ 7] = 0; // col 1
 	dst[ 8] = 0;       dst[ 9] = 0;       dst[10] = 1; dst[11] = 0; // col 2
 	dst[12] = src.c_x; dst[13] = src.c_y; dst[14] = 0; dst[15] = 1; // col 3
-}
-
-/**
- * @return {void} 
- * @param {fo.m3x2} mtx 
- */
-main.view_gl.prototype.load_projection_mtx = function (mtx)
-{
-	main.set_a16_from_m3x2(this.uMatrixP, mtx);
-}
-
-/**
- * @return {void} 
- * @param {fo.m3x2} mtx 
- */
-main.view_gl.prototype.load_camera_mtx = function (mtx)
-{
-	main.set_a16_from_m3x2(this.uMatrixC, mtx);
-}
-
-/**
- * @return {void} 
- * @param {fo.m3x2} mtx 
- */
-main.view_gl.prototype.load_modelview_mtx = function (mtx)
-{
-	main.set_a16_from_m3x2(this.uMatrixM, mtx);
-}
-
-/**
- * @return {void} 
- * @param {spine.pose} pose 
- */
-main.view_gl.prototype.draw_pose_gl = function (pose)
-{
-	var data = pose.m_data;
-	if (!data) { return; }
-	var skeleton = data.m_skeleton;
-	if (!skeleton) { return; }
-
-	pose.strike();
-
-	var ctx_gl = this.ctx_gl;
-
-	var skel_bones = pose.m_tweened_skel_bones;
-	var skel_slots = pose.m_tweened_skel_slots;
-
-	var mtx = new fo.m3x2();
-
-	var apply_skel_bone_transform = function (skel_bone)
-	{
-		if (skel_bone.parent)
-		{
-			apply_skel_bone_transform(skel_bones[skel_bone.parent]);
-		}
-		mtx.selfTranslate(skel_bone.x, skel_bone.y);
-		mtx.selfRotateDegrees(skel_bone.rotation);
-		mtx.selfScale(skel_bone.scaleY, skel_bone.scaleY);
-	}
-
-	var skel_skin = (skeleton.current_skin_i != null)?(skeleton.skins[skeleton.current_skin_i]):(null);
-
-	if (skel_skin) for (var slot_i in skel_slots)
-	{
-		var skel_slot = skel_slots[slot_i];
-		var skin_attachment_i = skel_slot.attachment;
-		if (!skin_attachment_i) { continue; }
-		var skin_slot = skel_skin.skin_slots[slot_i];
-		if (!skin_slot) { continue; }
-
-		var skel_bone = skel_bones[skel_slot.bone];
-		var skin_attachment = skin_slot.skin_attachments[skin_attachment_i];
-
-		mtx.makeIdentity();
-
-		apply_skel_bone_transform(skel_bone);
-
-		mtx.selfTranslate(skin_attachment.x, skin_attachment.y);
-		mtx.selfRotateDegrees(skin_attachment.rotation);
-		mtx.selfScale(skin_attachment.scaleX, skin_attachment.scaleY);
-
-		var name = skin_attachment.name || skin_attachment_i;
-
-		var file = skeleton.files && skeleton.files[name];
-
-		if (file && file.image && !file.image.hidden)
-		{
-			var w = file.width;
-			var h = file.height;
-			mtx.selfScale(w/2, h/2);
-		}
-		else
-		{
-			var w = skin_attachment.width;
-			var h = skin_attachment.height;
-			mtx.selfScale(w/2, h/2);
-		}
-
-		this.load_modelview_mtx(mtx);
-
-		this.uGlobalAlpha[0] = skel_slot.color.a;
-
-		if (file && !file.texture && file.image && !file.image.hidden)
-		{
-			file.texture = ctx_gl.createTexture();
-			ctx_gl.bindTexture(ctx_gl.TEXTURE_2D, file.texture);
-			ctx_gl.pixelStorei(ctx_gl.UNPACK_FLIP_Y_WEBGL, true);
-			ctx_gl.pixelStorei(ctx_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-			ctx_gl.texImage2D(ctx_gl.TEXTURE_2D, 0, ctx_gl.RGBA, ctx_gl.RGBA, ctx_gl.UNSIGNED_BYTE, file.image);
-			ctx_gl.texParameteri(ctx_gl.TEXTURE_2D, ctx_gl.TEXTURE_MAG_FILTER, ctx_gl.LINEAR);
-			ctx_gl.texParameteri(ctx_gl.TEXTURE_2D, ctx_gl.TEXTURE_MIN_FILTER, ctx_gl.LINEAR);
-			ctx_gl.texParameteri(ctx_gl.TEXTURE_2D, ctx_gl.TEXTURE_WRAP_S, ctx_gl.CLAMP_TO_EDGE);
-			ctx_gl.texParameteri(ctx_gl.TEXTURE_2D, ctx_gl.TEXTURE_WRAP_T, ctx_gl.CLAMP_TO_EDGE);
-			ctx_gl.bindTexture(ctx_gl.TEXTURE_2D, null);
-		}
-
-		if (file && file.texture)
-		{
-			var program = this.program;
-
-			ctx_gl.useProgram(program);
-
-			ctx_gl.uniformMatrix4fv(program.uMatrixP, false, this.uMatrixP);
-			ctx_gl.uniformMatrix4fv(program.uMatrixC, false, this.uMatrixC);
-			ctx_gl.uniformMatrix4fv(program.uMatrixM, false, this.uMatrixM);
-
-			ctx_gl.uniform1fv(program.uGlobalAlpha, this.uGlobalAlpha);
-
-			ctx_gl.activeTexture(ctx_gl.TEXTURE0);
-			ctx_gl.bindTexture(ctx_gl.TEXTURE_2D, file.texture);
-			ctx_gl.uniform1i(program.uSampler, 0);
-
-			ctx_gl.bindBuffer(ctx_gl.ARRAY_BUFFER, this.vertex_position_buffer);
-			ctx_gl.vertexAttribPointer(program.aVertexPosition, this.vertex_position_buffer.itemSize, this.vertex_position_buffer.itemType, false, 0, 0);
-			ctx_gl.enableVertexAttribArray(program.aVertexPosition);
-
-			ctx_gl.bindBuffer(ctx_gl.ARRAY_BUFFER, this.vertex_color_buffer);
-			ctx_gl.vertexAttribPointer(program.aVertexColor, this.vertex_color_buffer.itemSize, this.vertex_color_buffer.itemType, false, 0, 0);
-			ctx_gl.enableVertexAttribArray(program.aVertexColor);
-
-			ctx_gl.bindBuffer(ctx_gl.ARRAY_BUFFER, this.vertex_texcoord_buffer);
-			ctx_gl.vertexAttribPointer(program.aVertexTexCoord, this.vertex_texcoord_buffer.itemSize, this.vertex_texcoord_buffer.itemType, false, 0, 0);
-			ctx_gl.enableVertexAttribArray(program.aVertexTexCoord);
-
-			ctx_gl.bindBuffer(ctx_gl.ELEMENT_ARRAY_BUFFER, this.vertex_index_buffer);
-			ctx_gl.drawElements(ctx_gl.TRIANGLE_FAN, this.vertex_index_buffer.numItems, this.vertex_index_buffer.itemType, 0);
-		}
-	}
 }
 
 main.test_draw_bezier_curves = function (tick, ctx_2d)

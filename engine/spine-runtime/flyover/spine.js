@@ -1,40 +1,35 @@
 /**
- * Copyright (c) 2013 Flyover Games, LLC 
- *  
- * Isaac Burns isaacburns@gmail.com 
- *  
- * Permission is hereby granted, free of charge, to any person 
- * obtaining a copy of this software and associated 
- * documentation files (the "Software"), to deal in the Software 
- * without restriction, including without limitation the rights 
- * to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the 
- * following conditions: 
- *  
- * The above copyright notice and this permission notice shall 
- * be included in all copies or substantial portions of the 
- * Software. 
- *  
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY 
- * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE 
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+ * Copyright (c) 2013 Flyover Games, LLC
+ *
+ * Isaac Burns isaacburns@gmail.com
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software
+ * without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the
+ * following conditions:
+ *
+ * The above copyright notice and this permission notice shall
+ * be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+ * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 /**
- * A JavaScript API for the Spine JSON animation data format.
- */
-goog.provide('spine');
-
-/**
- * @return {boolean} 
- * @param {string} value 
- * @param {boolean=} def 
+ * @return {boolean}
+ * @param {string} value
+ * @param {boolean=} def
  */
 spine.toBool = function (value, def)
 {
@@ -46,9 +41,9 @@ spine.toBool = function (value, def)
 }
 
 /**
- * @return {number} 
- * @param {string} value 
- * @param {number=} def 
+ * @return {number}
+ * @param {string} value
+ * @param {number=} def
  */
 spine.toInt = function (value, def)
 {
@@ -60,9 +55,9 @@ spine.toInt = function (value, def)
 }
 
 /**
- * @return {number} 
- * @param {string} value 
- * @param {number=} def 
+ * @return {number}
+ * @param {string} value
+ * @param {number=} def
  */
 spine.toFloat = function (value, def)
 {
@@ -74,9 +69,9 @@ spine.toFloat = function (value, def)
 }
 
 /**
- * @return {?string} 
- * @param {string} value 
- * @param {?string=} def 
+ * @return {?string}
+ * @param {string} value
+ * @param {?string=} def
  */
 spine.toString = function (value, def)
 {
@@ -89,8 +84,8 @@ spine.toString = function (value, def)
 
 /**
  * @return {Array}
- * @param {*} value 
- * @param {Array=} def 
+ * @param {*} value
+ * @param {Array=} def
  */
 spine.toArray = function (value, def)
 {
@@ -125,8 +120,8 @@ spine.color = function ()
 }
 
 /**
- * @return {spine.color} 
- * @param {spine.color} other 
+ * @return {spine.color}
+ * @param {spine.color} other
  */
 spine.color.prototype.copy = function (other)
 {
@@ -139,8 +134,8 @@ spine.color.prototype.copy = function (other)
 }
 
 /**
- * @return {spine.color} 
- * @param {*} json 
+ * @return {spine.color}
+ * @param {*} json
  */
 spine.color.prototype.load = function (json)
 {
@@ -161,12 +156,12 @@ spine.color.prototype.load = function (json)
 
 // from: http://github.com/arian/cubic-bezier
 /**
- * @return {function(number):number} 
- * @param {number} x1 
- * @param {number} y1 
- * @param {number} x2 
- * @param {number} y2 
- * @param {number=} epsilon 
+ * @return {function(number):number}
+ * @param {number} x1
+ * @param {number} y1
+ * @param {number} x2
+ * @param {number} y2
+ * @param {number=} epsilon
  */
 spine.bezier_curve = function (x1, y1, x2, y2, epsilon)
 {
@@ -190,16 +185,16 @@ spine.bezier_curve = function (x1, y1, x2, y2, epsilon)
 	*/
 
 	/*
-	 
+
 	B(t) = P0*(1-t)^3 + 3*P1*(1-t)^2*t + 3*P2*(1-t)*t^2 + P3*t^3
 	B'(t) = P0 - 3*(P0 - P1)*t + 3*(P0 - 2*P1 + P2)*t^2 - (P0 - 3*P1 + 3*P2 - P3)*t^3
-	
+
 	if P0:(0,0) and P3:(1,1)
 	B(t) = 3*P1*(1-t)^2*t + 3*P2*(1-t)*t^2 + t^3
 	B'(t) = 3*P1*t - 3*(2*P1 - P2)*t^2 + (3*P1 - 3*P2 + 1)*t^3
-	
+
 	*/
-	
+
 	var curveX = function (t)
 	{
 		var t2 = t*t;
@@ -261,11 +256,11 @@ spine.bezier_curve = function (x1, y1, x2, y2, epsilon)
 
 // from: spine-libgdx/src/com/esotericsoftware/spine/Animation.java
 /**
- * @return {function(number):number} 
- * @param {number} cx1 
- * @param {number} cy1 
- * @param {number} cx2 
- * @param {number} cy2 
+ * @return {function(number):number}
+ * @param {number} cx1
+ * @param {number} cy1
+ * @param {number} cx2
+ * @param {number} cy2
  */
 spine.step_bezier_curve = function (cx1, cy1, cx2, cy2)
 {
@@ -320,8 +315,8 @@ spine.step_bezier_curve = function (cx1, cy1, cx2, cy2)
 
 /**
  * @return {function(number):number}
- * @param {*} value 
- * @param {function(number):number=} def 
+ * @param {*} value
+ * @param {function(number):number=} def
  */
 spine.toCurve = function (value, def)
 {
@@ -357,8 +352,8 @@ spine.tween = function (a, b, t)
 }
 
 /**
- * @return {number} 
- * @param {number} angle 
+ * @return {number}
+ * @param {number} angle
  */
 spine.wrapAngle = function (angle)
 {
@@ -379,7 +374,7 @@ spine.tweenAngle = function (a, b, t)
 }
 
 /**
- * @constructor 
+ * @constructor
  */
 spine.skel_bone = function ()
 {
@@ -400,8 +395,8 @@ spine.skel_bone = function ()
 }
 
 /**
- * @return {spine.skel_bone} 
- * @param {spine.skel_bone} other 
+ * @return {spine.skel_bone}
+ * @param {spine.skel_bone} other
  */
 spine.skel_bone.prototype.copy = function (other)
 {
@@ -416,8 +411,8 @@ spine.skel_bone.prototype.copy = function (other)
 }
 
 /**
- * @return {spine.skel_bone} 
- * @param {*} json 
+ * @return {spine.skel_bone}
+ * @param {*} json
  */
 spine.skel_bone.prototype.load = function (json)
 {
@@ -432,7 +427,7 @@ spine.skel_bone.prototype.load = function (json)
 }
 
 /**
- * @constructor 
+ * @constructor
  */
 spine.skel_slot = function ()
 {
@@ -445,8 +440,8 @@ spine.skel_slot = function ()
 }
 
 /**
- * @return {spine.skel_slot} 
- * @param {spine.skel_slot} other 
+ * @return {spine.skel_slot}
+ * @param {spine.skel_slot} other
  */
 spine.skel_slot.prototype.copy = function (other)
 {
@@ -457,8 +452,8 @@ spine.skel_slot.prototype.copy = function (other)
 }
 
 /**
- * @return {spine.skel_slot} 
- * @param {*} json 
+ * @return {spine.skel_slot}
+ * @param {*} json
  */
 spine.skel_slot.prototype.load = function (json)
 {
@@ -469,7 +464,7 @@ spine.skel_slot.prototype.load = function (json)
 }
 
 /**
- * @constructor 
+ * @constructor
  */
 spine.skin_attachment = function ()
 {
@@ -494,8 +489,8 @@ spine.skin_attachment = function ()
 }
 
 /**
- * @return {spine.skin_attachment} 
- * @param {*} json 
+ * @return {spine.skin_attachment}
+ * @param {*} json
  */
 spine.skin_attachment.prototype.load = function (json)
 {
@@ -523,7 +518,7 @@ spine.skin_attachment.prototype.load = function (json)
 }
 
 /**
- * @constructor 
+ * @constructor
  */
 spine.skin_slot = function ()
 {
@@ -532,8 +527,8 @@ spine.skin_slot = function ()
 }
 
 /**
- * @return {spine.skin_slot} 
- * @param {*} json 
+ * @return {spine.skin_slot}
+ * @param {*} json
  */
 spine.skin_slot.prototype.load = function (json)
 {
@@ -545,7 +540,7 @@ spine.skin_slot.prototype.load = function (json)
 }
 
 /**
- * @constructor 
+ * @constructor
  */
 spine.skin = function ()
 {
@@ -554,8 +549,8 @@ spine.skin = function ()
 }
 
 /**
- * @return {spine.skin} 
- * @param {*} json 
+ * @return {spine.skin}
+ * @param {*} json
  */
 spine.skin.prototype.load = function (json)
 {
@@ -567,8 +562,8 @@ spine.skin.prototype.load = function (json)
 }
 
 /**
- * @constructor 
- * @param {number=} time 
+ * @constructor
+ * @param {number=} time
  */
 spine.key = function (time)
 {
@@ -577,12 +572,12 @@ spine.key = function (time)
 }
 
 /**
- * @constructor 
- * @extends {spine.key} 
- * @param {number=} time 
+ * @constructor
+ * @extends {spine.key}
+ * @param {number=} time
  */
-spine.translate_key = function (time)
-{
+spine.translate_key = function (time) {
+
 	goog.base(this, time);
 
 	/** @type {number} */
@@ -596,8 +591,8 @@ spine.translate_key = function (time)
 goog.inherits(spine.translate_key, spine.key);
 
 /**
- * @return {spine.translate_key} 
- * @param {*} json 
+ * @return {spine.translate_key}
+ * @param {*} json
  */
 spine.translate_key.prototype.load = function (json)
 {
@@ -608,9 +603,9 @@ spine.translate_key.prototype.load = function (json)
 }
 
 /**
- * @constructor 
- * @extends {spine.key} 
- * @param {number=} time 
+ * @constructor
+ * @extends {spine.key}
+ * @param {number=} time
  */
 spine.rotate_key = function (time)
 {
@@ -622,11 +617,11 @@ spine.rotate_key = function (time)
 	this.curve = null;
 }
 
-goog.inherits(spine.rotate_key, spine.key);
+ goog.inherits(spine.rotate_key, spine.key);
 
 /**
- * @return {spine.rotate_key} 
- * @param {*} json 
+ * @return {spine.rotate_key}
+ * @param {*} json
  */
 spine.rotate_key.prototype.load = function (json)
 {
@@ -636,9 +631,9 @@ spine.rotate_key.prototype.load = function (json)
 }
 
 /**
- * @constructor 
- * @extends {spine.key} 
- * @param {number=} time 
+ * @constructor
+ * @extends {spine.key}
+ * @param {number=} time
  */
 spine.scale_key = function (time)
 {
@@ -655,8 +650,8 @@ spine.scale_key = function (time)
 goog.inherits(spine.scale_key, spine.key);
 
 /**
- * @return {spine.scale_key} 
- * @param {*} json 
+ * @return {spine.scale_key}
+ * @param {*} json
  */
 spine.scale_key.prototype.load = function (json)
 {
@@ -667,7 +662,7 @@ spine.scale_key.prototype.load = function (json)
 }
 
 /**
- * @constructor 
+ * @constructor
  */
 spine.anim_bone = function ()
 {
@@ -684,8 +679,8 @@ spine.anim_bone = function ()
 }
 
 /**
- * @return {spine.anim_bone} 
- * @param {*} json 
+ * @return {spine.anim_bone}
+ * @param {*} json
  */
 spine.anim_bone.prototype.load = function (json)
 {
@@ -786,9 +781,9 @@ spine.anim_bone.prototype.load = function (json)
 }
 
 /**
- * @constructor 
- * @extends {spine.key} 
- * @param {number=} time 
+ * @constructor
+ * @extends {spine.key}
+ * @param {number=} time
  */
 spine.color_key = function (time)
 {
@@ -803,8 +798,8 @@ spine.color_key = function (time)
 goog.inherits(spine.color_key, spine.key);
 
 /**
- * @return {spine.color_key} 
- * @param {*} json 
+ * @return {spine.color_key}
+ * @param {*} json
  */
 spine.color_key.prototype.load = function (json)
 {
@@ -814,9 +809,9 @@ spine.color_key.prototype.load = function (json)
 }
 
 /**
- * @constructor 
- * @extends {spine.key} 
- * @param {number=} time 
+ * @constructor
+ * @extends {spine.key}
+ * @param {number=} time
  */
 spine.attachment_key = function (time)
 {
@@ -829,8 +824,8 @@ spine.attachment_key = function (time)
 goog.inherits(spine.attachment_key, spine.key);
 
 /**
- * @return {spine.attachment_key} 
- * @param {*} json 
+ * @return {spine.attachment_key}
+ * @param {*} json
  */
 spine.attachment_key.prototype.load = function (json)
 {
@@ -839,7 +834,7 @@ spine.attachment_key.prototype.load = function (json)
 }
 
 /**
- * @constructor 
+ * @constructor
  */
 spine.anim_slot = function ()
 {
@@ -854,8 +849,8 @@ spine.anim_slot = function ()
 }
 
 /**
- * @return {spine.anim_slot} 
- * @param {*} json 
+ * @return {spine.anim_slot}
+ * @param {*} json
  */
 spine.anim_slot.prototype.load = function (json)
 {
@@ -949,8 +944,8 @@ spine.animation = function ()
 }
 
 /**
- * @return {spine.animation} 
- * @param {*} json 
+ * @return {spine.animation}
+ * @param {*} json
  */
 spine.animation.prototype.load = function (json)
 {
@@ -982,9 +977,9 @@ spine.animation.prototype.load = function (json)
 }
 
 /**
- * @return {number} 
- * @param {Array.<spine.key>} keys 
- * @param {number} time 
+ * @return {number}
+ * @param {Array.<spine.key>} keys
+ * @param {number} time
  */
 spine.animation.find_key = function (keys, time)
 {
@@ -1005,7 +1000,7 @@ spine.animation.find_key = function (keys, time)
 }
 
 /**
- * @constructor 
+ * @constructor
  */
 spine.skeleton = function ()
 {
@@ -1024,8 +1019,8 @@ spine.skeleton = function ()
 }
 
 /**
- * @return {spine.skeleton} 
- * @param {*} json 
+ * @return {spine.skeleton}
+ * @param {*} json
  */
 spine.skeleton.prototype.load = function (json)
 {
@@ -1091,7 +1086,7 @@ spine.skeleton.prototype.load = function (json)
 }
 
 /**
- * @constructor 
+ * @constructor
  */
 spine.data = function ()
 {
@@ -1102,8 +1097,8 @@ spine.data = function ()
 }
 
 /**
- * @return {spine.data} 
- * @param {*} json 
+ * @return {spine.data}
+ * @param {*} json
  */
 spine.data.prototype.load = function (json)
 {
@@ -1120,8 +1115,8 @@ spine.data.prototype.load = function (json)
 }
 
 /**
- * @return {spine.data} 
- * @param {*} json 
+ * @return {spine.data}
+ * @param {*} json
  */
 spine.data.prototype.loadSkeleton = function (json)
 {
@@ -1131,8 +1126,8 @@ spine.data.prototype.loadSkeleton = function (json)
 }
 
 /**
- * @return {spine.data} 
- * @param {*} json 
+ * @return {spine.data}
+ * @param {*} json
  */
 spine.data.prototype.loadAnimation = function (name, json)
 {
@@ -1142,7 +1137,7 @@ spine.data.prototype.loadAnimation = function (name, json)
 }
 
 /**
- * @return {number} 
+ * @return {number}
  */
 spine.data.prototype.getNumAnims = function ()
 {
@@ -1150,8 +1145,8 @@ spine.data.prototype.getNumAnims = function ()
 }
 
 /**
- * @return {?string} 
- * @param {number=} anim_index 
+ * @return {?string}
+ * @param {number=} anim_index
  */
 spine.data.prototype.getAnimName = function (anim_index)
 {
@@ -1166,8 +1161,8 @@ spine.data.prototype.getAnimName = function (anim_index)
 }
 
 /**
- * @return {number} 
- * @param {number} anim_index 
+ * @return {number}
+ * @param {number} anim_index
  */
 spine.data.prototype.getAnimLength = function (anim_index)
 {
@@ -1182,8 +1177,8 @@ spine.data.prototype.getAnimLength = function (anim_index)
 }
 
 /**
- * @constructor 
- * @param {spine.data=} data 
+ * @constructor
+ * @param {spine.data=} data
  */
 spine.pose = function (data)
 {
@@ -1206,7 +1201,7 @@ spine.pose = function (data)
 }
 
 /**
- * @return {number} 
+ * @return {number}
  */
 spine.pose.prototype.getNumAnims = function ()
 {
@@ -1226,7 +1221,7 @@ spine.pose.prototype.getAnim = function ()
 }
 
 /**
- * @return {void} 
+ * @return {void}
  * @param {number|string} anim_id
  */
 spine.pose.prototype.setAnim = function (anim_id)
@@ -1288,8 +1283,8 @@ spine.pose.prototype.setPrevAnim = function ()
 }
 
 /**
- * @return {?string} 
- * @param {number=} anim_index 
+ * @return {?string}
+ * @param {number=} anim_index
  */
 spine.pose.prototype.getAnimName = function (anim_index)
 {
@@ -1305,7 +1300,7 @@ spine.pose.prototype.getAnimName = function (anim_index)
 
 /**
  * @return {number}
- * @param {string=} anim_name 
+ * @param {string=} anim_name
  */
 spine.pose.prototype.getAnimLength = function (anim_name)
 {
@@ -1327,8 +1322,8 @@ spine.pose.prototype.getTime = function ()
 }
 
 /**
- * @return {void} 
- * @param {number} time 
+ * @return {void}
+ * @param {number} time
  */
 spine.pose.prototype.setTime = function (time)
 {
