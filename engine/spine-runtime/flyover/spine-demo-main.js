@@ -88,7 +88,8 @@ main.start = function ()
 	var data = new spine.data();
 
 	if (single_file) {
-		var url  = "data/examples/dragon/dragon.json";
+		//var url  = "data/examples/dragon/dragon.json";
+		var url  = "data/examples/boy1/spineboy.json";
 
 		data_info_div.innerHTML = "Loading...";
 		main.load_data_from_url(data, url, (function (skeleton) { return function ()
@@ -96,115 +97,22 @@ main.start = function ()
 			data_info_div.innerHTML = "Name: " + url;
 
 			pose = new spine.pose(data);
+console.log(data);
+			for (var i in data.m_animations) { /*pose.setAnim(i); break; */ console.log(i)};
+pose.setAnim('walk');
 
-			for (var i in data.m_animations) { pose.setAnim(i); break; }
+setInterval(function() {
+	pose.setAnim('jump');
 
+	setTimeout(function() {
+		pose.setAnim('walk');
+	}, data.m_animations.jump.length);
+
+}, data.m_animations.walk.length*3)
 			set_camera(pose);
 		}
 		})(data));
 	}
-
-	var file_input = file_input_div.appendChild(document.createElement('input'));
-	file_input.type = 'file';
-	file_input.multiple = 'multiple';
-	file_input.directory = file_input.webkitdirectory = file_input.mozdirectory = "directory";
-	var file_label = file_input_div.appendChild(document.createElement('span'));
-	file_label.innerHTML = "Drag the parent directory of a Spine skeleton JSON file to the file input.";
-	file_input.addEventListener('change', function (e)
-	{
-		var input_files = e.target.files;
-
-		// shim the relativePath
-		for (var idx = 0, len = input_files.length; idx < len; ++idx)
-		{
-			var input_file = input_files[idx];
-			input_file.webkitRelativePath = input_file.webkitRelativePath || null;
-			input_file.mozRelativePath = input_file.mozRelativePath || null;
-			input_file.relativePath = input_file.relativePath || input_file.webkitRelativePath || input_file.mozRelativePath || input_file.name;
-		}
-
-		var skeleton_files = [];
-
-		// look for Spine skeleton JSON files
-		// match: ".*-skeleton.json$"
-		for (var input_file_idx = 0, input_files_len = input_files.length; input_file_idx < input_files_len; ++input_file_idx)
-		{
-			var input_file = input_files[input_file_idx];
-
-			if (input_file.name.toLowerCase().match("^.*-skeleton.json$"))
-			{
-				skeleton_files.push(input_file);
-			}
-		}
-
-		// load first skeleton
-		// TODO: load all skeletons
-		//for (var skeleton_file_idx = 0, skeleton_files_len = skeleton_files.length; skeleton_file_idx < skeleton_files_len; ++skeleton_file_idx)
-		if (skeleton_files.length > 0)
-		{
-			//var skeleton_file = skeleton_files[skeleton_file_idx];
-			var skeleton_file = skeleton_files[0];
-
-			// look for Spine animation JSON files for this Spine skeleton
-			// get basename: basename-skeleton.json
-			// match: "^basename-*.json$"
-
-			var match = skeleton_file.name.match(/^(\w*)-skeleton.json$/i);
-			var basename = match && match[1];
-
-			var animation_files = [];
-
-			for (var input_file_idx = 0, input_files_len = input_files.length; input_file_idx < input_files_len; ++input_file_idx)
-			{
-				var input_file = input_files[input_file_idx];
-
-				if (input_file == skeleton_file) { continue; }
-
-				if (input_file.name.toLowerCase().match("^" + basename + "-.*.json$"))
-				{
-					animation_files.push(input_file);
-				}
-			}
-
-			var data = new spine.data();
-			var skeleton = data.m_skeleton;
-
-			skeleton_info_div.innerHTML = "Loading...";
-			main.load_skeleton_from_input_file(skeleton, skeleton_file, input_files, (function (skeleton) { return function ()
-			{
-				skeleton_info_div.innerHTML = "Skeleton Name: " + skeleton_file.relativePath;
-
-				pose = new spine.pose(data);
-				set_camera(pose);
-
-				// load all animations
-				for (var animation_file_idx = 0, animation_files_len = animation_files.length; animation_file_idx < animation_files_len; ++animation_file_idx)
-				{
-					var animation_file = animation_files[animation_file_idx];
-
-					var animation = new spine.animation();
-					animation.name = animation_file.relativePath;
-
-					if (animation_file_idx == 0) { pose.setAnim(animation.name); }
-
-					animation_info_div.innerHTML = "Loading...";
-					main.load_animation_from_input_file(animation, animation_file, input_files, (function (animation) { return function ()
-					{
-						animation_info_div.innerHTML = "Animation Name: " + animation_file.relativePath;
-
-						if (animation.name)
-						{
-							data.m_animations[animation.name] = animation;
-						}
-						set_camera(pose);
-					}
-					})(animation));
-				}
-			}
-			})(skeleton));
-		}
-	},
-	false);
 
 	var cursor_x = 0;
 	var cursor_y = 0;
@@ -370,8 +278,6 @@ main.start = function ()
 				}
 
 			ctx_2d.restore();
-
-			//if (debug_draw) { main.test_draw_bezier_curves(tick, ctx_2d); }
 		}
 	}
 
@@ -545,88 +451,7 @@ main.load_animation_from_url = function (animation, url, callback)
 	return animation;
 }
 
-main.load_skeleton_from_input_file = function (skeleton, skeleton_file, input_files, callback)
-{
-	skeleton.files = {};
 
-	var skeleton_file_reader = new FileReader();
-	skeleton_file_reader.addEventListener('load', function (e)
-	{
-		// load Spine skeleton JSON file
-		skeleton.load(goog.global.JSON.parse(e.target.result));
-
-		callback();
-
-		// load images
-		var find_file = function (name)
-		{
-			var name = name.toLowerCase() + '$'; // match at end of line only
-			for (var idx = 0, len = input_files.length; idx < len; ++idx)
-			{
-				var input_file = input_files[idx];
-				if (input_file.relativePath.toLowerCase().match(name))
-				{
-					return input_file;
-				}
-			}
-			return null;
-		}
-
-		var skel_skin = (skeleton.current_skin_i != null)?(skeleton.skins[skeleton.current_skin_i]):(null);
-		if (skel_skin) for (var slot_i in skel_skin.skin_slots)
-		{
-			var skin_slot = skel_skin.skin_slots[slot_i];
-			if (!skin_slot) { continue; }
-			for (var skin_attachment_i in skin_slot.skin_attachments)
-			{
-				var skin_attachment = skin_slot.skin_attachments[skin_attachment_i];
-				var name = skin_attachment.name || skin_attachment_i;
-				var file = skeleton.files && skeleton.files[name];
-				if (!file)
-				{
-					var image_file = find_file(name + ".png");
-					if (image_file)
-					{
-						file = skeleton.files[name] = {};
-						var image_file_reader = new FileReader();
-						image_file_reader.addEventListener('load', (function (file) { return function (e)
-						{
-							var image = file.image = new Image();
-							image.hidden = true;
-							image.addEventListener('load', function (e)
-							{
-								file.width = file.width || e.target.width;
-								file.height = file.height || e.target.height;
-								e.target.hidden = false;
-							},
-							false);
-							image.addEventListener('error', function (e) {}, false);
-							image.addEventListener('abort', function (e) {}, false);
-							image.src = e.target.result;
-						}
-						})(file), false);
-						image_file_reader.readAsDataURL(image_file);
-					}
-				}
-			}
-		}
-	},
-	false);
-	skeleton_file_reader.readAsText(skeleton_file);
-}
-
-main.load_animation_from_input_file = function (animation, animation_file, input_files, callback)
-{
-	var animation_file_reader = new FileReader();
-	animation_file_reader.addEventListener('load', function (e)
-	{
-		animation.load(goog.global.JSON.parse(e.target.result));
-
-		callback();
-	},
-	false);
-	animation_file_reader.readAsText(animation_file);
-}
 
 /**
  * @return {Object}
@@ -729,6 +554,8 @@ main.get_pose_extent = function (pose, extent)
 
 	return extent;
 }
+
+
 
 /**
  * @constructor
@@ -1014,99 +841,3 @@ main.view_2d.prototype.draw_pose_2d = function (pose)
 		ctx_2d.restore();
 	}
 }
-
-/**
- * @return {void}
- * @param {Float32Array} dst
- * @param {fo.m3x2} src
- */
-main.set_a16_from_m3x2 = function (dst, src)
-{
-	dst[ 0] = src.a_x; dst[ 1] = src.a_y; dst[ 2] = 0; dst[ 3] = 0; // col 0
-	dst[ 4] = src.b_x; dst[ 5] = src.b_y; dst[ 6] = 0; dst[ 7] = 0; // col 1
-	dst[ 8] = 0;       dst[ 9] = 0;       dst[10] = 1; dst[11] = 0; // col 2
-	dst[12] = src.c_x; dst[13] = src.c_y; dst[14] = 0; dst[15] = 1; // col 3
-}
-
-main.test_draw_bezier_curves = function (tick, ctx_2d)
-{
-	ctx_2d.save();
-
-	ctx_2d.translate(0, ctx_2d.canvas.height);
-	ctx_2d.scale(1, -1);
-	ctx_2d.translate(ctx_2d.canvas.width/4, ctx_2d.canvas.height/4);
-	ctx_2d.scale(0.5, 0.5);
-
-	ctx_2d.lineWidth = 4;
-
-	ctx_2d.strokeStyle = 'black';
-	ctx_2d.strokeRect(0, 0, ctx_2d.canvas.width, ctx_2d.canvas.height);
-
-	var x1 = Math.cos(tick.time / 1000);
-	var y1 = Math.sin(tick.time / 1000);
-	x1 = Math.min(Math.max(x1, 0), 1);
-
-	var x2 = 1-Math.cos(2*tick.time / 1000);
-	var y2 = 1-Math.sin(2*tick.time / 1000);
-	x2 = Math.min(Math.max(x2, 0), 1);
-
-	var c1 = spine.step_bezier_curve(x1, y1, x2, y2);
-	var c2 = spine.bezier_curve(x1, y1, x2, y2, 1e-6);
-
-	var step = 0.01;
-
-	ctx_2d.beginPath();
-	ctx_2d.moveTo(0,0);
-	for (var i = 0; i < 1+step; i += step)
-	{
-		var x = i * ctx_2d.canvas.width;
-		var y = c1(i) * ctx_2d.canvas.height;
-		ctx_2d.lineTo(x, y);
-	}
-	ctx_2d.strokeStyle = 'red';
-	ctx_2d.stroke();
-
-	ctx_2d.beginPath();
-	ctx_2d.moveTo(0,0);
-	for (var i = 0; i < 1+step; i += step)
-	{
-		var x = i * ctx_2d.canvas.width;
-		var y = c2(i) * ctx_2d.canvas.height;
-		ctx_2d.lineTo(x, y);
-	}
-	ctx_2d.strokeStyle = 'green';
-	ctx_2d.stroke();
-
-	ctx_2d.beginPath();
-	ctx_2d.moveTo(0,0);
-	ctx_2d.lineTo(x1 * ctx_2d.canvas.width, y1 * ctx_2d.canvas.height);
-	ctx_2d.arc(x1 * ctx_2d.canvas.width, y1 * ctx_2d.canvas.height, 10, 0, 2*Math.PI);
-	ctx_2d.strokeStyle = 'blue';
-	ctx_2d.stroke();
-
-	ctx_2d.beginPath();
-	ctx_2d.moveTo(ctx_2d.canvas.width, ctx_2d.canvas.height);
-	ctx_2d.lineTo(x2 * ctx_2d.canvas.width, y2 * ctx_2d.canvas.height);
-	ctx_2d.arc(x2 * ctx_2d.canvas.width, y2 * ctx_2d.canvas.height, 10, 0, 2*Math.PI);
-	ctx_2d.strokeStyle = 'blue';
-	ctx_2d.stroke();
-
-	var x = 0.5 + 0.5 * Math.cos(3*tick.time / 1000);
-	var y1 = c1(x);
-	var y2 = c2(x);
-	ctx_2d.beginPath();
-	ctx_2d.moveTo(x * ctx_2d.canvas.width, 0);
-	ctx_2d.lineTo(x * ctx_2d.canvas.width, y1 * ctx_2d.canvas.height);
-	ctx_2d.arc(x * ctx_2d.canvas.width, y1 * ctx_2d.canvas.height, 10, 0, 2*Math.PI);
-	ctx_2d.strokeStyle = 'blue';
-	ctx_2d.stroke();
-
-	ctx_2d.beginPath();
-	ctx_2d.moveTo(x * ctx_2d.canvas.width, 0);
-	ctx_2d.lineTo(x * ctx_2d.canvas.width, y2 * ctx_2d.canvas.height);
-	ctx_2d.strokeStyle = 'blue';
-	ctx_2d.stroke();
-
-	ctx_2d.restore();
-}
-
