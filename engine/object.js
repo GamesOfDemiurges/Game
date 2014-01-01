@@ -1,34 +1,46 @@
 function obj() {
 
 	/* Private */
-	var image,
-		width,
-		height,
-		animations,
+	var animations = {},
 		x = -9999,
 		y = -9999,
-		z = 1,
-		animationQueue = [];
-
+		z = 1;
 
 	/* Public */
 
 	return {
 
 		// Создает объект из заданного ресурса
-		// с задаными размерами
 		// в заданную точку (необязательно)
 		// с заданной анимацией (необязательно)
 
 		// p.image
-		// p.width
-		// p.height
 		// p.x
 		// p.y
 		// p.z
 		// p.animation
 		create: function ( p ) {
+			var _this = this;
+			if (typeof p.image === undefined) return false;
 
+			var setObjectPosition = function setObjectPosition( ) {
+				_this.image.position.x = (typeof p.x !== undefined) ? p.x : x;
+				_this.image.position.y = (typeof p.y !== undefined) ? p.y : y;
+			}
+
+			if (p.image.indexOf('.anim') !== -1) { console.log('anim');
+				_this.type = 'spine';
+				_this.image = new PIXI.Spine( p.image );
+
+				_this.image.state.setAnimationByName("walk", true);
+			} else { console.log('image');
+				_this.type = 'image';
+				_this.image = new PIXI.Sprite.fromImage( p.image );
+			}
+
+			setObjectPosition();
+
+			return _this;
 		},
 
 		// Двигает объект по горизонтали/вертикали, коэффициенту удаления
@@ -43,23 +55,6 @@ function obj() {
 		// p.z
 		move: function ( p ) {
 
-		},
-
-		// p.animation
-		draw: function ( p ) {
-			//  без p.animation рисуется следующий кадр текущей анимации
-
-			// с p.animation задается новая анимация
-			// для этого анализируется текущая очередь анимаций
-			// если в очереди одна анимация, принимается решение о том, возможен ли непосредственный переход к новой анимации
-				// если переход возможен, устанавливается флаг о завершении текущей анимации,
-				// новая анимация добавляется в очередь
-
-				// если переход невозможен, устанавливается флаг о завершении текущей анимации,
-				// промежуточные анимации и новая анимация добавляются в очередь в необходимом порядке
-
-			// если в очереди несколько анимаций, все анимации, идущие за текущей выполняющейся, удаляются из очереди,
-			// выполняется обработка по сценарию с одной анимацией в очереди
 		}
 	}
 }

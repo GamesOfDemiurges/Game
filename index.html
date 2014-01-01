@@ -3,7 +3,7 @@
 <!--[if IE 9]>         <html class="js ie9"> <![endif]-->
 <!--[if gt IE 9]><!--> <html class="js"> <!--<![endif]-->
 	<head>
-		<title>Городские Проекты</title>
+		<title>Игры Демиургов</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=0.5, user-scalable=no"/>
 
@@ -34,8 +34,54 @@
 			}
 		</style>
 
+		<script type="text/javascript" src="engine/spine-runtime/pixi/bin/pixi.dev.js"></script>
+		<script type="text/javascript" src="engine/scene.js"></script>
+		<script type="text/javascript" src="engine/object.js"></script>
+
+		<script type="text/javascript">
+			window.onload = function() {
+
+				var assetsToLoader = [
+					"assets/models/spineboy/spineboy.json",
+					"assets/models/spineboy/spineboy.anim",
+
+					"assets/background/lvl1_1.png"
+				];
+
+				// create a new loader
+				var loader = new PIXI.AssetLoader(assetsToLoader);
+
+				// use callback
+				loader.onComplete = function() {
+					console.log('loaded');
+
+					scene
+						.init({
+							canvasId: 'view'
+						})
+						.addObj({
+							image: 'assets/background/lvl1_1.png',
+							x: 0,
+							y: 0
+						})
+						.addObj({
+							image: 'assets/models/spineboy/spineboy.anim',
+							x: 200,
+							y: 400
+						})
+
+					console.log(PIXI);
+
+				}
+
+				//begin load
+				loader.load();
+
+			}
+		</script>
+
 	</head>
 	<body>
-		<canvas class="view"></canvas>
+		<canvas id="view"></canvas>
 	</body>
 </html>

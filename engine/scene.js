@@ -1,37 +1,16 @@
-function scene() {
+var scene = function scene() {
 
 	/* Private */
-	var instance, // реализация Singleton
+	var stage, // сцена
+		renderer, // оператор рендеринга
 		masterCanvas, // Физический канвас на вьюпорте
-		slaveCanvas; // Виртуальный канвас для промежуточной отрисовки
+		playGround,
+		x = 0, y = 0; // точки отсчета для сцены
 
-	// Создает виртуальный канвас
-	// p.width
-	// p.height
-	function createSlaveCanvas( p ) {
-
-		if ( !!slaveCanvas ) {
-			// Канвас уже существует; может пригодится под ресайз окна
-
-		} else {
-			// Канваса еще нет, первичная инициализация
-
-		}
-
-		return slaveCanvas;
-	}
-
-	// Выполняет отрисовку объектов на виртуальном канвасе,
-	// затем копирует его на физический
-	// Таким образом отбрасывается необходимость в очистке физического канваса,
-	// а также увеличивается скорость отрисовки
-	function repaintCanvas() {
-
-		// Сначала всё отрисовываем на виртуальном канвасе
-		// Обход зарегистрированных объектов
-		// Отрисовываются только те зарегистрированные объекты, которые попадают во вьюпорт
-
-		// Затем проецируем виртуальный канвас на физический
+	// Обертка над оператором рендера PIXI
+	var repaintCanvas = function repaintCanvas() {
+		requestAnimFrame(repaintCanvas);
+		renderer.render(stage);
 	}
 
 	/* Public */
@@ -40,37 +19,42 @@ function scene() {
 
 		// Инициализация сцены
 		// Передается селектор физического канваса
-		// Сцена может быть только одна, выполняется проверка на её существование,
-		// если она существует, возвращается готовый экземпляр, иначе создается новый
-		// (паттерн Синглтон)
 
 		// p.canvasSelector
 		init: function ( p ) {
+			masterCanvas = document.getElementById(p.canvasId); // указатель на DOM
+			stage = new PIXI.Stage(0xFFFFFF, true); // Корневая сцена
 
-			if ( !!instance ) {
-
-			} else {
-				// где-то тут нужно добавить аттач события под ресайз окна
-				instance = this;
+			renderer = new PIXI.CanvasRenderer(510/masterCanvas.clientHeight*masterCanvas.clientWidth, 510, masterCanvas, false); // Оператор рендеринга 900x510 native
+			window.onresize = function () {
+				renderer.resize(510/masterCanvas.clientHeight*masterCanvas.clientWidth, 510);
 			}
 
-			return instance;
+			// Контейнер сцены
+			// его будем двигать для смещения сцены относительно вьюпорта
+			playGround = new PIXI.DisplayObjectContainer();
+			playGround.position.x = x;
+			playGround.position.y = y;
+
+			// Добавили контейнер
+			stage.addChild( playGround );
+
+			// Запустили перерисовку холста
+			repaintCanvas();
+
+			return this;
 		},
 
 		// На сцену в произвольный момент может быть добавлен один из существующих объектов
-		// Сцена будет пытаться отрисовывать только добавленные на неё объекты
-		// Аккуратное управление добавленными на сцену объектами может положительно сказаться на производительности
-		// А может и не сказаться. В этом случае выпилим addObj и removeObj и будем оперировать только
-		// фактом видимости во вьюпорте
-		// p.obj
+		// p.image
 		addObj: function ( p ) {
+			var _this = this;
 
+			var newObj = obj().create( p );
+			playGround.addChild( newObj.image );
+
+			return _this;
 		},
-
-		// Удаление ненужного объекта из сцены (но не из списка зарегистрированных объектов!)
-		removeObj ( p ): function () {
-
-		}
 
 		// Смещение сцены (не путать со смещением объекта)
 		// p.dx
@@ -79,4 +63,4 @@ function scene() {
 
 		}
 	}
-}
+}();

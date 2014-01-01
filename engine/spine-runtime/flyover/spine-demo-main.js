@@ -1,29 +1,29 @@
 /**
- * Copyright (c) 2013 Flyover Games, LLC 
- *  
- * Isaac Burns isaacburns@gmail.com 
- *  
- * Permission is hereby granted, free of charge, to any person 
- * obtaining a copy of this software and associated 
- * documentation files (the "Software"), to deal in the Software 
- * without restriction, including without limitation the rights 
- * to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the 
- * following conditions: 
- *  
- * The above copyright notice and this permission notice shall 
- * be included in all copies or substantial portions of the 
- * Software. 
- *  
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY 
- * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE 
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+ * Copyright (c) 2013 Flyover Games, LLC
+ *
+ * Isaac Burns isaacburns@gmail.com
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software
+ * without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the
+ * following conditions:
+ *
+ * The above copyright notice and this permission notice shall
+ * be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+ * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 goog.provide('main.start');
@@ -120,14 +120,14 @@ main.start = function ()
 		//var animation_urls = [ "data/examples/example-animation.json" ];
 
 		//var skeleton_url  = "data/examples/spineboy/spineboy-skeleton.json";
-		//var animation_urls = 
+		//var animation_urls =
 		//[
 		//	"data/examples/spineboy/spineboy-walk.json",
 		//	"data/examples/spineboy/spineboy-jump.json"
 		//];
 
 		var skeleton_url  = "data/examples/dragon/dragon-skeleton.json";
-		var animation_urls = 
+		var animation_urls =
 		[
 			"data/examples/dragon/dragon-flying.json"
 		];
@@ -271,7 +271,7 @@ main.start = function ()
 			}
 			})(skeleton));
 		}
-	}, 
+	},
 	false);
 
 	var cursor_x = 0;
@@ -285,12 +285,12 @@ main.start = function ()
 		cursor_down = true;
 		cursor_down_x = e.clientX;
 		cursor_down_y = e.clientY;
-	}, 
+	},
 	false);
 	canvas_div.addEventListener('mouseup', function (e)
 	{
 		cursor_down = false;
-	}, 
+	},
 	false);
 	canvas_div.addEventListener('mousemove', function (e)
 	{
@@ -333,7 +333,7 @@ main.start = function ()
 			camera_scale *= 0.9;
 			camera_scale = Math.max(camera_scale, 0.01);
 		}
-	}, 
+	},
 	false);
 
 	var canvas_2d_div = canvas_div.appendChild(document.createElement('div'));
@@ -374,7 +374,7 @@ main.start = function ()
 	{
 		time_scale = parseFloat(e.target.value);
 		slider_value.innerHTML = time_scale.toFixed(2);
-	}, 
+	},
 	false);
 
 	var debug_draw = false;
@@ -387,7 +387,7 @@ main.start = function ()
 	checkbox.addEventListener('change', function (e)
 	{
 		debug_draw = e.target.checked;
-	}, 
+	},
 	false);
 
 	var update = function (tick)
@@ -439,8 +439,8 @@ main.start = function ()
 					var extent = main.get_pose_extent(pose);
 					ctx_2d.strokeStyle = 'blue';
 					ctx_2d.strokeRect(
-						extent.min.x, extent.min.y, 
-						extent.max.x - extent.min.x, 
+						extent.min.x, extent.min.y,
+						extent.max.x - extent.min.x,
 						extent.max.y - extent.min.y);
 				}
 				else
@@ -557,7 +557,7 @@ main.load_data_from_url = function (data, url, callback)
 				}
 			}
 		}
-	}, 
+	},
 	false);
 	req.send();
 
@@ -617,7 +617,7 @@ main.load_skeleton_from_url = function (skeleton, url, callback)
 				}
 			}
 		}
-	}, 
+	},
 	false);
 	req.send();
 
@@ -639,7 +639,7 @@ main.load_animation_from_url = function (animation, url, callback)
 		animation.load(goog.global.JSON.parse(e.target.responseText));
 
 		callback();
-	}, 
+	},
 	false);
 	req.send();
 
@@ -711,7 +711,7 @@ main.load_skeleton_from_input_file = function (skeleton, skeleton_file, input_fi
 				}
 			}
 		}
-	}, 
+	},
 	false);
 	skeleton_file_reader.readAsText(skeleton_file);
 }
@@ -724,15 +724,15 @@ main.load_animation_from_input_file = function (animation, animation_file, input
 		animation.load(goog.global.JSON.parse(e.target.result));
 
 		callback();
-	}, 
+	},
 	false);
 	animation_file_reader.readAsText(animation_file);
 }
 
 /**
- * @return {Object} 
- * @param {spine.pose} pose 
- * @param {Object=} extent 
+ * @return {Object}
+ * @param {spine.pose} pose
+ * @param {Object=} extent
  */
 main.get_pose_extent = function (pose, extent)
 {
@@ -833,7 +833,7 @@ main.get_pose_extent = function (pose, extent)
 
 /**
  * @constructor
- * @param {HTMLCanvasElement} canvas_2d 
+ * @param {HTMLCanvasElement} canvas_2d
  */
 main.view_2d = function (canvas_2d)
 {
@@ -841,8 +841,8 @@ main.view_2d = function (canvas_2d)
 }
 
 /**
- * @return {void} 
- * @param {spine.pose} pose 
+ * @return {void}
+ * @param {spine.pose} pose
  */
 main.view_2d.prototype.debug_draw_skeleton_2d = function (pose)
 {
@@ -904,8 +904,8 @@ main.view_2d.prototype.debug_draw_skeleton_2d = function (pose)
 }
 
 /**
- * @return {void} 
- * @param {spine.pose} pose 
+ * @return {void}
+ * @param {spine.pose} pose
  */
 main.view_2d.prototype.draw_skeleton_2d = function (pose)
 {
@@ -977,8 +977,8 @@ main.view_2d.prototype.draw_skeleton_2d = function (pose)
 }
 
 /**
- * @return {void} 
- * @param {spine.pose} pose 
+ * @return {void}
+ * @param {spine.pose} pose
  */
 main.view_2d.prototype.debug_draw_pose_2d = function (pose)
 {
@@ -1042,8 +1042,8 @@ main.view_2d.prototype.debug_draw_pose_2d = function (pose)
 }
 
 /**
- * @return {void} 
- * @param {spine.pose} pose 
+ * @return {void}
+ * @param {spine.pose} pose
  */
 main.view_2d.prototype.draw_pose_2d = function (pose)
 {
@@ -1117,8 +1117,8 @@ main.view_2d.prototype.draw_pose_2d = function (pose)
 }
 
 /**
- * @constructor 
- * @param {HTMLCanvasElement} canvas_gl 
+ * @constructor
+ * @param {HTMLCanvasElement} canvas_gl
  */
 main.view_gl = function (canvas_gl)
 {
@@ -1139,7 +1139,7 @@ main.view_gl = function (canvas_gl)
 	{
 		//window.console.log(ctx_gl.getSupportedExtensions());
 
-		if (!ctx_gl.getExtension('WEBKIT_WEBGL_compressed_texture_s3tc') && 
+		if (!ctx_gl.getExtension('WEBKIT_WEBGL_compressed_texture_s3tc') &&
 			!ctx_gl.getExtension('MOZ_WEBGL_compressed_texture_s3tc'))
 		{
 			window.console.log("No WebGL Compressed Texture S3TC");
@@ -1251,13 +1251,13 @@ main.view_gl = function (canvas_gl)
 		program.aVertexTexCoord = ctx_gl.getAttribLocation(program, "aVertexTexCoord");
 
 		// vertex position buffer
-		var vertex_position_array = 
+		var vertex_position_array =
 		[
 			-1.0, -1.0, 0.0, // tl
 			-1.0,  1.0, 0.0, // bl
 			 1.0,  1.0, 0.0, // br
 			 1.0, -1.0, 0.0  // tr
-		];  
+		];
 		var vertex_position_buffer = this.vertex_position_buffer = ctx_gl.createBuffer();
 		ctx_gl.bindBuffer(ctx_gl.ARRAY_BUFFER, vertex_position_buffer);
 		ctx_gl.bufferData(ctx_gl.ARRAY_BUFFER, new Float32Array(vertex_position_array), ctx_gl.STATIC_DRAW);
@@ -1266,13 +1266,13 @@ main.view_gl = function (canvas_gl)
 		vertex_position_buffer.numItems = vertex_position_array.length / vertex_position_buffer.itemSize;
 
 		// vertex color buffer
-		var vertex_color_array = 
+		var vertex_color_array =
 		[
 			1.0, 0.0, 0.0, 0.5, // tl
 			0.0, 1.0, 0.0, 0.5, // bl
 			0.0, 0.0, 1.0, 0.5, // br
 			1.0, 1.0, 1.0, 0.5  // tr
-		];  
+		];
 		var vertex_color_buffer = this.vertex_color_buffer = ctx_gl.createBuffer();
 		ctx_gl.bindBuffer(ctx_gl.ARRAY_BUFFER, vertex_color_buffer);
 		ctx_gl.bufferData(ctx_gl.ARRAY_BUFFER, new Float32Array(vertex_color_array), ctx_gl.STATIC_DRAW);
@@ -1281,13 +1281,13 @@ main.view_gl = function (canvas_gl)
 		vertex_color_buffer.numItems = vertex_color_array.length / vertex_color_buffer.itemSize;
 
 		// vertex texture coordinate buffer
-		var vertex_texcoord_array = 
+		var vertex_texcoord_array =
 		[
 			0.0, 0.0, // tl
 			0.0, 1.0, // bl
 			1.0, 1.0, // br
 			1.0, 0.0  // tr
-		];  
+		];
 		var vertex_texcoord_buffer = this.vertex_texcoord_buffer = ctx_gl.createBuffer();
 		ctx_gl.bindBuffer(ctx_gl.ARRAY_BUFFER, vertex_texcoord_buffer);
 		ctx_gl.bufferData(ctx_gl.ARRAY_BUFFER, new Float32Array(vertex_texcoord_array), ctx_gl.STATIC_DRAW);
@@ -1296,7 +1296,7 @@ main.view_gl = function (canvas_gl)
 		vertex_texcoord_buffer.numItems = vertex_texcoord_array.length / vertex_texcoord_buffer.itemSize;
 
 		// vertex index buffer
-		var vertex_index_array = 
+		var vertex_index_array =
 		[
 			0, 1, 2, 3
 		];
@@ -1310,9 +1310,9 @@ main.view_gl = function (canvas_gl)
 }
 
 /**
- * @return {void} 
- * @param {Float32Array} dst 
- * @param {fo.m3x2} src 
+ * @return {void}
+ * @param {Float32Array} dst
+ * @param {fo.m3x2} src
  */
 main.set_a16_from_m3x2 = function (dst, src)
 {
@@ -1323,8 +1323,8 @@ main.set_a16_from_m3x2 = function (dst, src)
 }
 
 /**
- * @return {void} 
- * @param {fo.m3x2} mtx 
+ * @return {void}
+ * @param {fo.m3x2} mtx
  */
 main.view_gl.prototype.load_projection_mtx = function (mtx)
 {
@@ -1332,8 +1332,8 @@ main.view_gl.prototype.load_projection_mtx = function (mtx)
 }
 
 /**
- * @return {void} 
- * @param {fo.m3x2} mtx 
+ * @return {void}
+ * @param {fo.m3x2} mtx
  */
 main.view_gl.prototype.load_camera_mtx = function (mtx)
 {
@@ -1341,8 +1341,8 @@ main.view_gl.prototype.load_camera_mtx = function (mtx)
 }
 
 /**
- * @return {void} 
- * @param {fo.m3x2} mtx 
+ * @return {void}
+ * @param {fo.m3x2} mtx
  */
 main.view_gl.prototype.load_modelview_mtx = function (mtx)
 {
@@ -1350,8 +1350,8 @@ main.view_gl.prototype.load_modelview_mtx = function (mtx)
 }
 
 /**
- * @return {void} 
- * @param {spine.pose} pose 
+ * @return {void}
+ * @param {spine.pose} pose
  */
 main.view_gl.prototype.draw_pose_gl = function (pose)
 {
