@@ -7,7 +7,6 @@ var scene = function scene() {
 		playGround,
 		x = 0, y = 0; // точки отсчета для сцены
 
-	// Обертка над оператором рендера PIXI
 	var repaintCanvas = function repaintCanvas() {
 		requestAnimFrame(repaintCanvas);
 		renderer.render(stage);
@@ -22,6 +21,11 @@ var scene = function scene() {
 
 		// p.canvasSelector
 		init: function ( p ) {
+			var _this = this;
+
+			// Обертка над оператором рендера PIXI
+
+
 			masterCanvas = document.getElementById(p.canvasId); // указатель на DOM
 			stage = new PIXI.Stage(0xFFFFFF, true); // Корневая сцена
 
@@ -42,7 +46,10 @@ var scene = function scene() {
 			// Запустили перерисовку холста
 			repaintCanvas();
 
-			return this;
+			_this.stage = stage;
+			_this.playGround = playGround;
+
+			return _this;
 		},
 
 		// На сцену в произвольный момент может быть добавлен один из существующих объектов
@@ -50,8 +57,7 @@ var scene = function scene() {
 		addObj: function ( p ) {
 			var _this = this;
 
-			var newObj = obj().create( p );
-			playGround.addChild( newObj.image );
+			playGround.addChild( p.image );
 
 			return _this;
 		},

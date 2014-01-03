@@ -45,8 +45,17 @@
 					"assets/models/spineboy/spineboy.json",
 					"assets/models/spineboy/spineboy.anim",
 
+					"assets/models/dragon/dragon.json",
+					"assets/models/dragon/dragon.anim",
+
+					"assets/models/goblins/images/goblin/goblin.json",
+					"assets/models/goblins/images/goblin/goblin.anim",
+
 					"assets/background/lvl1_1.png"
 				];
+
+				//	"assets/models/goblins/images/goblin/goblin.json",
+				//	"assets/models/goblins/images/goblin/goblin.anim",
 
 				// create a new loader
 				var loader = new PIXI.AssetLoader(assetsToLoader);
@@ -55,22 +64,66 @@
 				loader.onComplete = function() {
 					console.log('loaded');
 
+
+					var obj1 = obj().create({
+							image: 'assets/background/lvl1_1.png',
+							x: 0,
+							y: 0
+						});
+
+					var obj2 = obj().create({
+							image: 'assets/models/spineboy/spineboy.anim',
+							x: 600,
+							y: 400
+						});
+
+					var obj3 = obj().create({
+							image: 'assets/models/dragon/dragon.anim',
+							x: 400,
+							y: 700
+						});
+
+					var obj4 = obj().create({
+							image: 'assets/models/goblins/images/goblin/goblin.anim',
+							x: 300,
+							y: 300
+						});
+
 					scene
 						.init({
 							canvasId: 'view'
 						})
-						.addObj({
-							image: 'assets/background/lvl1_1.png',
-							x: 0,
-							y: 0
-						})
-						.addObj({
-							image: 'assets/models/spineboy/spineboy.anim',
-							x: 200,
-							y: 400
-						})
+						.addObj(obj1)
+						.addObj(obj2)
+						.addObj(obj3)
+						.addObj(obj4);
 
-					console.log(PIXI);
+
+					function swapZ(Zarray) {
+						var p1 = Zarray.getChildAt(0);
+						var p2 = Zarray.getChildAt(1);
+
+						//console.log(p1, p2);
+
+						Zarray.removeChild(p1);
+						Zarray.removeChild(p2);
+
+						Zarray.addChild(p2);
+						Zarray.addChild(p1);
+
+						/*Zarray[0] = p2;
+						Zarray[1] = p1; */
+
+						//Zarray.swapChildren(0, 1);
+
+						//console.log(Zarray.children);
+
+
+					}
+
+					setInterval(function() {
+						//swapZ( scene.playGround);
+					}, 2000)
 
 				}
 

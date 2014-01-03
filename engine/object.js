@@ -32,7 +32,13 @@ function obj() {
 				_this.type = 'spine';
 				_this.image = new PIXI.Spine( p.image );
 
-				_this.image.state.setAnimationByName("walk", true);
+				var animations = _this.image.state.data.skeletonData.animations;
+				_this.image.state.setAnimationByName( animations[animations.length-1].name , true);
+
+				if (_this.image.state.data.skeletonData.skins.length > 1) {
+					_this.image.skeleton.setSkinByName("goblin");
+					_this.image.skeleton.setSlotsToSetupPose();
+				}
 			} else { console.log('image');
 				_this.type = 'image';
 				_this.image = new PIXI.Sprite.fromImage( p.image );
