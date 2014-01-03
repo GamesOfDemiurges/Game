@@ -54,40 +54,56 @@
 					"assets/background/lvl1_1.png"
 				];
 
-				//	"assets/models/goblins/images/goblin/goblin.json",
-				//	"assets/models/goblins/images/goblin/goblin.anim",
-
 				// create a new loader
 				var loader = new PIXI.AssetLoader(assetsToLoader);
 
 				// use callback
 				loader.onComplete = function() {
-					console.log('loaded');
+					//console.log('loaded');
 
 
 					var obj1 = obj().create({
-							image: 'assets/background/lvl1_1.png',
+							src: 'assets/background/lvl1_1.png',
 							x: 0,
-							y: 0
+							y: 0,
+							z: 10
 						});
 
 					var obj2 = obj().create({
-							image: 'assets/models/spineboy/spineboy.anim',
+							src: 'assets/models/spineboy/spineboy.anim',
 							x: 600,
-							y: 400
+							y: 400,
+							z: 20
 						});
 
 					var obj3 = obj().create({
-							image: 'assets/models/dragon/dragon.anim',
+							src: 'assets/models/dragon/dragon.anim',
 							x: 400,
-							y: 700
+							y: 700,
+							z: 30
 						});
 
 					var obj4 = obj().create({
-							image: 'assets/models/goblins/images/goblin/goblin.anim',
+							src: 'assets/models/goblins/images/goblin/goblin.anim',
 							x: 300,
-							y: 300
+							y: 300,
+							z: 40
 						});
+
+					var obj5 = obj().create({
+							src: 'assets/models/spineboy/spineboy.anim',
+							x: 200,
+							y: 400,
+							z: 50
+						});
+
+					var obj6 = obj().create({
+							src: 'assets/models/goblins/images/goblin/goblin.anim',
+							x: 350,
+							y: 400,
+							z: 60
+						});
+
 
 					scene
 						.init({
@@ -95,35 +111,38 @@
 						})
 						.addObj(obj1)
 						.addObj(obj2)
+						.addObj(obj4)
 						.addObj(obj3)
-						.addObj(obj4);
-
-
-					function swapZ(Zarray) {
-						var p1 = Zarray.getChildAt(0);
-						var p2 = Zarray.getChildAt(1);
-
-						//console.log(p1, p2);
-
-						Zarray.removeChild(p1);
-						Zarray.removeChild(p2);
-
-						Zarray.addChild(p2);
-						Zarray.addChild(p1);
-
-						/*Zarray[0] = p2;
-						Zarray[1] = p1; */
-
-						//Zarray.swapChildren(0, 1);
-
-						//console.log(Zarray.children);
-
-
-					}
+						.addObj(obj5)
+						.addObj(obj6);
 
 					setInterval(function() {
-						//swapZ( scene.playGround);
-					}, 2000)
+						var objects = [obj2, obj3, obj4, obj5, obj6],
+							planes = [20, 30, 40, 50, 60],
+							index = planes[ Math.round( Math.random() * 4 ) ],
+							index2 = objects[ Math.round( Math.random() * 4 ) ];
+
+
+						index2.move({
+							z: index
+						})
+						//console.log(index2, index);
+						//console.log(Z.getZindex());
+					}, 1000)
+
+					 /*setTimeout(function() {
+						obj6.move({
+							z: 20
+						})
+						console.log(Z.getZindex());
+
+						 setTimeout(function() {
+							obj6.move({
+								z: 60
+							})
+							console.log(Z.getZindex());
+						}, 1000)
+					}, 1000)*/
 
 				}
 

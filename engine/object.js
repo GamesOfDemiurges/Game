@@ -4,7 +4,8 @@ function obj() {
 	var animations = {},
 		x = -9999,
 		y = -9999,
-		z = 1;
+		z = 1,
+		pz = 1;
 
 	/* Public */
 
@@ -21,16 +22,19 @@ function obj() {
 		// p.animation
 		create: function ( p ) {
 			var _this = this;
-			if (typeof p.image === undefined) return false;
+			if (p.src === undefined) return false;
 
 			var setObjectPosition = function setObjectPosition( ) {
-				_this.image.position.x = (typeof p.x !== undefined) ? p.x : x;
-				_this.image.position.y = (typeof p.y !== undefined) ? p.y : y;
+				_this.image.position.x = (p.x !== undefined) ? p.x : x;
+				_this.image.position.y = (p.y !== undefined) ? p.y : y;
+				_this.z = (p.z !== undefined) ? p.z : z;
+				_this.pz = (p.pz !== undefined) ? p.pz : pz;
 			}
 
-			if (p.image.indexOf('.anim') !== -1) { console.log('anim');
+			if (p.src.indexOf('.anim') !== -1) { //console.log('anim');
 				_this.type = 'spine';
-				_this.image = new PIXI.Spine( p.image );
+				_this.src = p.src;
+				_this.image = new PIXI.Spine( p.src );
 
 				var animations = _this.image.state.data.skeletonData.animations;
 				_this.image.state.setAnimationByName( animations[animations.length-1].name , true);
@@ -39,9 +43,10 @@ function obj() {
 					_this.image.skeleton.setSkinByName("goblin");
 					_this.image.skeleton.setSlotsToSetupPose();
 				}
-			} else { console.log('image');
+			} else { //console.log('image');
 				_this.type = 'image';
-				_this.image = new PIXI.Sprite.fromImage( p.image );
+				_this.src = p.src;
+				_this.image = new PIXI.Sprite.fromImage( p.src );
 			}
 
 			setObjectPosition();
@@ -60,7 +65,16 @@ function obj() {
 		// p.y
 		// p.z
 		move: function ( p ) {
+			var _this = this;
 
+			if (p.z !== undefined) {
+				Z.changeZindex({
+					obj: _this,
+					z: p.z
+				});
+			}
+
+			return _this;
 		}
 	}
 }

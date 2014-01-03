@@ -7517,7 +7517,9 @@ PIXI.Spine = function (url) {
 			continue;
 		}
 
-		attachment.rendererObject.name = this.baseUrl + attachment.rendererObject.name;
+		if (attachment.rendererObject.name.indexOf(this.baseUrl) === -1) {
+			attachment.rendererObject.name = this.baseUrl + attachment.rendererObject.name;
+		}
 		var spriteName = attachment.rendererObject.name;
 		var sprite = this.createSprite(slot, attachment.rendererObject);
 		slot.currentSprite = sprite;
@@ -7555,7 +7557,9 @@ PIXI.Spine.prototype.updateTransform = function () {
 
 		if (attachment.rendererObject) {
 			if (!slot.currentSpriteName /*|| slot.currentSpriteName != attachment.name*/) {
-				attachment.rendererObject.name = this.baseUrl + attachment.rendererObject.name;
+				if (attachment.rendererObject.name.indexOf(this.baseUrl) === -1) {
+					attachment.rendererObject.name = this.baseUrl + attachment.rendererObject.name;
+				}
 				var spriteName = attachment.rendererObject.name;
 				if (slot.currentSprite !== undefined) {
 					slot.currentSprite.visible = false;
