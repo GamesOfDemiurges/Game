@@ -26,11 +26,40 @@
 				position: relative;
 			}
 
-			canvas {
+			#view {
 				display: block;
 				position: relative;
 				height: 100%;
 				width: 100%;
+			}
+
+			.debug {
+				display: none;
+			}
+
+			.debug,
+			#debug__view {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+			}
+
+			#debug__view {
+				background-color: rgba(255, 255, 255, 0.7);
+			}
+
+			.debug__point {
+				position: absolute;
+				top: 0;
+				left: 0;
+				margin-left: -5px;
+				margin-top: -5px;
+				width: 6px;
+				height: 6px;
+				background: yellow;
+				border: 2px black solid;
 			}
 		</style>
 
@@ -38,8 +67,10 @@
 		<script type="text/javascript" src="engine/scene.js"></script>
 		<script type="text/javascript" src="engine/object.js"></script>
 
+		<script type="text/javascript" src="tools/debugTraect.js"></script>
+
 		<script type="text/javascript">
-			window.onload = function() {
+			document.addEventListener("DOMContentLoaded", function(event) {
 
 				var assetsToLoader = [
 					"assets/models/spineboy/spineboy.json",
@@ -59,13 +90,18 @@
 
 				// use callback
 				loader.onComplete = function() {
-					//console.log('loaded');
-
 
 					var obj1 = obj().create({
 							src: 'assets/background/lvl1_1.png',
 							x: 0,
 							y: 0,
+							z: 5
+						});
+
+					var obj5 = obj().create({
+							src: 'assets/models/spineboy/spineboy.anim',
+							x: 600,
+							y: 400,
 							z: 10
 						});
 
@@ -73,50 +109,63 @@
 							src: 'assets/models/spineboy/spineboy.anim',
 							x: 600,
 							y: 400,
-							z: 20
+							z: 15,
+							scale: 0.5
 						});
 
 					var obj3 = obj().create({
 							src: 'assets/models/dragon/dragon.anim',
+							x: 450,
+							y: 500,
+							z: 19,
+							pz: 10,
+							scale: 0.5
+						});
+
+					var obj31 = obj().create({
+							src: 'assets/models/dragon/dragon.anim',
+							x: 200,
+							y: 400,
+							z: 10,
+							pz: 10,
+							scale: 0.3
+						});
+
+					var obj32 = obj().create({
+							src: 'assets/models/dragon/dragon.anim',
 							x: 400,
-							y: 700,
-							z: 30
+							y: 300,
+							z: 11,
+							pz: 10,
+							scale: 0.4
 						});
 
 					var obj4 = obj().create({
 							src: 'assets/models/goblins/images/goblin/goblin.anim',
-							x: 300,
+							x: 100,
 							y: 300,
-							z: 40
-						});
-
-					var obj5 = obj().create({
-							src: 'assets/models/spineboy/spineboy.anim',
-							x: 200,
-							y: 400,
-							z: 50
+							z: 10,
+							scale: 0.7
 						});
 
 					var obj6 = obj().create({
 							src: 'assets/models/goblins/images/goblin/goblin.anim',
-							x: 350,
+							x: 150,
 							y: 400,
-							z: 60
+							z: 10
 						});
 
-
 					scene
-						.init({
-							canvasId: 'view'
-						})
 						.addObj(obj1)
 						.addObj(obj2)
-						.addObj(obj4)
 						.addObj(obj3)
+						.addObj(obj31)
+						.addObj(obj32)
+						.addObj(obj4)
 						.addObj(obj5)
 						.addObj(obj6);
 
-					setInterval(function() {
+					/*setInterval(function() {
 						var objects = [obj2, obj3, obj4, obj5, obj6],
 							planes = [20, 30, 40, 50, 60],
 							index = planes[ Math.round( Math.random() * 4 ) ],
@@ -128,7 +177,7 @@
 						})
 						//console.log(index2, index);
 						//console.log(Z.getZindex());
-					}, 1000)
+					}, 1000) */
 
 					 /*setTimeout(function() {
 						obj6.move({
@@ -147,13 +196,31 @@
 				}
 
 				//begin load
+				scene
+					.init({
+						canvasId: 'view'
+					})
+
 				loader.load();
 
-			}
+				/********************** DEBUGGER ************************/
+				document.getElementById('debug__view').setAttribute('width', document.getElementById('view').getAttribute('width'));
+				document.getElementById('debug__view').setAttribute('height', document.getElementById('view').getAttribute('height'));
+				debugTraect.paint();
+
+			})
 		</script>
 
 	</head>
 	<body>
 		<canvas id="view"></canvas>
+		<div class="debug" style="display: block">
+			<canvas id="debug__view"></canvas>
+
+			<div class="debug__point" style="top: 500px; left: 100px"></div>
+			<div class="debug__point" style="top: 600px; left: 300px"></div>
+			<div class="debug__point" style="top: 400px; left: 500px"></div>
+			<div class="debug__point" style="top: 500px; left: 700px"></div>
+		</div>
 	</body>
 </html>

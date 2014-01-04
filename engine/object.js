@@ -24,11 +24,15 @@ function obj() {
 			var _this = this;
 			if (p.src === undefined) return false;
 
-			var setObjectPosition = function setObjectPosition( ) {
+			function setObjectPosition() {
 				_this.image.position.x = (p.x !== undefined) ? p.x : x;
 				_this.image.position.y = (p.y !== undefined) ? p.y : y;
 				_this.z = (p.z !== undefined) ? p.z : z;
 				_this.pz = (p.pz !== undefined) ? p.pz : pz;
+			}
+
+			function setObjectScale() {
+				_this.image.scale.x = _this.image.scale.y = (p.scale !== undefined) ? p.scale : 1
 			}
 
 			if (p.src.indexOf('.anim') !== -1) { //console.log('anim');
@@ -50,6 +54,7 @@ function obj() {
 			}
 
 			setObjectPosition();
+			setObjectScale();
 
 			return _this;
 		},

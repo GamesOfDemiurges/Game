@@ -7,7 +7,7 @@ var scene = function scene() {
 		playGround,
 		x = 0, y = 0; // точки отсчета для сцены
 
-	var repaintCanvas = function repaintCanvas() {
+	function repaintCanvas() {
 		if (Z.zchange) {
 			Z.drawZindex(playGround);
 		}
@@ -92,7 +92,7 @@ var Z = function() {
 			return zindex;
 		},
 		addZindex: function ( p ) {
-			var addChild = function addChild(next ) {
+			function addChild(next ) {
 				var child = Math.random();
 
 				zindex[p.z].children[child] = {
