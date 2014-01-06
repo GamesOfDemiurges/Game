@@ -38,7 +38,7 @@
 			}
 
 			.debug,
-			#debug__view {
+			.debug__view {
 				position: absolute;
 				top: 0;
 				left: 0;
@@ -46,7 +46,7 @@
 				height: 100%;
 			}
 
-			#debug__view {
+			.debug__view {
 				background-color: rgba(255, 255, 255, 0.7);
 			}
 
@@ -60,6 +60,34 @@
 				height: 6px;
 				background: yellow;
 				border: 2px black solid;
+			}
+
+			.debug__point-handle {
+				position: absolute;
+				top: 0;
+				left: 0;
+				margin-left: -3px;
+				margin-top: -3px;
+				width: 4px;
+				height: 4px;
+				background: white;
+				border: 2px black solid;
+			}
+
+			.debug__control {
+				position: fixed;
+				z-index: 10;
+				top: 100px;
+				right: 10px;
+				width: 150px;
+				background-color: rgba(255, 255, 255, 0.5);
+				border: 1px black solid;
+			}
+
+			.debug__control-traects select {
+				display: block;
+				width: 90%;
+				margin: 10px auto;
 			}
 		</style>
 
@@ -157,13 +185,13 @@
 
 					scene
 						.addObj(obj1)
-						.addObj(obj2)
+/*						.addObj(obj2)
 						.addObj(obj3)
 						.addObj(obj31)
 						.addObj(obj32)
 						.addObj(obj4)
 						.addObj(obj5)
-						.addObj(obj6);
+						.addObj(obj6); */
 
 					/*setInterval(function() {
 						var objects = [obj2, obj3, obj4, obj5, obj6],
@@ -204,8 +232,8 @@
 				loader.load();
 
 				/********************** DEBUGGER ************************/
-				document.getElementById('debug__view').setAttribute('width', document.getElementById('view').getAttribute('width'));
-				document.getElementById('debug__view').setAttribute('height', document.getElementById('view').getAttribute('height'));
+				document.querySelector('.debug__view').setAttribute('width', document.getElementById('view').getAttribute('width'));
+				document.querySelector('.debug__view').setAttribute('height', document.getElementById('view').getAttribute('height'));
 				debugTraect.paint();
 
 			})
@@ -215,12 +243,25 @@
 	<body>
 		<canvas id="view"></canvas>
 		<div class="debug" style="display: block">
-			<canvas id="debug__view"></canvas>
+			<div class="debug__control">
+				<div class="debug__control-traects">
+					<select id="" size="10"></select>
+				</div>
 
-			<div class="debug__point" style="top: 500px; left: 100px"></div>
+				<div class="debug__control-objects"></div>
+
+				<div class="debug__control-buttons">
+					<button class="debug__button debug__button_add">Добавить</button>
+					<button disabled=disabled>Удалить</button>
+				</div>
+			</div>
+
+			<canvas class="debug__view"></canvas>
+
+			<!--<div class="debug__point" style="top: 500px; left: 100px"></div>
 			<div class="debug__point" style="top: 600px; left: 300px"></div>
 			<div class="debug__point" style="top: 400px; left: 500px"></div>
-			<div class="debug__point" style="top: 500px; left: 700px"></div>
+			<div class="debug__point" style="top: 500px; left: 700px"></div>-->
 		</div>
 	</body>
 </html>
