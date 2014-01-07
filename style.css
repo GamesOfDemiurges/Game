@@ -1,0 +1,85 @@
+/* canvas { -webkit-transform: scale3d(2, 2, 0) translate3d(200px, 110px, 0); }		*/
+
+html {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	width: 10000px;
+	position: relative;
+}
+
+#view {
+	display: block;
+	position: fixed;
+	height: 100%;
+	width: 100%;
+}
+
+.debug {
+	display: none;
+	position: relative;
+}
+
+.debug__view {
+	position: absolute;
+	background-color: rgba(255, 255, 255, 0.7);
+}
+
+.debug__view_hidden {
+	display: none;
+}
+
+.debug,
+.debug__view {
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.debug__point {
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin-left: -5px;
+	margin-top: -5px;
+	width: 6px;
+	height: 6px;
+	background: yellow;
+	border: 2px black solid;
+}
+
+.debug__point-handle {
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin-left: -3px;
+	margin-top: -3px;
+	width: 4px;
+	height: 4px;
+	background: white;
+	border: 2px black solid;
+}
+
+.debug__control {
+	position: fixed;
+	z-index: 10;
+	top: 100px;
+	right: 10px;
+	width: 150px;
+	background-color: rgba(255, 255, 255, 0.5);
+	border: 1px black solid;
+	text-align: center;
+}
+
+.debug__control-traects select {
+	display: block;
+	width: 90%;
+	margin: 10px auto;
+}

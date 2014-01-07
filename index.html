@@ -7,90 +7,8 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=0.5, user-scalable=no"/>
 
-		<!--<link rel="stylesheet" type="text/css" href="css/style.css" media="screen, projection, print">
-		<script type="text/javascript" src="js/main.js"></script> -->
-
-		<style type="text/css">
-			/* canvas { -webkit-transform: scale3d(2, 2, 0) translate3d(200px, 110px, 0); }		*/
-
-			html {
-				margin: 0;
-				padding: 0;
-				height: 100%;
-			}
-
-			body {
-				margin: 0;
-				padding: 0;
-				height: 100%;
-				position: relative;
-			}
-
-			#view {
-				display: block;
-				position: relative;
-				height: 100%;
-				width: 100%;
-			}
-
-			.debug {
-				display: none;
-			}
-
-			.debug,
-			.debug__view {
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 100%;
-			}
-
-			.debug__view {
-				background-color: rgba(255, 255, 255, 0.7);
-			}
-
-			.debug__point {
-				position: absolute;
-				top: 0;
-				left: 0;
-				margin-left: -5px;
-				margin-top: -5px;
-				width: 6px;
-				height: 6px;
-				background: yellow;
-				border: 2px black solid;
-			}
-
-			.debug__point-handle {
-				position: absolute;
-				top: 0;
-				left: 0;
-				margin-left: -3px;
-				margin-top: -3px;
-				width: 4px;
-				height: 4px;
-				background: white;
-				border: 2px black solid;
-			}
-
-			.debug__control {
-				position: fixed;
-				z-index: 10;
-				top: 100px;
-				right: 10px;
-				width: 150px;
-				background-color: rgba(255, 255, 255, 0.5);
-				border: 1px black solid;
-				text-align: center;
-			}
-
-			.debug__control-traects select {
-				display: block;
-				width: 90%;
-				margin: 10px auto;
-			}
-		</style>
+		<link rel="stylesheet" type="text/css" href="style.css" media="screen, projection, print">
+		<!--<script type="text/javascript" src="js/main.js"></script> -->
 
 		<script type="text/javascript" src="engine/spine-runtime/pixi/bin/pixi.dev.js"></script>
 		<script type="text/javascript" src="engine/scene.js"></script>
@@ -227,15 +145,32 @@
 				}
 
 				//begin load
+
+				function resizeViewPort() {
+					document.body.style.width = ( 2922 / document.getElementById('view').getAttribute('width') ) * document.getElementById('view').clientWidth + 'px';
+				}
+
 				scene
 					.init({
 						canvasId: 'view'
 					})
 
 				loader.load();
+				resizeViewPort();
+				setTimeout(function() {
+					window.scroll(0, 0);
+				}, 1000)
+
+				window.onscroll = function(e) {
+					scene.playGround.position.x = -2922 * window.pageXOffset / document.body.clientWidth;
+				}
+
+				window.addEventListener('resize', function() {
+					resizeViewPort();
+				})
 
 				/********************** DEBUGGER ************************/
-				document.querySelector('.debug__view').setAttribute('width', document.getElementById('view').getAttribute('width'));
+				document.querySelector('.debug__view').setAttribute('width', document.body.clientWidth / document.getElementById('view').clientHeight * 510 );
 				document.querySelector('.debug__view').setAttribute('height', document.getElementById('view').getAttribute('height'));
 				debugTraect.paint();
 
@@ -262,6 +197,7 @@
 					<button class="debug__button debug__button-model-forward">Вперед</button>
 					<button class="debug__button debug__button-model-backward">Назад</button>
 					<hr />
+					<button class="debug__button debug__button_toggle-overlay">Переключить оверлей</button>
 					<!--<button disabled=disabled>Удалить</button>-->
 				</div>
 			</div>

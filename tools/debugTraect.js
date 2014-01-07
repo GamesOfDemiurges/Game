@@ -650,7 +650,6 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 		// Даблклик по холсту создает новую точку
 		if (e.target.classList.contains('debug__view') ) {
-
 			debugTraect.addPoint({
 				x: e.pageX,
 				y: e.pageY
@@ -659,6 +658,16 @@ document.addEventListener("DOMContentLoaded", function(e) {
 	})
 
 	debugPanel.addEventListener("click", function(e) {
+
+		// переключить оверлей
+		if (e.target.classList.contains('debug__button_toggle-overlay')) {
+
+			if ( canvas.classList.contains('debug__view_hidden') ) {
+				canvas.classList.remove('debug__view_hidden');
+			} else {
+				canvas.classList.add('debug__view_hidden');
+			}
+		}
 
 		// Добавление траектории
 		if (e.target.classList.contains('debug__button_add')) {

@@ -34,9 +34,9 @@ var scene = function scene() {
 			stage = new PIXI.Stage(0xFFFFFF, true); // Корневая сцена
 
 			renderer = new PIXI.CanvasRenderer(510/masterCanvas.clientHeight*masterCanvas.clientWidth, 510, masterCanvas, false); // Оператор рендеринга 900x510 native
-			window.onresize = function () {
+			window.addEventListener('resize', function() {
 				renderer.resize(510/masterCanvas.clientHeight*masterCanvas.clientWidth, 510);
-			}
+			})
 
 			// Контейнер сцены
 			// его будем двигать для смещения сцены относительно вьюпорта
