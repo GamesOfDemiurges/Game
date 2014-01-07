@@ -35,13 +35,22 @@ function obj() {
 				_this.image.scale.x = _this.image.scale.y = (p.scale !== undefined) ? p.scale : 1
 			}
 
+			function setReverse() {
+				if (p.reverse) {
+					_this.image.scale.x *= -1;
+					//_this.image.position.x = centerX - _this.image.scale.x * containerWidth / 2;
+				}
+			}
+
 			if (p.src.indexOf('.anim') !== -1) { //console.log('anim');
 				_this.type = 'spine';
 				_this.src = p.src;
 				_this.image = new PIXI.Spine( p.src );
 
-				var animations = _this.image.state.data.skeletonData.animations;
-				_this.image.state.setAnimationByName( animations[animations.length-1].name , true);
+				if (p.animated) {
+					var animations = _this.image.state.data.skeletonData.animations;
+					_this.image.state.setAnimationByName( animations[animations.length-1].name , true);
+				}
 
 				if (_this.image.state.data.skeletonData.skins.length > 1) {
 					_this.image.skeleton.setSkinByName("goblin");
@@ -55,6 +64,7 @@ function obj() {
 
 			setObjectPosition();
 			setObjectScale();
+			setReverse();
 
 			return _this;
 		},
@@ -71,6 +81,24 @@ function obj() {
 		// p.z
 		move: function ( p ) {
 			var _this = this;
+
+			if (p.x !== undefined) {
+
+				// Автоматический разворот модели в зависимости от направления движения
+				if ( (_this.image.position.x > p.x) && (_this.image.scale.x > 0) ) {
+					_this.image.scale.x *= -1;
+				}
+
+				if ( (_this.image.position.x < p.x) && (_this.image.scale.x < 0) ) {
+					_this.image.scale.x *= -1;
+				}
+
+				_this.image.position.x = p.x;
+			}
+
+			if (p.y !== undefined) {
+				_this.image.position.y = p.y;
+			}
 
 			if (p.z !== undefined) {
 				Z.changeZindex({

@@ -1,6 +1,5 @@
 var repaint = false,
 	debugPanel,
-	dots,
 	canvas,
 	ctx,
 	scale;
@@ -21,22 +20,252 @@ var debugTraect = function debugTraect() {
 		requestAnimFrame(render);
 	}
 
-		// Вернуть позицию управляющих точек
-		//p.x1
-		//p.y1
-		//p.x2
-		//p.y2
-	var getAdditionalBezierPointsCoords = function getAdditionalBezierPointsCoords( p ) {
-			var ap1 = 0.3,
-				ap2 = 0.7;
+	// Возвращает Эвклидово расстояния
+	//p.x1
+	//p.y1
+	//p.x2
+	//p.y2
+	var getDistance = function getDistance(p) {
+		var xDistance = p.x2 - p.x1,
+			yDistance = p.y2 - p.y1;
 
-			return {
-				ax1: (p.x2 - p.x1) * ap1 + p.x1,
-				ay1: (p.y2 - p.y1) * ap1 + p.y1,
-				ax2: (p.x2 - p.x1) * ap2 + p.x1,
-				ay2: (p.y2 - p.y1) * ap2 + p.y1
+		return Math.sqrt( xDistance*xDistance + yDistance*yDistance );
+	}
+
+	// Возвращает координаты точку на отрезке
+	//p.x1
+	//p.y1
+	//p.x2
+	//p.y2
+	//p.t
+	var getLinePointCoords = function getLinePointCoords( p ) {
+		return {
+			x: (p.x2 - p.x1) * p.t + p.x1,
+			y: (p.y2 - p.y1) *  p.t + p.y1,
+		}
+	}
+
+	// Возвращает координаты точки в кривой Безье
+	//p.x1
+	//p.y1
+	//p.ax1
+	//p.ay1
+	//p.ax2
+	//p.ay2
+	//p.x2
+	//p.y2
+	//p.t
+	var getBezierPointCoords = function getBezierPointCoords(p) {
+
+		function polynom(z) {
+			var at = (1 - p.t);
+
+			return (at * at * at * z.p0) + (3 * p.t * at * at * z.p1) + (3 * p.t * p.t * at * z.p2) + (p.t * p.t * p.t * z.p3);
+		}
+
+		return {
+			x: polynom( { p0: p.x1, p1: p.ax1, p2: p.ax2, p3: p.x2 } ),
+			y: polynom( { p0: p.y1, p1: p.ay1, p2: p.ay2, p3: p.y2 } )
+		}
+	}
+
+	// Возвращает позицию управляющих точек на кривой Безье
+	//p.x1
+	//p.y1
+	//p.x2
+	//p.y2
+	var getAdditionalBezierPointsCoords = function getAdditionalBezierPointsCoords( p ) {
+
+		var a1 = getLinePointCoords({
+			x1: p.x1,
+			y1: p.y1,
+			x2: p.x2,
+			y2: p.y2,
+			t: 0.3
+		})
+
+		var a2 = getLinePointCoords({
+			x1: p.x1,
+			y1: p.y1,
+			x2: p.x2,
+			y2: p.y2,
+			t: 0.7
+		})
+
+		return {
+			ax1: a1.x,
+			ay1: a1.y,
+			ax2: a2.x,
+			ay2: a2.y
+		}
+	}
+
+	// Строит рекурсивно атомарные шаги по заданной кривой Безье длиной не более допустимого расстояния
+	//p.x1
+	//p.y1
+	//p.ax1
+	//p.ay1
+	//p.ax2
+	//p.ay2
+	//p.x2
+	//p.y2
+	//p.t1,
+	//p.t2
+	var buildCurveSteps = function buildCurveSteps(p) {
+
+		// максимально допустимое расстояние в пикселах
+		var maxDistance = 1.4
+
+		var path = {};
+
+		// считаем среднюю точку в заданном интервале [t1, t2]
+		var middleT = p.t1 + (p.t2 - p.t1)/2;
+
+		// получаем координаты точек при t = t1, middleT, t2
+		var pointInT = getBezierPointCoords({
+			x1: p.x1,
+			y1: p.y1,
+			ax1: p.ax1,
+			ay1: p.ay1,
+			ax2: p.ax2,
+			ay2: p.ay2,
+			x2: p.x2,
+			y2: p.y2,
+			t: middleT
+		});
+
+		var pointInT1 = getBezierPointCoords({
+			x1: p.x1,
+			y1: p.y1,
+			ax1: p.ax1,
+			ay1: p.ay1,
+			ax2: p.ax2,
+			ay2: p.ay2,
+			x2: p.x2,
+			y2: p.y2,
+			t: p.t1
+		});
+
+		var pointInT2 = getBezierPointCoords({
+			x1: p.x1,
+			y1: p.y1,
+			ax1: p.ax1,
+			ay1: p.ay1,
+			ax2: p.ax2,
+			ay2: p.ay2,
+			x2: p.x2,
+			y2: p.y2,
+			t: p.t2
+		});
+
+		// обход дерева слева
+		var leftDistance = getDistance({
+			x1: pointInT1.x,
+			y1: pointInT1.y,
+			x2: pointInT.x,
+			y2: pointInT.y
+		})
+
+		if ( leftDistance > maxDistance ) {
+
+			// Если можно разбить ветвь дальше, рекурсивно разбиваем
+			var innerLeftSteps = buildCurveSteps({
+				x1: p.x1,
+				y1: p.y1,
+				ax1: p.ax1,
+				ay1: p.ay1,
+				ax2: p.ax2,
+				ay2: p.ay2,
+				x2: p.x2,
+				y2: p.y2,
+				t1: p.t1,
+				t2: middleT
+			});
+
+			// добавляем полученные точки в текущий путь
+			for (var i in innerLeftSteps) {
+				path[i] = innerLeftSteps[i];
+			}
+
+		} else {
+
+			// Ветвь нельзя разбить дальше
+			// Добавляем полученную точку к пути и возвращаемся обратно по стеку
+			path[middleT] = pointInT;
+			return path;
+		}
+
+		// обход дерева справа
+		var rightDistance = getDistance({
+			x1: pointInT.x,
+			y1: pointInT.y,
+			x2: pointInT2.x,
+			y2: pointInT2.y
+		})
+
+		if ( rightDistance >= maxDistance ) {
+
+			// Рекурсивно строим ветку (фактически работает только левый обход)
+			var innerRightSteps = buildCurveSteps({
+				x1: p.x1,
+				y1: p.y1,
+				ax1: p.ax1,
+				ay1: p.ay1,
+				ax2: p.ax2,
+				ay2: p.ay2,
+				x2: p.x2,
+				y2: p.y2,
+				t1: middleT,
+				t2: p.t2
+			});
+
+			// Если ветвь можно разбить, добавляем полученные точки к текущему пути
+			for (var i in innerRightSteps) {
+				path[i] = innerRightSteps[i];
 			}
 		}
+
+		// Добавим текущую среднюю точку в путь, если её еще там нет
+		path[middleT] = {
+			x: pointInT.x,
+			y: pointInT.y
+		}
+
+		// Случай, когда весь путь уже построен
+		if ((p.t1 == 0) && (p.t2 == 1)) {
+
+			// Добавляем граничные точки
+			path[0] = {
+				x: p.x1,
+				y: p.y1
+			}
+
+			path[1] = {
+				x: p.x2,
+				y: p.y2
+			}
+
+			// Разворачиваем объект в сортированный массив
+			var keyArr = [],
+				result = [];
+
+			for (var i in path) {
+				keyArr.push(i);
+			}
+
+			keyArr = keyArr.sort();
+
+			for (var i = 0; i < keyArr.length; i++) {
+				result.push(path[keyArr[i]]);
+			}
+
+			// Финальный возврат пути в виде массива
+			return result;
+		}
+
+		// Рекурсивный возврат пути
+		return path;
+	}
 
 	var paint = function paint() {
 
@@ -55,65 +284,129 @@ var debugTraect = function debugTraect() {
 
 		// Выводим линии
 		// Перебираем текущие узлы и получаем их координаты.
-		// Накладываем коэффициент масштабирования
+		// Узлы образуют траектории, отдельных траекторий может быть много
 		for (path in paths) {
 
+			// Работаем с каждой траекторией в списке
 			if (paths[path].dots.length) {
+
+				paths[path].steps = [];
+
+				// Характеристики линии
+				// смещение к началу рисования траектории
 				ctx.lineWidth = "1";
 				ctx.beginPath();
 				ctx.moveTo( paths[path].dots[0].mainHandle.x, paths[path].dots[0].mainHandle.y );
 
+				// Обновляем координаты точки из DOM
 				paths[path].dots[0].mainHandle.x = getCoordsFromCss( paths[path].dots[0].mainHandle.dom ).x;
 				paths[path].dots[0].mainHandle.y = getCoordsFromCss( paths[path].dots[0].mainHandle.dom ).y;
 
+				// Если у первой точки есть рычаг
 				if (paths[path].dots[0].nextHandle !== null) {
+					// Обновляем его координаты из DOM
 					paths[path].dots[0].nextHandle.x = getCoordsFromCss( paths[path].dots[0].nextHandle.dom ).x;
 					paths[path].dots[0].nextHandle.y = getCoordsFromCss( paths[path].dots[0].nextHandle.dom ).y;
+
+					// рисуем
 					ctx.lineTo(paths[path].dots[0].nextHandle.x, paths[path].dots[0].nextHandle.y);
+
+					// Возвращаем перо к точке траектории
 					ctx.moveTo( paths[path].dots[0].mainHandle.x, paths[path].dots[0].mainHandle.y );
 				}
 
+				// Отрисовка точек, начиная со второй
+				// отдельно, потому что между двумя точками уже можно провести линию
 				for (var i = 1; i < paths[path].dots.length; i++) {
+					// обновить координаты точки из DOM
 					paths[path].dots[i].mainHandle.x = getCoordsFromCss( paths[path].dots[i].mainHandle.dom ).x;
 					paths[path].dots[i].mainHandle.y = getCoordsFromCss( paths[path].dots[i].mainHandle.dom ).y;
 
+					// Если следующий рычаг существует, обновить его координаты из DOM
 					if (paths[path].dots[i].nextHandle !== null) {
 						paths[path].dots[i].nextHandle.x = getCoordsFromCss( paths[path].dots[i].nextHandle.dom ).x;
 						paths[path].dots[i].nextHandle.y = getCoordsFromCss( paths[path].dots[i].nextHandle.dom ).y;
 					}
 
-					//if (paths[path].dots[i].prevHandle.dom !== null) {
-						paths[path].dots[i].prevHandle.x = getCoordsFromCss( paths[path].dots[i].prevHandle.dom ).x;
-						paths[path].dots[i].prevHandle.y = getCoordsFromCss( paths[path].dots[i].prevHandle.dom ).y;
-					//}
+					// Координаты управляющей точки предыдущего отрезка
+					paths[path].dots[i].prevHandle.x = getCoordsFromCss( paths[path].dots[i].prevHandle.dom ).x;
+					paths[path].dots[i].prevHandle.y = getCoordsFromCss( paths[path].dots[i].prevHandle.dom ).y;
 
+					// Сама кривая
+					//ctx.bezierCurveTo( paths[path].dots[i-1].nextHandle.x, paths[path].dots[i-1].nextHandle.y, paths[path].dots[i].prevHandle.x, paths[path].dots[i].prevHandle.y, paths[path].dots[i].mainHandle.x, paths[path].dots[i].mainHandle.y )
+					ctx.moveTo(paths[path].dots[i].mainHandle.x, paths[path].dots[i].mainHandle.y);
 
-					ctx.lineWidth = "3";
-					ctx.bezierCurveTo( paths[path].dots[i-1].nextHandle.x, paths[path].dots[i-1].nextHandle.y, paths[path].dots[i].prevHandle.x, paths[path].dots[i].prevHandle.y, paths[path].dots[i].mainHandle.x, paths[path].dots[i].mainHandle.y )
-
-					ctx.lineWidth = "1";
+					// Нарисовать рычаг предыдущего отрезка
 					ctx.lineTo(paths[path].dots[i].prevHandle.x, paths[path].dots[i].prevHandle.y);
 
+					// Если есть следующая точка, то есть рычаг следующего отрезка
 					if (paths[path].dots[i].nextHandle !== null) {
+
+						// нарисовать его
 						ctx.moveTo( paths[path].dots[i].mainHandle.x, paths[path].dots[i].mainHandle.y )
 						ctx.lineTo(paths[path].dots[i].nextHandle.x, paths[path].dots[i].nextHandle.y);
+
+						// вернуть перо в точку завершения отрисовки кривой
 						ctx.moveTo( paths[path].dots[i].mainHandle.x, paths[path].dots[i].mainHandle.y )
 					}
+
+					var stepsArray = buildCurveSteps({
+						x1: paths[path].dots[i-1].mainHandle.x,
+						y1: paths[path].dots[i-1].mainHandle.y,
+						ax1: paths[path].dots[i-1].nextHandle.x,
+						ay1: paths[path].dots[i-1].nextHandle.y,
+						ax2: paths[path].dots[i].prevHandle.x,
+						ay2: paths[path].dots[i].prevHandle.y,
+						x2: paths[path].dots[i].mainHandle.x,
+						y2: paths[path].dots[i].mainHandle.y,
+						t1: 0,
+						t2: 1
+					})
+
+					for (var j = 0; j < stepsArray.length; j++) {
+						ctx.rect( stepsArray[j].x, stepsArray[j].y, 1, 1 );
+
+						paths[path].steps.push({
+							x: stepsArray[j].x,
+							y: stepsArray[j].y
+						})
+					}
+
+					// Проверка на плотность шагов
+					/*console.clear();
+					for (var j = 1; j < stepsArray.length; j++) {
+						var d =  getDistance({
+							x1: stepsArray[j-1].x,
+							y1: stepsArray[j-1].y,
+							x2: stepsArray[j].x,
+							y2: stepsArray[j].y
+						})
+
+						if (d >= 1.4) {
+							console.log(j);
+						}
+					}*/
 				}
 
+				// отрендерить все линии
 				ctx.stroke();
 			}
 		}
 
 	}
 
+	// Добавляем в список траекторий новую, с заданным именем
 	var addPath = function addPath(p) {
 		paths[p.name] = {
 			dots: [],
+			steps: [],
 			name: p.name
 		}
 	}
 
+	// Добавляет точку на холст с заданными координатами
+	//p.x
+	//p.y
 	var addPoint = function addPoint(p) {
 		var pathList = document.querySelectorAll('.debug__control-traects option'),
 			currentPathId,
@@ -126,27 +419,56 @@ var debugTraect = function debugTraect() {
 					x: p.x * scale,
 					y: p.y * scale
 				},
-				prevhandle: null,
+				prevHandle: null,
 				nextHandle: null
 			}
 
-		for (var i = 0; i < pathList.length; i++) {
-			if (!!pathList[i].selected) {
-				currentPathId = pathList[i].getAttribute('value');
-				break;
+		if (!pathList.length) {
+			var name = Math.random(),
+				newItem = document.createElement('option');
+
+			newItem.textContent = name;
+			newItem.setAttribute('value', name);
+			newItem.selected = true;
+
+			document.querySelector('.debug__control-traects select').appendChild(newItem);
+
+			addPath({
+				name: name
+			});
+
+			currentPathId = name
+		} else {
+			// Поиск по списку созданных траекторий
+			// активная та, что имеет свойство .selected
+			// Как только находим её, забираем её идентификатор и выходим из списка
+			for (var i = 0; i < pathList.length; i++) {
+				if (!!pathList[i].selected) {
+					currentPathId = pathList[i].getAttribute('value');
+					break;
+				}
 			}
+
 		}
 
+		// Если вообще ничего не выделено, не добавляем точку
 		if (!paths[currentPathId]) return false;
 
+		// Если в траектории уже есть точки,
+		// значит добавление новой точки неявно повлечет создание кривой между ними,
+		// значит нужно поработать с парой последних точек в траектории
 		if ( paths[currentPathId].dots.length ) {
 			preLastPathPoint = paths[currentPathId].dots[ paths[currentPathId].dots.length-1 ];
 		}
 
+		// Добавили самую последнюю точку — только что созданную
 		paths[currentPathId].dots.push(newPoint);
 		lastPathPoint = paths[currentPathId].dots[ paths[currentPathId].dots.length-1 ];
 
+		// Если точек в пути теперь больше одной, создаем управляющие рычаги для кривой
 		if (!!preLastPathPoint) {
+
+			// (x1, y1) и (x2, y2) — координаты управлящих точек
 			var addBezierPoint = getAdditionalBezierPointsCoords({
 				x1: preLastPathPoint.mainHandle.x / scale,
 				y1: preLastPathPoint.mainHandle.y / scale,
@@ -154,7 +476,7 @@ var debugTraect = function debugTraect() {
 				y2: lastPathPoint.mainHandle.y / scale
 			})
 
-
+			// Создаем DOM-представление для рычага предыдущей точки
 			tempPoint = document.createElement('div');
 			tempPoint.className = 'debug__point-handle';
 			tempPoint.style.top = addBezierPoint.ay1 + 'px';
@@ -165,6 +487,7 @@ var debugTraect = function debugTraect() {
 
 			debugPanel.appendChild(tempPoint);
 
+			// Создаем DOM-представление для рычага новой точки
 			tempPoint = document.createElement('div');
 			tempPoint.className = 'debug__point-handle';
 			tempPoint.style.top = addBezierPoint.ay2 + 'px';
@@ -176,6 +499,7 @@ var debugTraect = function debugTraect() {
 			debugPanel.appendChild(tempPoint);
 		}
 
+		// создаем DOM-представление для новой точки
 		var tempPoint = document.createElement('div');
 		tempPoint.className = 'debug__point';
 		tempPoint.style.top = p.y + 'px';
@@ -184,7 +508,7 @@ var debugTraect = function debugTraect() {
 
 		debugPanel.appendChild(tempPoint);
 
-		dots = document.querySelectorAll('.debug__point');
+		// нужна перерисовка сцены
 		repaint = true;
 
 	}
@@ -233,9 +557,32 @@ document.addEventListener("DOMContentLoaded", function(e) {
 			y: 0
 		}
 
-	// var addButton = document.querySelector('.debug__button_add');
+	var newObj;
+
+	// возвращает выбранный в списке путь или false
+	function getCurrentPath() {
+		var pathListItem = document.querySelectorAll('.debug__control-traects option'),
+			currentPathId,
+			currentPath = false;;
+
+		for (var i = 0; i < pathListItem.length; i++) {
+			if (!!pathListItem[i].selected) {
+				currentPathId = pathListItem[i].getAttribute('value');
+				break;
+			}
+		}
+
+		if (!!paths[currentPathId]) {
+			currentPath = paths[currentPathId];
+		}
+
+		return currentPath;
+	}
 
 	debugPanel.addEventListener("mousedown", function(e) {
+
+		// Событие начала перетаскивания
+		// Точка
 		if ( e.target.className == 'debug__point' ) {
 			tempPoint.x = e.pageX;
 			tempPoint.y = e.pageY;
@@ -244,6 +591,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 			currentTarget = e.target;
 		}
 
+		// Контрольный рычаг
 		if ( e.target.className == 'debug__point-handle' ) {
 			e.target.isDragged = true;
 			currentTarget = e.target;
@@ -251,6 +599,9 @@ document.addEventListener("DOMContentLoaded", function(e) {
 	})
 
 	debugPanel.addEventListener("mouseup", function(e) {
+
+		// Событие завершение перетаскивания
+		// обрабатывается одинаково точкой и рычагом
 		if ( (e.target.className == 'debug__point') || (e.target.className == 'debug__point-handle') ) {
 			e.target.isDragged = undefined;
 			currentTarget = undefined;
@@ -258,10 +609,13 @@ document.addEventListener("DOMContentLoaded", function(e) {
 	})
 
 	debugPanel.addEventListener("mousemove", function(e) {
+
+		// Событие факта перетаскивания
 		if (currentTarget !== undefined) {
 			currentTarget.style.top = e.pageY + 'px';
 			currentTarget.style.left = e.pageX + 'px';
 
+			// При перетаскивании точки её рычаги переносятся аналогично
 			if (e.target.className == 'debug__point') {
 				var d = {
 					x: Number(e.target.style.left.replace('px', '')) - tempPoint.x,
@@ -283,15 +637,18 @@ document.addEventListener("DOMContentLoaded", function(e) {
 				}
 			}
 
+			// Требуется перерисовка
 			repaint = true;
 		}
 	})
 
 	debugPanel.addEventListener("dblclick", function(e) {
 		if (e.target.classList.contains('debug__point') ) {
+			// TODO: удаление точки
 			console.log('point dbl click');
 		}
 
+		// Даблклик по холсту создает новую точку
 		if (e.target.classList.contains('debug__view') ) {
 
 			debugTraect.addPoint({
@@ -302,6 +659,8 @@ document.addEventListener("DOMContentLoaded", function(e) {
 	})
 
 	debugPanel.addEventListener("click", function(e) {
+
+		// Добавление траектории
 		if (e.target.classList.contains('debug__button_add')) {
 			var name = Math.random(),
 				newItem = document.createElement('option');
@@ -316,8 +675,130 @@ document.addEventListener("DOMContentLoaded", function(e) {
 				name: name
 			});
 		}
+
+		// Удаление траектории
+		if (e.target.classList.contains('debug__button_remove')) {
+			var pathListItem = document.querySelectorAll('.debug__control-traects option'),
+				currentPathId,
+				currentPath = false;;
+
+			for (var i = 0; i < pathListItem.length; i++) {
+				if (!!pathListItem[i].selected) {
+					currentPathId = pathListItem[i].getAttribute('value');
+					break;
+				}
+			}
+
+			pathList.removeChild( pathListItem[i] );
+
+			if (!!paths[currentPathId]) {
+
+				for (var i = 0; i < paths[currentPathId].dots.length; i++) {
+
+					if ( paths[currentPathId].dots[i].mainHandle !== null  ) {
+						debugPanel.removeChild( paths[currentPathId].dots[i].mainHandle.dom );
+					}
+
+					if ( paths[currentPathId].dots[i].prevHandle !== null ) {
+						debugPanel.removeChild( paths[currentPathId].dots[i].prevHandle.dom );
+					}
+
+					if ( paths[currentPathId].dots[i].nextHandle !== null ) {
+						debugPanel.removeChild( paths[currentPathId].dots[i].nextHandle.dom );
+					}
+				}
+
+				delete paths[currentPathId];
+			}
+
+			repaint = true;
+		}
+
+		// Добавление модели
+		if (e.target.classList.contains('debug__button_add-model')) {
+
+			var currentPath = getCurrentPath();
+			if (!currentPath) return false;
+
+			if (currentPath.steps.length) {
+				newObj = obj().create({
+						src: 'assets/models/spineboy/spineboy.anim',
+						x: currentPath.steps[0].x,
+						y: currentPath.steps[0].y,
+						z: 15,
+						scale: 0.5
+					});
+
+				newObj.image.state.clearAnimation();
+
+				scene.addObj(newObj);
+			}
+		}
+
+		// Модель идет вперед
+		if (e.target.classList.contains('debug__button-model-forward')) {
+			var currentPath = getCurrentPath();
+			if (!currentPath) return false;
+
+			var animations = newObj.image.state.data.skeletonData.animations;
+			newObj.image.state.setAnimationByName( animations[animations.length-1].name , true);
+
+			var i = 0;
+
+			var moveForward = function moveForward(j) {
+
+				if (j > currentPath.steps.length-1) {
+					newObj.image.state.clearAnimation();
+					return;
+				}
+
+				newObj.move({
+					x: currentPath.steps[j].x,
+					y: currentPath.steps[j].y,
+				})
+
+				j += 2;
+
+				requestAnimationFrame( function() {
+					moveForward(j);
+				} );
+			}(i);
+
+
+		}
+
+		// Модель идет назад
+		if (e.target.classList.contains('debug__button-model-backward')) {
+			var currentPath = getCurrentPath();
+			if (!currentPath) return false;
+
+			var animations = newObj.image.state.data.skeletonData.animations;
+			newObj.image.state.setAnimationByName( animations[animations.length-1].name , true);
+
+			var i = currentPath.steps.length-1;
+
+			var moveBack = function moveBack(j) {
+
+				if (j < 0) {
+					newObj.image.state.clearAnimation();
+					return;
+				}
+
+				newObj.move({
+					x: currentPath.steps[j].x,
+					y: currentPath.steps[j].y,
+				})
+
+				j -= 2;
+
+				requestAnimationFrame( function() {
+					moveBack(j);
+				} );
+			}(i);
+		}
 	})
 
+	// инициализация траектории
 	debugTraect
 		.init();
 })

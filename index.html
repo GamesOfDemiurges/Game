@@ -82,6 +82,7 @@
 				width: 150px;
 				background-color: rgba(255, 255, 255, 0.5);
 				border: 1px black solid;
+				text-align: center;
 			}
 
 			.debug__control-traects select {
@@ -138,7 +139,8 @@
 							x: 600,
 							y: 400,
 							z: 15,
-							scale: 0.5
+							scale: 0.5,
+							animated: true
 						});
 
 					var obj3 = obj().create({
@@ -147,7 +149,8 @@
 							y: 500,
 							z: 19,
 							pz: 10,
-							scale: 0.5
+							scale: 0.5,
+							reverse: true
 						});
 
 					var obj31 = obj().create({
@@ -185,12 +188,12 @@
 
 					scene
 						.addObj(obj1)
-/*						.addObj(obj2)
+						/*.addObj(obj2)
 						.addObj(obj3)
+						.addObj(obj5);
 						.addObj(obj31)
 						.addObj(obj32)
 						.addObj(obj4)
-						.addObj(obj5)
 						.addObj(obj6); */
 
 					/*setInterval(function() {
@@ -251,8 +254,15 @@
 				<div class="debug__control-objects"></div>
 
 				<div class="debug__control-buttons">
-					<button class="debug__button debug__button_add">Добавить</button>
-					<button disabled=disabled>Удалить</button>
+					<button class="debug__button debug__button_add">Добавить траекторию</button>
+					<button class="debug__button debug__button_remove">Удалить траекторию</button>
+
+					<hr />
+					<button class="debug__button debug__button_add-model">Добавить модель</button>
+					<button class="debug__button debug__button-model-forward">Вперед</button>
+					<button class="debug__button debug__button-model-backward">Назад</button>
+					<hr />
+					<!--<button disabled=disabled>Удалить</button>-->
 				</div>
 			</div>
 
