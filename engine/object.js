@@ -42,12 +42,17 @@ function obj() {
 				}
 			}
 
+			function setHero() {
+				_this.hero = p.hero || false;
+			}
+
 			if (p.src.indexOf('.anim') !== -1) { //console.log('anim');
 				_this.type = 'spine';
 				_this.src = p.src;
 				_this.image = new PIXI.Spine( p.src );
+				_this.animated = p.animated || false;
 
-				if (p.animated) {
+				if (_this.animated) {
 					var animations = _this.image.state.data.skeletonData.animations;
 					_this.image.state.setAnimationByName( animations[animations.length-1].name , true);
 				}
@@ -65,6 +70,7 @@ function obj() {
 			setObjectPosition();
 			setObjectScale();
 			setReverse();
+			setHero();
 
 			return _this;
 		},
@@ -83,17 +89,33 @@ function obj() {
 			var _this = this;
 
 			if (p.x !== undefined) {
+				var dx = p.x - _this.image.position.x
 
-				// Автоматический разворот модели в зависимости от направления движения
-				if ( (_this.image.position.x > p.x) && (_this.image.scale.x > 0) ) {
-					_this.image.scale.x *= -1;
+				// Идем назад
+				if ( dx < 0 ) {
+
+					// Автоматический разворот модели в зависимости от направления движения
+					if (_this.image.scale.x > 0 ) {
+						_this.image.scale.x *= -1;
+					}
 				}
 
-				if ( (_this.image.position.x < p.x) && (_this.image.scale.x < 0) ) {
-					_this.image.scale.x *= -1;
+				// Идем вперед
+				if ( dx > 0 ) {
+
+					// Автоматический разворот модели в зависимости от направления движения
+					if (_this.image.scale.x < 0)  {
+						_this.image.scale.x *= -1;
+					}
 				}
 
 				_this.image.position.x = p.x;
+
+				if ( (_this.hero) && ((Math.abs(_this.image.position.x - scene.playGround.position.x)) > scene.width/2) ) {
+					scene.move({
+						dx: _this.image.position.x + scene.playGround.position.x - scene.width/2
+					})
+				}
 			}
 
 			if (p.y !== undefined) {

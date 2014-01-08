@@ -55,6 +55,10 @@ body {
 	border: 2px black solid;
 }
 
+.debug__point_first {
+	background-color: red;
+}
+
 .debug__point-handle {
 	position: absolute;
 	top: 0;
@@ -76,10 +80,11 @@ body {
 	background-color: rgba(255, 255, 255, 0.5);
 	border: 1px black solid;
 	text-align: center;
+	padding: 10px 0;
 }
 
 .debug__control-traects select {
 	display: block;
 	width: 90%;
-	margin: 10px auto;
+	margin: 0 auto 10px;
 }

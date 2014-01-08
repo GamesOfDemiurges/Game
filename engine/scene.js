@@ -28,14 +28,18 @@ var scene = function scene() {
 			var _this = this;
 
 			// Обертка над оператором рендера PIXI
-
-
 			masterCanvas = document.getElementById(p.canvasId); // указатель на DOM
 			stage = new PIXI.Stage(0xFFFFFF, true); // Корневая сцена
 
-			renderer = new PIXI.CanvasRenderer(510/masterCanvas.clientHeight*masterCanvas.clientWidth, 510, masterCanvas, false); // Оператор рендеринга 900x510 native
+			_this.scale = 510/masterCanvas.clientHeight;
+			_this.width = _this.scale * masterCanvas.clientWidth;
+
+			renderer = new PIXI.CanvasRenderer(_this.width, 510, masterCanvas, false); // Оператор рендеринга 900x510 native
 			window.addEventListener('resize', function() {
-				renderer.resize(510/masterCanvas.clientHeight*masterCanvas.clientWidth, 510);
+				_this.scale = 510/masterCanvas.clientHeight;
+				_this.width = _this.scale * masterCanvas.clientWidth;
+
+				renderer.resize(_this.width, 510);
 			})
 
 			// Контейнер сцены
@@ -71,7 +75,24 @@ var scene = function scene() {
 		// p.dx
 		// p.dy
 		move: function ( p ) {
+			var _this = this;
 
+			if ( _this.playGround.position.x - p.dx > 0) {
+				window.scroll(0, 0);
+				return _this;
+			}
+
+			if ( _this.playGround.position.x + 2922 - p.dx < _this.width ) {
+				window.scroll(document.body.clientWidth, 0);
+				return _this;
+			}
+
+			//_this.playGround.position.x -= (p.dx || 0);
+			_this.playGround.position.y -= (p.dy || 0);
+
+			window.scroll( (_this.playGround.position.x -= (p.dx || 0)) * document.body.clientWidth / -2922, 0 )
+
+			return _this;
 		}
 	}
 }();
