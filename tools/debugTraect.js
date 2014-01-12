@@ -13,10 +13,10 @@ var debugTraect = function debugTraect() {
 	// Извлечение сохраненных путей из файла
 	var readTraectFromFile = function readTraectFromFile () {
 		var readTraect = new XMLHttpRequest;
-		readTraect.open("POST", '/tools/traect.json');
+		readTraect.open("GET", '/tools/traect.json?' + new Date().getTime());
 		readTraect.onreadystatechange = function() {
 
-			if ((readTraect.status == 200) && (readTraect.readyState==4)) {
+			if (readTraect.readyState==4) {
 				var newItem,
 					tempPoint,
 					pathList = document.querySelector('.debug__control-traects select');
@@ -90,7 +90,7 @@ var debugTraect = function debugTraect() {
 	//p.y1
 	//p.x2
 	//p.y2
-	var getDistance = function getDistance(p) {
+	var getDistance = function getDistance( p ) {
 		var xDistance = p.x2 - p.x1,
 			yDistance = p.y2 - p.y1;
 
@@ -120,7 +120,7 @@ var debugTraect = function debugTraect() {
 	//p.x2
 	//p.y2
 	//p.t
-	var getBezierPointCoords = function getBezierPointCoords(p) {
+	var getBezierPointCoords = function getBezierPointCoords( p ) {
 
 		function polynom(z) {
 			var at = (1 - p.t);
@@ -176,7 +176,7 @@ var debugTraect = function debugTraect() {
 	//p.y2
 	//p.t1,
 	//p.t2
-	var buildCurveSteps = function buildCurveSteps(p) {
+	var buildCurveSteps = function buildCurveSteps( p ) {
 
 		// максимально допустимое расстояние в пикселах
 		var maxDistance = 1.4
@@ -332,6 +332,79 @@ var debugTraect = function debugTraect() {
 		return path;
 	}
 
+	// Генерирует управляющий контур для траектории
+	// p.pathId
+	var buildControlPoligon = function buildControlPoligon( p ) {
+
+		var touchRadiusDistance = 100;
+		var currentPath = paths[p.pathId];
+
+		var controlPath = [];
+
+		/*var touchPointCount = Math.round( currentPath.steps.length / touchRadiusDistance );
+
+		for (var touchPoint = 0; touchPoint < touchPointCount; touchPoint++) {
+			var startTouchPoint = {
+				x: currentPath.steps[touchPoint*touchRadiusDistance].x - (touchRadiusDistance/2),
+				y: currentPath.steps[touchPoint*touchRadiusDistance].y - (touchRadiusDistance/2)
+			}
+			console.log(touchPoint*touchRadiusDistance);
+			ctx.rect( startTouchPoint.x, startTouchPoint.y, touchRadiusDistance, touchRadiusDistance );
+
+		}*/
+
+		var lastPoint = 0;
+
+		for (var i = 0; i < currentPath.steps.length; i++) {
+
+			var distance = getDistance({
+				x1: currentPath.steps[lastPoint].x,
+				y1: currentPath.steps[lastPoint].y,
+				x2: currentPath.steps[i].x,
+				y2: currentPath.steps[i].y,
+			})
+
+			if (distance > touchRadiusDistance) {
+
+				// создание
+				var startTouchPoint = {
+					x: currentPath.steps[lastPoint].x - (touchRadiusDistance/2),
+					y: currentPath.steps[lastPoint].y - (touchRadiusDistance/2)
+				}
+
+				controlPath.push({
+					rect: new PIXI.Rectangle(startTouchPoint.x, startTouchPoint.y, touchRadiusDistance, touchRadiusDistance),
+					step: lastPoint
+				})
+
+				// Визуализация
+				ctx.rect( controlPath[ controlPath.length-1 ].rect.x, controlPath[ controlPath.length-1 ].rect.y, controlPath[ controlPath.length-1 ].rect.width, controlPath[ controlPath.length-1 ].rect.height );
+				ctx.rect( currentPath.steps[ controlPath[ controlPath.length-1 ].step ].x, currentPath.steps[ controlPath[ controlPath.length-1 ].step ].y,  6, 6 );
+
+				lastPoint = i;
+			}
+		}
+
+		var startTouchPoint = {
+			x: currentPath.steps[lastPoint].x - (touchRadiusDistance/2),
+			y: currentPath.steps[lastPoint].y - (touchRadiusDistance/2)
+		}
+
+		// создание
+		controlPath.push({
+			rect: new PIXI.Rectangle(startTouchPoint.x, startTouchPoint.y, currentPath.steps[currentPath.steps.length-1].x - startTouchPoint.x+ (touchRadiusDistance/2), currentPath.steps[currentPath.steps.length-1].y - startTouchPoint.y + (touchRadiusDistance/2)),
+			step: (currentPath.steps.length-1)
+		})
+
+		currentPath.controlPath = controlPath;
+
+		// Визуализация
+		ctx.rect( controlPath[ controlPath.length-1 ].rect.x, controlPath[ controlPath.length-1 ].rect.y, controlPath[ controlPath.length-1 ].rect.width, controlPath[ controlPath.length-1 ].rect.height );
+		ctx.rect( currentPath.steps[ controlPath[ controlPath.length-1 ].step ].x, currentPath.steps[ controlPath[ controlPath.length-1 ].step ].y,  6, 6 );
+
+		ctx.stroke();
+	}
+
 	var paint = function paint() {
 
 		// Возвращает координаты точки на холсте,
@@ -351,11 +424,12 @@ var debugTraect = function debugTraect() {
 		// Перебираем текущие узлы и получаем их координаты.
 		// Узлы образуют траектории, отдельных траекторий может быть много
 		for (path in paths) {
-			if ( document.querySelector('.debug__control-traects option[value="' + path + '"]').selected ) {
+			// IE умирает от setStrokeColor
+			/*if ( document.querySelector('.debug__control-traects option[value="' + path + '"]').selected ) {
 				ctx.setStrokeColor('#383');
 			} else {
 				ctx.setStrokeColor('#000');
-			}
+			}*/
 
 			// Работаем с каждой траекторией в списке
 			if (paths[path].dots.length) {
@@ -461,6 +535,11 @@ var debugTraect = function debugTraect() {
 
 				// отрендерить все линии
 				ctx.stroke();
+
+				// генерация управляющей области
+				buildControlPoligon({
+					pathId: path
+				})
 			}
 		}
 
@@ -813,75 +892,15 @@ document.addEventListener("DOMContentLoaded", function(e) {
 						y: currentPath.steps[0].y,
 						z: 15,
 						scale: 0.5,
-						hero: true
+						hero: true,
+						step: 0,
+						path: currentPath.name
 					});
 
 				newObj.image.state.clearAnimation();
 
 				scene.addObj(newObj);
 			}
-		}
-
-		// Модель идет вперед
-		if (e.target.classList.contains('debug__button-model-forward')) {
-			var currentPath = getCurrentPath();
-			if (!currentPath) return false;
-
-			var animations = newObj.image.state.data.skeletonData.animations;
-			newObj.image.state.setAnimationByName( animations[animations.length-1].name , true);
-
-			var i = 0;
-
-			var moveForward = function moveForward(j) {
-
-				if ((currentPath.steps.length-1 - j) < 0) {
-					newObj.image.state.clearAnimation();
-					return;
-				}
-
-				newObj.move({
-					x: currentPath.steps[j].x,
-					y: currentPath.steps[j].y,
-				})
-
-				j += 2;
-
-				requestAnimationFrame( function() {
-					moveForward(j);
-				} );
-			}(i);
-
-
-		}
-
-		// Модель идет назад
-		if (e.target.classList.contains('debug__button-model-backward')) {
-			var currentPath = getCurrentPath();
-			if (!currentPath) return false;
-
-			var animations = newObj.image.state.data.skeletonData.animations;
-			newObj.image.state.setAnimationByName( animations[animations.length-1].name , true);
-
-			var i = currentPath.steps.length-1;
-
-			var moveBack = function moveBack(j) {
-
-				if (j < 0) {
-					newObj.image.state.clearAnimation();
-					return;
-				}
-
-				newObj.move({
-					x: currentPath.steps[j].x,
-					y: currentPath.steps[j].y,
-				})
-
-				j -= 2;
-
-				requestAnimationFrame( function() {
-					moveBack(j);
-				} );
-			}(i);
 		}
 
 		// Сохранение в файл
@@ -943,6 +962,147 @@ document.addEventListener("DOMContentLoaded", function(e) {
 		}
 
 	})
+
+	// Движение объекта
+	var movement = {
+		current: false,
+		switchFx: false,
+		fx: null
+	};
+
+	function moveHandle(e) {
+		if (newObj === undefined) return false;
+
+		var animations = newObj.image.state.data.skeletonData.animations,
+			animationName = animations[animations.length-1].name;
+
+		newObj.image.stateData.setMixByName("walk", "stop", 0.5);
+
+		var currentPath = getCurrentPath(),
+			pathChainCount = currentPath.controlPath.length;
+
+		// Движение модели до заданного шага
+		// p.direction
+		// p.speed
+		// p.targetStep
+		function move( p ) {
+			if (Math.abs(newObj.step - p.targetStep) < p.speed) {
+				newObj.image.state.setAnimationByName("stop", false);
+				movement.current = false;
+				return;
+			}
+
+			if (movement.switchFx) {
+				movement.switchFx = false;
+				movement.fx();
+				return;
+			}
+
+			if (newObj.image.state.isComplete()) {
+				newObj.image.state.setAnimationByName( animationName , false);
+			}
+
+			movement.current = true;
+
+			newObj.step = newObj.step + p.direction * p.speed;
+			newObj.move({
+				x: currentPath.steps[ newObj.step ].x,
+				y: currentPath.steps[ newObj.step ].y,
+			})
+
+			requestAnimationFrame( function() {
+				move({
+					direction: p.direction,
+					speed: p.speed,
+					targetStep: p.targetStep
+				});
+			} );
+		}
+
+		// Запуск движения модели к заданному шагу
+		function processControlPoint( p ) {
+
+			var modelStep = newObj.step,
+				targetStep = currentPath.controlPath[p].step;
+
+			if (modelStep == targetStep ) return false;
+
+			// Направление движения
+			var stepDirection = currentPath.controlPath[p].step - newObj.step;
+			stepDirection != 0
+				? stepDirection = stepDirection / Math.abs(stepDirection)
+				: false;
+
+			// включили анимацию перед движением
+			newObj.image.state.setAnimationByName( animationName , false);
+
+			if (!movement.current) {
+				move({
+					direction: stepDirection,
+					speed: 2,
+					targetStep: targetStep
+				})
+
+			} else {
+				movement = {
+					switchFx: true,
+					fx: function() {
+						move({
+							direction: stepDirection,
+							speed: 2,
+							targetStep: targetStep
+						})
+					}
+				}
+			}
+		}
+
+		// Поиск шага, сопоставленного с областью клика
+
+		var targetX = e.pageX || e.changedTouches[0].pageX,
+			targetY = e.pageY || e.changedTouches[0].pageY;
+
+		while(pathChainCount--) {
+			if (currentPath.controlPath[pathChainCount].rect.contains( targetX * scale, targetY * scale )) {
+
+				processControlPoint(pathChainCount);
+				movement.current = true;
+				break;
+			}
+		}
+	}
+
+	document.body.addEventListener('click', function(e) {
+		moveHandle(e);
+	})
+
+	document.body.addEventListener('touchend', function(e) {
+		moveHandle(e);
+	})
+
+	// Автодобавление объекта
+	setTimeout( function() {
+		var currentPath = getCurrentPath();
+		if (!currentPath) return false;
+
+		if (currentPath.steps.length) {
+			newObj = obj().create({
+					src: 'assets/models/spineboy/spineboy.anim',
+					x: currentPath.steps[0].x,
+					y: currentPath.steps[0].y,
+					z: 15,
+					scale: 0.5,
+					hero: true,
+					step: 0,
+					path: currentPath.name
+				});
+
+			newObj.image.state.clearAnimation();
+
+			scene.addObj(newObj);
+		}
+
+	}, 2000 )
 
 	// инициализация траектории
 	debugTraect

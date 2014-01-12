@@ -5,7 +5,7 @@
 	<head>
 		<title>Игры Демиургов</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=0.5, user-scalable=no"/>
+		<meta name="viewport" content="width=device-width, user-scalable=no"/>
 
 		<link rel="stylesheet" type="text/css" href="style.css" media="screen, projection, print">
 		<!--<script type="text/javascript" src="js/main.js"></script> -->
@@ -14,6 +14,7 @@
 		<script type="text/javascript" src="engine/scene.js"></script>
 		<script type="text/javascript" src="engine/object.js"></script>
 
+		<script type="text/javascript" src="engine/classlist.js"></script>
 		<script type="text/javascript" src="tools/debugTraect.js"></script>
 
 		<script type="text/javascript">
@@ -141,7 +142,6 @@
 							console.log(Z.getZindex());
 						}, 1000)
 					}, 1000)*/
-
 				}
 
 				//begin load
@@ -183,7 +183,7 @@
 		<div class="debug" style="display: block">
 			<div class="debug__control">
 				<div class="debug__control-traects">
-					<select id="" size="10"></select>
+					<select id="" size="2" ></select>
 				</div>
 
 				<div class="debug__control-objects"></div>
@@ -194,8 +194,8 @@
 
 					<hr />
 					<button class="debug__button debug__button_add-model">Добавить модель</button>
-					<button class="debug__button debug__button-model-forward">Вперед</button>
-					<button class="debug__button debug__button-model-backward">Назад</button>
+					<!--<button class="debug__button debug__button-model-forward">Вперед</button>
+					<button class="debug__button debug__button-model-backward">Назад</button>-->
 					<hr />
 					<button class="debug__button debug__button_toggle-overlay">Переключить оверлей</button>
 					<hr />
@@ -203,12 +203,7 @@
 				</div>
 			</div>
 
-			<canvas class="debug__view"></canvas>
-
-			<!--<div class="debug__point" style="top: 500px; left: 100px"></div>
-			<div class="debug__point" style="top: 600px; left: 300px"></div>
-			<div class="debug__point" style="top: 400px; left: 500px"></div>
-			<div class="debug__point" style="top: 500px; left: 700px"></div>-->
+			<canvas class="debug__view debug__view_hidden"></canvas>
 		</div>
 	</body>
 </html>

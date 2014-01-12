@@ -5,7 +5,9 @@ function obj() {
 		x = -9999,
 		y = -9999,
 		z = 1,
-		pz = 1;
+		pz = 1,
+		step = null,
+		path = null;
 
 	/* Public */
 
@@ -29,6 +31,9 @@ function obj() {
 				_this.image.position.y = (p.y !== undefined) ? p.y : y;
 				_this.z = (p.z !== undefined) ? p.z : z;
 				_this.pz = (p.pz !== undefined) ? p.pz : pz;
+
+				_this.step = (p.step !== undefined) ? p.step : step;
+				_this.path = (p.path !== undefined) ? p.path : path;
 			}
 
 			function setObjectScale() {
