@@ -56,10 +56,15 @@ body {
 	height: 6px;
 	background: yellow;
 	border: 2px black solid;
+	z-index: 5;
 }
 
 .debug__point_first {
 	background-color: red;
+}
+
+.debug__point_dragged {
+	z-index: 3;
 }
 
 .debug__point-handle {

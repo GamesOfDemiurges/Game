@@ -537,9 +537,11 @@ var debugTraect = function debugTraect() {
 				ctx.stroke();
 
 				// генерация управляющей области
-				buildControlPoligon({
-					pathId: path
-				})
+				if (paths[path].steps.length) {
+					buildControlPoligon({
+						pathId: path
+					})
+				}
 			}
 		}
 
@@ -731,6 +733,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 	}
 
 	debugPanel.addEventListener("mousedown", function(e) {
+		e.stopPropagation();
 
 		// Событие начала перетаскивания
 		// Точка
@@ -740,6 +743,8 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 			e.target.isDragged = true;
 			currentTarget = e.target;
+
+			e.target.classList.add('debug__point_dragged');
 		}
 
 		// Контрольный рычаг
@@ -750,12 +755,14 @@ document.addEventListener("DOMContentLoaded", function(e) {
 	})
 
 	debugPanel.addEventListener("mouseup", function(e) {
+		e.stopPropagation();
 
 		// Событие завершение перетаскивания
 		// обрабатывается одинаково точкой и рычагом
 		if ( (e.target.classList.contains('debug__point')) || (e.target.classList.contains('debug__point-handle')) ) {
 			e.target.isDragged = undefined;
 			currentTarget = undefined;
+			e.target.classList.remove('debug__point_dragged');
 		}
 	})
 
@@ -766,25 +773,31 @@ document.addEventListener("DOMContentLoaded", function(e) {
 			currentTarget.style.top = e.pageY + 'px';
 			currentTarget.style.left = e.pageX + 'px';
 
+			// Залипание точки
+			if ( (e.target.classList.contains('debug__point')) && (e.target !== currentTarget) ) {
+				currentTarget.style.top = e.target.style.top;
+				currentTarget.style.left = e.target.style.left;
+			}
+
 			// При перетаскивании точки её рычаги переносятся аналогично
-			if (e.target.classList.contains('debug__point')) {
+			if (currentTarget.classList.contains('debug__point')) {
 				var d = {
-					x: Number(e.target.style.left.replace('px', '')) - tempPoint.x,
-					y: Number(e.target.style.top.replace('px', '')) - tempPoint.y,
+					x: Number(currentTarget.style.left.replace('px', '')) - tempPoint.x,
+					y: Number(currentTarget.style.top.replace('px', '')) - tempPoint.y,
 				}
 				tempPoint = {
 					x: e.pageX,
 					y: e.pageY
 				}
 
-				if ( (e.target.nextSibling !== null) && (e.target.nextSibling.className == 'debug__point-handle') ) {
-					e.target.nextSibling.style.top = Number(e.target.nextSibling.style.top.replace('px', '')) + d.y + 'px';
-					e.target.nextSibling.style.left = Number(e.target.nextSibling.style.left.replace('px', '')) + d.x + 'px';
+				if ( (currentTarget.nextSibling !== null) && (currentTarget.nextSibling.className == 'debug__point-handle') ) {
+					currentTarget.nextSibling.style.top = Number(currentTarget.nextSibling.style.top.replace('px', '')) + d.y + 'px';
+					currentTarget.nextSibling.style.left = Number(currentTarget.nextSibling.style.left.replace('px', '')) + d.x + 'px';
 				}
 
-				if ( (e.target.previousSibling !== null) && (e.target.previousSibling.className == 'debug__point-handle') ) {
-					e.target.previousSibling.style.top = Number(e.target.previousSibling.style.top.replace('px', '')) + d.y + 'px';
-					e.target.previousSibling.style.left = Number(e.target.previousSibling.style.left.replace('px', '')) + d.x + 'px';
+				if ( (currentTarget.previousSibling !== null) && (currentTarget.previousSibling.className == 'debug__point-handle') ) {
+					currentTarget.previousSibling.style.top = Number(currentTarget.previousSibling.style.top.replace('px', '')) + d.y + 'px';
+					currentTarget.previousSibling.style.left = Number(currentTarget.previousSibling.style.left.replace('px', '')) + d.x + 'px';
 				}
 			}
 
@@ -795,12 +808,16 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 	debugPanel.addEventListener("dblclick", function(e) {
 		if (e.target.classList.contains('debug__point') ) {
+			e.stopPropagation();
+
 			// TODO: удаление точки
 			console.log('point dbl click');
 		}
 
 		// Даблклик по холсту создает новую точку
 		if (e.target.classList.contains('debug__view') ) {
+			e.stopPropagation();
+
 			debugTraect.addPoint({
 				x: e.pageX,
 				y: e.pageY
@@ -812,6 +829,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 		// переключить оверлей
 		if (e.target.classList.contains('debug__button_toggle-overlay')) {
+			e.stopPropagation();
 
 			if ( canvas.classList.contains('debug__view_hidden') ) {
 				canvas.classList.remove('debug__view_hidden');
@@ -822,6 +840,8 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 		// Добавление траектории
 		if (e.target.classList.contains('debug__button_add')) {
+			e.stopPropagation();
+
 			var name = Math.random(),
 				newItem = document.createElement('option');
 
@@ -838,11 +858,15 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 		// Переключение траектории
 		if (e.target.tagName == 'OPTION') {
+			e.stopPropagation();
+
 			debugTraect.paint();
 		}
 
 		// Удаление траектории
 		if (e.target.classList.contains('debug__button_remove')) {
+			e.stopPropagation();
+
 			var pathListItem = document.querySelectorAll('.debug__control-traects option'),
 				currentPathId,
 				currentPath = false;;
@@ -881,6 +905,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 		// Добавление модели
 		if (e.target.classList.contains('debug__button_add-model')) {
+			e.stopPropagation();
 
 			var currentPath = getCurrentPath();
 			if (!currentPath) return false;
@@ -905,6 +930,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 		// Сохранение в файл
 		if (e.target.classList.contains('debug__button_save')) {
+			e.stopPropagation();
 
 			// Создаем упрощенную версию пути без ссылок на DOM-узлы
 			var smallPaths = {};
@@ -961,6 +987,10 @@ document.addEventListener("DOMContentLoaded", function(e) {
 			req.send(param);
 		}
 
+		if (e.target.classList.contains('debug__point') || e.target.classList.contains('debug__point-handle')) {
+			e.stopPropagation();
+		}
+
 	})
 
 	// Движение объекта
@@ -970,7 +1000,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 		fx: null
 	};
 
-	function moveHandle(e) {
+	function moveHero(e) {
 		if (newObj === undefined) return false;
 
 		var animations = newObj.image.state.data.skeletonData.animations,
@@ -1072,13 +1102,13 @@ document.addEventListener("DOMContentLoaded", function(e) {
 		}
 	}
 
-	document.body.addEventListener('click', function(e) {
-		moveHandle(e);
+	/*document.body.addEventListener('click', function(e) {
+		moveHero(e);
 	})
 
 	document.body.addEventListener('touchend', function(e) {
-		moveHandle(e);
-	})
+		moveHero(e);
+	})*/
 
 	// Автодобавление объекта
 	setTimeout( function() {
