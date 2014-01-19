@@ -1092,6 +1092,9 @@ document.addEventListener("DOMContentLoaded", function(e) {
 		var targetX = e.pageX || e.changedTouches[0].pageX,
 			targetY = e.pageY || e.changedTouches[0].pageY;
 
+		// TODO: Переделать на перебор всех возможных траекторий
+		// В случае совпадения области у двух и более траекторий выбирать кратчайший путь
+		// Весом ребра графа будет количество шагов
 		while(pathChainCount--) {
 			if (currentPath.controlPath[pathChainCount].rect.contains( targetX * scale, targetY * scale )) {
 
@@ -1102,17 +1105,21 @@ document.addEventListener("DOMContentLoaded", function(e) {
 		}
 	}
 
-	/*document.body.addEventListener('click', function(e) {
-		moveHero(e);
+	document.body.addEventListener('click', function(e) {
+		if ( document.querySelector('.debug__view.debug__view_hidden') !== null ) {
+			moveHero(e);
+		}
 	})
 
 	document.body.addEventListener('touchend', function(e) {
-		moveHero(e);
-	})*/
+		if ( document.querySelector('.debug__view.debug__view_hidden') !== null ) {
+			moveHero(e);
+		}
+	})
 
 	// Автодобавление объекта
 	setTimeout( function() {
-		var currentPath = getCurrentPath();
+		var currentPath = paths[ document.querySelector('.debug__control-traects option').getAttribute('value') ];
 		if (!currentPath) return false;
 
 		if (currentPath.steps.length) {
