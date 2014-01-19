@@ -974,9 +974,9 @@ document.addEventListener("DOMContentLoaded", function(e) {
 		if (newObj === undefined) return false;
 
 		var animations = newObj.image.state.data.skeletonData.animations,
-			animationName = animations[animations.length-1].name;
+			animationName = 'new'; //animations[animations.length-1].name;
 
-		newObj.image.stateData.setMixByName("walk", "stop", 0.5);
+		newObj.image.stateData.setMixByName("new", "stop", 0.5);
 
 		var currentPath = getCurrentPath(),
 			pathChainCount = currentPath.controlPath.length;
@@ -1087,11 +1087,11 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 		if (currentPath.steps.length) {
 			newObj = obj().create({
-					src: 'assets/models/spineboy/spineboy.anim',
+					src: 'assets/models/animation/images/animation.anim',
 					x: currentPath.steps[0].x,
 					y: currentPath.steps[0].y,
 					z: 15,
-					scale: 0.5,
+					scale: 0.35,
 					hero: true,
 					step: 0,
 					path: currentPath.name
