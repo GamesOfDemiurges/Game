@@ -69,6 +69,11 @@ var debugTraect = function debugTraect() {
 				}
 
 				repaint = true;
+
+				setTimeout(function() {
+					buildGraph();
+				}, 1000)
+
 			}
 		};
 		readTraect.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -425,11 +430,11 @@ var debugTraect = function debugTraect() {
 		// Узлы образуют траектории, отдельных траекторий может быть много
 		for (path in paths) {
 			// IE умирает от setStrokeColor
-			/*if ( document.querySelector('.debug__control-traects option[value="' + path + '"]').selected ) {
+			if ( (document.querySelector('.debug__view_hidden') === null) && (document.querySelector('.debug__control-traects option[value="' + path + '"]').selected) ) {
 				ctx.setStrokeColor('#383');
 			} else {
 				ctx.setStrokeColor('#000');
-			}*/
+			}
 
 			// Работаем с каждой траекторией в списке
 			if (paths[path].dots.length) {
@@ -663,6 +668,112 @@ var debugTraect = function debugTraect() {
 		// нужна перерисовка сцены
 		repaint = true;
 
+	}
+
+	var buildGraph = function buildGraph() {
+		var graph = {},
+			adjacencyMatrix;
+
+		function makeIdByCoords(x, y) {
+
+			return Math.round(x).toString() + '_' + Math.round(y).toString();
+		}
+
+		function addToGraph(path, point1, point2, distance) {
+
+			if ( graph[point1] === undefined ) {
+				graph[point1] = {};
+			}
+
+			if ( graph[point2] === undefined ) {
+				graph[point2] = {};
+			}
+
+			if ( graph[point1][point2] === undefined ) {
+				graph[point1][point2] = {
+					distance: distance,
+					name: path
+				}
+			}
+
+			if ( graph[point2][point1] === undefined ) {
+				graph[point2][point1] = {
+					distance: distance,
+					name: path
+				}
+			}
+		}
+
+		function buildAdjacencyMatrix() {
+			var tmpArray = [];
+
+			for (var point in graph) {
+				tmpArray.push(point);
+			}
+
+			visualizeGraph(tmpArray);
+
+			adjacencyMatrix = new Array(tmpArray.length);
+
+			for (var i = 0; i < tmpArray.length; i++) {
+				adjacencyMatrix[i] = new Array(tmpArray.length);
+
+				for (var j = 0; j < tmpArray.length; j++) {
+					var distance = (graph[ tmpArray[i] ][ tmpArray[j] ])
+						? graph[ tmpArray[i] ][ tmpArray[j] ].distance
+						: (i == j)
+							? 0
+							: Number.POSITIVE_INFINITY;
+
+					adjacencyMatrix[i][j] = {
+						path: [],
+						distance: distance
+					}
+				}
+			}
+
+			console.log(adjacencyMatrix);
+			console.log('=============')
+			calculateShortestDistance();
+		}
+
+		function calculateShortestDistance() {
+			var n = adjacencyMatrix[0].length;
+
+			for (var k = 0; k < n; k++) {
+				for (var i = 0; i < n; i++) {
+					for (var j = 0; j < n; j++) {
+
+						if (adjacencyMatrix[i][j].distance > (adjacencyMatrix[i][k].distance + adjacencyMatrix[k][j].distance) ) {
+							adjacencyMatrix[i][j].distance = adjacencyMatrix[i][k].distance + adjacencyMatrix[k][j].distance;
+							adjacencyMatrix[i][j].path.push(k); // Лажа!!
+						}
+
+					}
+				}
+			}
+
+			console.log(adjacencyMatrix);
+		}
+
+		function visualizeGraph(arr) {
+			for (var i = 0; i < arr.length; i++) {
+				var x = arr[i].split('_')[0];
+				var y = arr[i].split('_')[1];
+
+				ctx.strokeText( i, x, y-10 );
+			}
+		}
+
+		for (var path in paths) {
+			var point1 = paths[path].dots[0].mainHandle;
+			var point2 = paths[path].dots[ paths[path].dots.length-1 ].mainHandle;
+			var distance = paths[path].steps.length;
+
+			addToGraph(path, makeIdByCoords(point1.x, point1.y), makeIdByCoords(point2.x, point2.y), distance);
+		}
+
+		buildAdjacencyMatrix();
 	}
 
 	return {
