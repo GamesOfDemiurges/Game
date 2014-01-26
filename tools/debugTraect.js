@@ -4,7 +4,8 @@ var repaint = false,
 	ctx,
 	scale;
 
-var paths = {};
+var paths = {},
+	graph = {};
 
 var debugTraect = function debugTraect() {
 
@@ -671,7 +672,7 @@ var debugTraect = function debugTraect() {
 	}
 
 	var buildGraph = function buildGraph() {
-		var graph = {},
+		var serviceGraph = {},
 			adjacencyMatrix;
 
 		function makeIdByCoords(x, y) {
@@ -679,62 +680,110 @@ var debugTraect = function debugTraect() {
 			return Math.round(x).toString() + '_' + Math.round(y).toString();
 		}
 
-		function addToGraph(path, point1, point2, distance) {
+		function addToGraph(pathName, linkToPathPoint1, linkToPathPoint2, point1, point2, distance) {
 
-			if ( graph[point1] === undefined ) {
-				graph[point1] = {};
+			if ( serviceGraph[point1] === undefined ) {
+				serviceGraph[point1] = {
+					link: {}
+				};
 			}
 
-			if ( graph[point2] === undefined ) {
-				graph[point2] = {};
+			if (serviceGraph[point1].link[path] === undefined  ) {
+				serviceGraph[point1].link[path] = linkToPathPoint1;
 			}
 
-			if ( graph[point1][point2] === undefined ) {
-				graph[point1][point2] = {
+			if ( serviceGraph[point2] === undefined ) {
+				serviceGraph[point2] = {
+					link: {}
+				};
+			}
+
+			if (serviceGraph[point2].link[path] === undefined  ) {
+				serviceGraph[point2].link[path] = linkToPathPoint2;
+			}
+
+			if ( serviceGraph[point1][point2] === undefined ) {
+				serviceGraph[point1][point2] = {
 					distance: distance,
-					name: path
+					path: pathName
 				}
 			}
 
-			if ( graph[point2][point1] === undefined ) {
-				graph[point2][point1] = {
+			if ( serviceGraph[point2][point1] === undefined ) {
+				serviceGraph[point2][point1] = {
 					distance: distance,
-					name: path
+					path: pathName
 				}
 			}
 		}
 
 		function buildAdjacencyMatrix() {
-			var tmpArray = [];
+			var reference = [];
 
-			for (var point in graph) {
-				tmpArray.push(point);
+			for (var point in serviceGraph) {
+				reference.push(point);
 			}
 
-			visualizeGraph(tmpArray);
+			visualizeGraph(reference);
 
-			adjacencyMatrix = new Array(tmpArray.length);
+			adjacencyMatrix = new Array(reference.length);
 
-			for (var i = 0; i < tmpArray.length; i++) {
-				adjacencyMatrix[i] = new Array(tmpArray.length);
+			for (var i = 0; i < reference.length; i++) {
+				adjacencyMatrix[i] = new Array(reference.length);
 
-				for (var j = 0; j < tmpArray.length; j++) {
-					var distance = (graph[ tmpArray[i] ][ tmpArray[j] ])
-						? graph[ tmpArray[i] ][ tmpArray[j] ].distance
+				for (var j = 0; j < reference.length; j++) {
+					var distance = (serviceGraph[ reference[i] ][ reference[j] ])
+						? serviceGraph[ reference[i] ][ reference[j] ].distance
 						: (i == j)
 							? 0
 							: Number.POSITIVE_INFINITY;
 
+					var path = (distance)
+						? [i, j]
+						: [];
+
 					adjacencyMatrix[i][j] = {
-						path: [],
+						path: path,
 						distance: distance
 					}
 				}
 			}
 
-			console.log(adjacencyMatrix);
-			console.log('=============')
 			calculateShortestDistance();
+
+			for (var point = 0; point < reference.length; point++) {
+
+				graph[point] = {
+					targets: {},
+					links: {}
+				}
+
+				for (var linkId in serviceGraph[ reference[point] ].link) {
+
+					serviceGraph[ reference[point] ].link[linkId].graphId = point;
+
+					graph[point].links[linkId] = serviceGraph[ reference[point] ].link[linkId];
+
+					for (var otherId = 0; otherId < reference.length; otherId++) {
+						//console.log(reference[point], reference[otherId]);
+						var pathName = (serviceGraph[ reference[point] ][ reference[otherId] ] !== undefined)
+							? serviceGraph[ reference[point] ][ reference[otherId] ].path
+							: false;
+
+						graph[point].targets[ otherId ] = {
+							distance: adjacencyMatrix[point][otherId].distance,
+							path: [],
+							pathName: pathName
+						}
+
+						for (var graphPath = 0; graphPath < adjacencyMatrix[point][otherId].path.length; graphPath++) {
+							graph[point].targets[otherId].path.push( adjacencyMatrix[point][otherId].path[graphPath] );
+						}
+					}
+
+
+				}
+			}
 		}
 
 		function calculateShortestDistance() {
@@ -746,14 +795,22 @@ var debugTraect = function debugTraect() {
 
 						if (adjacencyMatrix[i][j].distance > (adjacencyMatrix[i][k].distance + adjacencyMatrix[k][j].distance) ) {
 							adjacencyMatrix[i][j].distance = adjacencyMatrix[i][k].distance + adjacencyMatrix[k][j].distance;
-							adjacencyMatrix[i][j].path.push(k); // Лажа!!
+
+
+							adjacencyMatrix[i][j].path = [];
+
+							for (var e1 = 0; e1 < adjacencyMatrix[i][k].path.length; e1++) {
+								adjacencyMatrix[i][j].path.push( adjacencyMatrix[i][k].path[e1] );
+							}
+
+							for (var e2 = 1; e2 < adjacencyMatrix[k][j].path.length; e2++) {
+								adjacencyMatrix[i][j].path.push( adjacencyMatrix[k][j].path[e2] );
+							}
 						}
 
 					}
 				}
 			}
-
-			console.log(adjacencyMatrix);
 		}
 
 		function visualizeGraph(arr) {
@@ -770,7 +827,7 @@ var debugTraect = function debugTraect() {
 			var point2 = paths[path].dots[ paths[path].dots.length-1 ].mainHandle;
 			var distance = paths[path].steps.length;
 
-			addToGraph(path, makeIdByCoords(point1.x, point1.y), makeIdByCoords(point2.x, point2.y), distance);
+			addToGraph(path, paths[path].dots[0], paths[path].dots[ paths[path].dots.length-1 ], makeIdByCoords(point1.x, point1.y), makeIdByCoords(point2.x, point2.y), distance);
 		}
 
 		buildAdjacencyMatrix();
@@ -1119,23 +1176,29 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 		newObj.image.stateData.setMixByName("walk", "stop", 0.5);
 
-		var currentPath = getCurrentPath(),
-			pathChainCount = currentPath.controlPath.length;
+		//var currentPath = getCurrentPath(),
+		//	pathChainCount = currentPath.controlPath.length;
 
 		// Движение модели до заданного шага
 		// p.direction
 		// p.speed
 		// p.targetStep
 		function move( p ) {
+
+			var currentPath = p.currentPath,
+				callback = p.callback || function() {};
+
 			if (Math.abs(newObj.step - p.targetStep) < p.speed) {
 				newObj.image.state.setAnimationByName("stop", false);
 				movement.current = false;
+				callback();
 				return;
 			}
 
 			if (movement.switchFx) {
 				movement.switchFx = false;
 				movement.fx();
+				callback();
 				return;
 			}
 
@@ -1153,9 +1216,11 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 			requestAnimationFrame( function() {
 				move({
+					currentPath: currentPath,
 					direction: p.direction,
 					speed: p.speed,
-					targetStep: p.targetStep
+					targetStep: p.targetStep,
+					callback: p.callback
 				});
 			} );
 		}
@@ -1164,12 +1229,14 @@ document.addEventListener("DOMContentLoaded", function(e) {
 		function processControlPoint( p ) {
 
 			var modelStep = newObj.step,
-				targetStep = currentPath.controlPath[p].step;
+				currentPath = paths[ p.pathName ],
+				targetStep = currentPath.controlPath[ p.chain ].step,
+				callback = p.callback || function() {};
 
 			if (modelStep == targetStep ) return false;
 
 			// Направление движения
-			var stepDirection = currentPath.controlPath[p].step - newObj.step;
+			var stepDirection = currentPath.controlPath[ p.chain ].step - newObj.step;
 			stepDirection != 0
 				? stepDirection = stepDirection / Math.abs(stepDirection)
 				: false;
@@ -1179,9 +1246,11 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 			if (!movement.current) {
 				move({
+					currentPath: currentPath,
 					direction: stepDirection,
 					speed: 2,
-					targetStep: targetStep
+					targetStep: targetStep,
+					callback: callback
 				})
 
 			} else {
@@ -1189,13 +1258,42 @@ document.addEventListener("DOMContentLoaded", function(e) {
 					switchFx: true,
 					fx: function() {
 						move({
+							currentPath: currentPath,
 							direction: stepDirection,
 							speed: 2,
-							targetStep: targetStep
+							targetStep: targetStep,
+							callback: callback
 						})
 					}
 				}
 			}
+		}
+
+		function processPaths( pathArray, targetChain ) {
+console.log( pathArray, targetChain );
+				if (pathArray.length > 1) {
+					processControlPoint({
+						pathName: pathArray[0],
+						chain: paths[ pathArray[0] ].controlPath.length-1,
+						callback: function() {
+
+							newObj.step = 0;
+							newObj.path = pathArray[1];
+
+							var trash = pathArray.shift();
+							processPaths( pathArray, targetChain );
+						}
+					});
+					movement.current = true;
+				} else {
+					newObj.step = 0;
+					newObj.path = pathArray[0];
+
+					processControlPoint({
+						pathName: pathArray[0],
+						chain: targetChain
+					});
+				}
 		}
 
 		// Поиск шага, сопоставленного с областью клика
@@ -1206,14 +1304,98 @@ document.addEventListener("DOMContentLoaded", function(e) {
 		// TODO: Переделать на перебор всех возможных траекторий
 		// В случае совпадения области у двух и более траекторий выбирать кратчайший путь
 		// Весом ребра графа будет количество шагов
-		while(pathChainCount--) {
+		/*while(pathChainCount--) {
 			if (currentPath.controlPath[pathChainCount].rect.contains( targetX * scale, targetY * scale )) {
 
 				processControlPoint(pathChainCount);
 				movement.current = true;
 				break;
 			}
+		}*/
+
+		var currentPath = [
+			{
+				steps: newObj.step,
+				graphId: paths[ newObj.path ].dots[0].graphId
+			},
+			{
+				steps: paths[ newObj.path ].steps.length - newObj.step,
+				graphId: paths[ newObj.path ].dots[ paths[ newObj.path ].dots.length-1 ].graphId
+			}
+		];
+
+		var resultPath = {
+			steps: Number.POSITIVE_INFINITY,
+			graphIdStart: null,
+			graphIdEnd: null
 		}
+
+		// получить опорные точки у текущей траектории
+
+		// перебрать все траектории, понять, на которых из них может лежать целевая точка
+		for (path in paths) {
+			for (var chain = 0; chain < paths[path].controlPath.length; chain++) {
+				if (paths[path].controlPath[chain].rect.contains( targetX * scale, targetY * scale )) {
+
+					var	candidatePath = [
+						{
+							steps: paths[path].controlPath[chain].step,
+							graphId: paths[path].dots[0].graphId
+						},
+						{
+							steps: paths[path].steps.length - paths[path].controlPath[chain].step,
+							graphId: paths[path].dots[ paths[path].dots.length-1 ].graphId
+						}
+					]
+
+					var minPath = {
+						steps: Number.POSITIVE_INFINITY,
+						graphIdStart: null,
+						graphIdEnd: null
+					}
+
+					for (var currentPathVar = 0 ; currentPathVar < 2; currentPathVar++) {
+						for (var candidatePathVar = 0 ; candidatePathVar < 2; candidatePathVar++) {
+
+							var tDistance = currentPath[currentPathVar].steps +
+								candidatePath[candidatePathVar].steps +
+								graph[ currentPath[currentPathVar].graphId ].targets[ candidatePath[candidatePathVar].graphId ].distance;
+
+							if ( (tDistance) < minPath.steps ) {
+
+								minPath = {
+									steps: tDistance,
+									graphIdStart: currentPath[currentPathVar].graphId,
+									graphIdEnd: candidatePath[candidatePathVar].graphId
+								}
+							}
+
+						}
+					}
+
+					if ( resultPath.steps > minPath.steps ) {
+
+						resultPath = {
+							steps: minPath.steps,
+							graphIdStart: minPath.graphIdStart,
+							graphIdEnd: minPath.graphIdEnd,
+							path: path,
+							chain: chain
+						}
+					}
+				}
+			}
+		}
+
+		var targetPath = graph[resultPath.graphIdStart].targets[resultPath.graphIdEnd],
+			pathArray = [];
+
+		for (var pathSteps = 1; pathSteps < targetPath.path.length; pathSteps++ ) {
+			pathArray.push(graph[ targetPath.path[pathSteps-1] ].targets[ targetPath.path[pathSteps] ].pathName );
+		}
+
+		pathArray.push( resultPath.path );
+		processPaths(pathArray, resultPath.chain);
 	}
 
 	document.body.addEventListener('click', function(e) {
