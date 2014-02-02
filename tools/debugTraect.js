@@ -1080,7 +1080,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 			if (currentPath.steps.length) {
 				newObj = obj().create({
-						src: 'assets/models/spineboy/spineboy.anim',
+						src: 'assets/models/hero/images/hero_final.anim',
 						x: currentPath.steps[0].x,
 						y: currentPath.steps[0].y,
 						z: 15,
@@ -1465,11 +1465,11 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 		if (currentPath.steps.length) {
 			newObj = obj().create({
-					src: 'assets/models/animation/images/animation.anim',
+					src: 'assets/models/hero/images/hero_final.anim',
 					x: currentPath.steps[0].x,
 					y: currentPath.steps[0].y,
 					z: 15,
-					scale: 0.35,
+					scale: 0.5,
 					hero: true,
 					step: 0,
 					path: currentPath.name
