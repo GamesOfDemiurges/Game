@@ -1233,7 +1233,10 @@ document.addEventListener("DOMContentLoaded", function(e) {
 				targetStep = currentPath.controlPath[ p.chain ].step,
 				callback = p.callback || function() {};
 
-			if (modelStep == targetStep ) return false;
+			if (modelStep == targetStep ) {
+				callback();
+				return;
+			}
 
 			// Направление движения
 			var stepDirection = currentPath.controlPath[ p.chain ].step - newObj.step;
@@ -1270,48 +1273,88 @@ document.addEventListener("DOMContentLoaded", function(e) {
 		}
 
 		function processPaths( pathArray, targetChain ) {
-console.log( pathArray, targetChain );
-				if (pathArray.length > 1) {
-					processControlPoint({
-						pathName: pathArray[0],
-						chain: paths[ pathArray[0] ].controlPath.length-1,
-						callback: function() {
+			var servicePoints;
 
-							newObj.step = 0;
-							newObj.path = pathArray[1];
+			function getServicePoint(path0, path1) {
+				var serviceChain,
+					serviceStep;
 
-							var trash = pathArray.shift();
-							processPaths( pathArray, targetChain );
-						}
-					});
-					movement.current = true;
-				} else {
-					newObj.step = 0;
-					newObj.path = pathArray[0];
-
-					processControlPoint({
-						pathName: pathArray[0],
-						chain: targetChain
-					});
+				var path0point1 = {
+					x: paths[ path0 ].dots[0].mainHandle.x,
+					y: paths[ path0 ].dots[0].mainHandle.y
 				}
+
+				var path0point2 = {
+					x: paths[ path0 ].dots[ paths[ path0 ].dots.length-1 ].mainHandle.x,
+					y: paths[ path0 ].dots[ paths[ path0 ].dots.length-1 ].mainHandle.y
+				}
+
+				var path1point1 = {
+					x: paths[ path1 ].dots[0].mainHandle.x,
+					y: paths[ path1 ].dots[0].mainHandle.y,
+				}
+
+				var path1point2 = {
+					x: paths[ path1 ].dots[ paths[ path1 ].dots.length-1 ].mainHandle.x,
+					y: paths[ path1 ].dots[ paths[ path1 ].dots.length-1 ].mainHandle.y
+				}
+
+				if ( (path0point1.x == path1point1.x) && (path0point1.y == path1point1.y) ) {
+					serviceChain = 0;
+					serviceStep = 0;
+				}
+
+				if ( (path0point1.x == path1point2.x) && (path0point1.y == path1point2.y) ) {
+					serviceChain = 0;
+					serviceStep = paths[ path1 ].steps.length;
+				}
+
+				if ( (path0point2.x == path1point1.x) && (path0point2.y == path1point1.y) ) {
+					serviceChain = paths[ path0 ].controlPath.length-1;
+					serviceStep = 0;
+				}
+
+				if ( (path0point2.x == path1point2.x) && (path0point2.y == path1point2.y) ) {
+					serviceChain = paths[ path0 ].controlPath.length-1;
+					serviceStep = paths[ path1 ].steps.length;
+				}
+
+				return {
+					serviceChain: serviceChain,
+					serviceStep: serviceStep
+				}
+			}
+
+			if (pathArray.length > 1) {
+
+				servicePoints = getServicePoint( pathArray[0], pathArray[1] );
+
+				processControlPoint({
+					pathName: pathArray[0],
+					chain: servicePoints.serviceChain,
+					callback: function() {
+
+						newObj.path = pathArray[1];
+						newObj.step = servicePoints.serviceStep;
+
+						var trash = pathArray.shift();
+						processPaths( pathArray, targetChain );
+					}
+				});
+				movement.current = true;
+			} else {
+
+				processControlPoint({
+					pathName: pathArray[0],
+					chain: targetChain
+				});
+			}
 		}
 
 		// Поиск шага, сопоставленного с областью клика
 
 		var targetX = e.pageX || e.changedTouches[0].pageX,
 			targetY = e.pageY || e.changedTouches[0].pageY;
-
-		// TODO: Переделать на перебор всех возможных траекторий
-		// В случае совпадения области у двух и более траекторий выбирать кратчайший путь
-		// Весом ребра графа будет количество шагов
-		/*while(pathChainCount--) {
-			if (currentPath.controlPath[pathChainCount].rect.contains( targetX * scale, targetY * scale )) {
-
-				processControlPoint(pathChainCount);
-				movement.current = true;
-				break;
-			}
-		}*/
 
 		var currentPath = [
 			{
@@ -1395,6 +1438,11 @@ console.log( pathArray, targetChain );
 		}
 
 		pathArray.push( resultPath.path );
+
+		if (pathArray[0] !== newObj.path) {
+			pathArray.unshift(newObj.path);
+		}
+
 		processPaths(pathArray, resultPath.chain);
 	}
 
