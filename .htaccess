@@ -1,1 +1,2 @@
 AddType "application/json" .anim
+AddDefaultCharset UTF-8
