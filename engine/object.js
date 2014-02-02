@@ -49,9 +49,12 @@ function obj() {
 
 			function setHero() {
 				_this.hero = p.hero || false;
+				if (_this.hero) {
+					_this.image.state.setAnimationByName("stop", false);
+				}
 			}
 
-			if (p.src.indexOf('.anim') !== -1) { //console.log('anim');
+			if (p.src.indexOf('.anim') !== -1) {
 				_this.type = 'spine';
 				_this.src = p.src;
 				_this.image = new PIXI.Spine( p.src );
@@ -66,7 +69,7 @@ function obj() {
 					_this.image.skeleton.setSkinByName("goblin");
 					_this.image.skeleton.setSlotsToSetupPose();
 				}
-			} else { //console.log('image');
+			} else {
 				_this.type = 'image';
 				_this.src = p.src;
 				_this.image = new PIXI.Sprite.fromImage( p.src );

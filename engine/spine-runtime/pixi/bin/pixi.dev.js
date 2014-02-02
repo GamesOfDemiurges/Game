@@ -7556,7 +7556,7 @@ PIXI.Spine.prototype.updateTransform = function () {
 		}
 
 		if (attachment.rendererObject) {
-			if (!slot.currentSpriteName /*|| slot.currentSpriteName != attachment.name*/) {
+			if (!slot.currentSpriteName || slot.currentSpriteName != attachment.name) {
 				if (attachment.rendererObject.name.indexOf(this.baseUrl) === -1) {
 					attachment.rendererObject.name = this.baseUrl + attachment.rendererObject.name;
 				}

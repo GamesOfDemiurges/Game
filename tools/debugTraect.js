@@ -1174,7 +1174,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 		var animations = newObj.image.state.data.skeletonData.animations,
 			animationName = 'new'; //animations[animations.length-1].name;
 
-		newObj.image.stateData.setMixByName("new", "stop", 0.5);
+		newObj.image.stateData.setMixByName("new", "stop", 0.8);
 
 		//var currentPath = getCurrentPath(),
 		//	pathChainCount = currentPath.controlPath.length;
@@ -1430,6 +1430,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 			}
 		}
 
+		if (resultPath.graphIdEnd == null) return false;
 		var targetPath = graph[resultPath.graphIdStart].targets[resultPath.graphIdEnd],
 			pathArray = [];
 
@@ -1475,7 +1476,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 					path: currentPath.name
 				});
 
-			newObj.image.state.clearAnimation();
+			//newObj.image.state.clearAnimation();
 
 			scene.addObj(newObj);
 		}
