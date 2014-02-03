@@ -1165,19 +1165,23 @@ document.addEventListener("DOMContentLoaded", function(e) {
 	var movement = {
 		current: false,
 		switchFx: false,
-		fx: null
+		fx: null,
+		noCallback: false
 	};
 
+	/**
+	* Перемещает объект точку, заданную координатами клика
+	* @param {Event} e
+	*/
 	function moveHero(e) {
 		if (newObj === undefined) return false;
 
+		// Анимации для перемещения
 		var animations = newObj.image.state.data.skeletonData.animations,
-			animationName = 'new'; //animations[animations.length-1].name;
+			animationName = 'new';
 
+		// Скорость перехода между анимациями
 		newObj.image.stateData.setMixByName("new", "stop", 0.8);
-
-		//var currentPath = getCurrentPath(),
-		//	pathChainCount = currentPath.controlPath.length;
 
 		// Движение модели до заданного шага
 		// p.direction
@@ -1188,6 +1192,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 			var currentPath = p.currentPath,
 				callback = p.callback || function() {};
 
+			// Объект пришел в конечную точку (возможно, конечную точку промежуточной траектории)
 			if (Math.abs(newObj.step - p.targetStep) < p.speed) {
 				newObj.image.state.setAnimationByName("stop", false);
 				movement.current = false;
@@ -1195,25 +1200,41 @@ document.addEventListener("DOMContentLoaded", function(e) {
 				return;
 			}
 
+			// Событие переключения направления движения
 			if (movement.switchFx) {
 				movement.switchFx = false;
 				movement.fx();
-				callback();
+				if (!movement.noCallback) {
+					callback();
+				}
+				movement.noCallback = false;
 				return;
 			}
 
+			// Анимация запукается циклически
 			if (newObj.image.state.isComplete()) {
 				newObj.image.state.setAnimationByName( animationName , false);
 			}
 
+			// Флаг того, что объект сейчас в движении
 			movement.current = true;
 
 			newObj.step = newObj.step + p.direction * p.speed;
+
+			// Если возникла ошибка в перемещении, останавливаемся
+			if (currentPath.steps[ newObj.step ] === undefined) {
+				newObj.image.state.setAnimationByName("stop", false);
+				movement.current = false;
+				callback();
+				return;
+			}
+
 			newObj.move({
 				x: currentPath.steps[ newObj.step ].x,
 				y: currentPath.steps[ newObj.step ].y,
 			})
 
+			// Рекурсивное достижение точки
 			requestAnimationFrame( function() {
 				move({
 					currentPath: currentPath,
@@ -1272,9 +1293,14 @@ document.addEventListener("DOMContentLoaded", function(e) {
 			}
 		}
 
+		// Прохождение по массиву путей
+		// У промежуточных путей targetChain считается конечной точкой,
+		// у последнего пути — берется из параметра
 		function processPaths( pathArray, targetChain ) {
 			var servicePoints;
 
+			// Вычисляет целевой targetChain на промежуточных путях, а также шаг,
+			// возникающий после достижения этого targetChain
 			function getServicePoint(path0, path1) {
 				var serviceChain,
 					serviceStep;
@@ -1325,6 +1351,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 				}
 			}
 
+			// Если есть промежуточные пути
 			if (pathArray.length > 1) {
 
 				servicePoints = getServicePoint( pathArray[0], pathArray[1] );
@@ -1333,7 +1360,8 @@ document.addEventListener("DOMContentLoaded", function(e) {
 					pathName: pathArray[0],
 					chain: servicePoints.serviceChain,
 					callback: function() {
-
+						// По завершению перехода переключиться на следующий путь
+						// установить новое значения шага
 						newObj.path = pathArray[1];
 						newObj.step = servicePoints.serviceStep;
 
@@ -1343,7 +1371,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 				});
 				movement.current = true;
 			} else {
-
+				// Промежуточных путей нет
 				processControlPoint({
 					pathName: pathArray[0],
 					chain: targetChain
@@ -1356,6 +1384,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 		var targetX = e.pageX || e.changedTouches[0].pageX,
 			targetY = e.pageY || e.changedTouches[0].pageY;
 
+		// Отражает количество шагов от объекта до ближайших двух вершин графа
 		var currentPath = [
 			{
 				steps: newObj.step,
@@ -1367,19 +1396,20 @@ document.addEventListener("DOMContentLoaded", function(e) {
 			}
 		];
 
+		// Предполагаем, что у искомого пути от объекта до заданной точки в исходном (худшем) состоянии
+		// бесконечное число шагов, начальная и конечная вершина графа не определены
 		var resultPath = {
 			steps: Number.POSITIVE_INFINITY,
 			graphIdStart: null,
 			graphIdEnd: null
 		}
 
-		// получить опорные точки у текущей траектории
-
 		// перебрать все траектории, понять, на которых из них может лежать целевая точка
 		for (path in paths) {
 			for (var chain = 0; chain < paths[path].controlPath.length; chain++) {
 				if (paths[path].controlPath[chain].rect.contains( targetX * scale, targetY * scale )) {
 
+					// Поиск ближайшей вершины графа из попадающих в область клика
 					var	candidatePath = [
 						{
 							steps: paths[path].controlPath[chain].step,
@@ -1397,6 +1427,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 						graphIdEnd: null
 					}
 
+					// Пары кратчайших путей (2*2)
 					for (var currentPathVar = 0 ; currentPathVar < 2; currentPathVar++) {
 						for (var candidatePathVar = 0 ; candidatePathVar < 2; candidatePathVar++) {
 
@@ -1416,6 +1447,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 						}
 					}
 
+					// Сохраняется путь с минимальным числом шагов
 					if ( resultPath.steps > minPath.steps ) {
 
 						resultPath = {
@@ -1430,6 +1462,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 			}
 		}
 
+		// Построение списка путей, необходимых для достижения конечной вершины графа
 		if (resultPath.graphIdEnd == null) return false;
 		var targetPath = graph[resultPath.graphIdStart].targets[resultPath.graphIdEnd],
 			pathArray = [];
@@ -1444,7 +1477,20 @@ document.addEventListener("DOMContentLoaded", function(e) {
 			pathArray.unshift(newObj.path);
 		}
 
-		processPaths(pathArray, resultPath.chain);
+		// Если в момент клика объект движется, нужно прервать движение и запустить просчет
+		// графа с текущей точки
+		if (movement.current) {
+			movement = {
+				switchFx: true,
+				noCallback: true,
+				fx: function() {
+					processPaths(pathArray, resultPath.chain);
+				}
+			}
+		} else {
+			processPaths(pathArray, resultPath.chain);
+		}
+
 	}
 
 	document.body.addEventListener('click', function(e) {
