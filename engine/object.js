@@ -60,15 +60,15 @@ function obj() {
 				_this.image = new PIXI.Spine( p.src );
 				_this.animated = p.animated || false;
 
-				if (_this.animated) {
+				/*if (_this.animated) {
 					var animations = _this.image.state.data.skeletonData.animations;
 					_this.image.state.setAnimationByName( animations[animations.length-1].name , true);
-				}
+				}*/
 
-				if (_this.image.state.data.skeletonData.skins.length > 1) {
+				/*if (_this.image.state.data.skeletonData.skins.length > 1) {
 					_this.image.skeleton.setSkinByName("goblin");
 					_this.image.skeleton.setSlotsToSetupPose();
-				}
+				}*/
 			} else {
 				_this.type = 'image';
 				_this.src = p.src;

@@ -11,68 +11,44 @@
 		<!--<script type="text/javascript" src="js/main.js"></script> -->
 
 		<script type="text/javascript" src="engine/spine-runtime/pixi/bin/pixi.dev.js"></script>
-		<script type="text/javascript" src="engine/scene.js"></script>
-		<script type="text/javascript" src="engine/object.js"></script>
 
-		<script type="text/javascript" src="engine/classlist.js"></script>
-		<script type="text/javascript" src="tools/debugTraect.js"></script>
+		<script type="text/javascript" src="engine/globals.js"></script>
+		<script type="text/javascript" src="engine/scene.js"></script>
+		<script type="text/javascript" src="engine/zplain.js"></script>
+		<script type="text/javascript" src="engine/object.js"></script>
+		<script type="text/javascript" src="engine/utils.js"></script>
+		<script type="text/javascript" src="engine/graph.js"></script>
+		<script type="text/javascript" src="engine/pathfinder.js"></script>
+		<script type="text/javascript" src="engine/loader.js"></script>
+
+		<!--<script type="text/javascript" src="engine/classlist.js"></script>-->
+		<!--<script type="text/javascript" src="tools/debugTraect.js"></script>-->
 
 		<script type="text/javascript">
-			document.addEventListener("DOMContentLoaded", function(event) {
-
-				var assetsToLoader = [
-					"assets/models/hero/images/hero_final.json",
-					"assets/models/hero/images/hero_final.anim",
-
-					"assets/background/lvl1_1.png"
-				];
-
-				// create a new loader
-				var loader = new PIXI.AssetLoader(assetsToLoader);
-
-				// use callback
-				loader.onComplete = function() {
-
-					var obj1 = obj().create({
-							src: 'assets/background/lvl1_1.png',
-							x: 0,
-							y: 0,
-							z: 5
-						});
-
-					scene
-						.addObj(obj1);
-				}
-
-				//begin load
+			document.addEventListener("DOMContentLoaded", function() {
 
 				function resizeViewPort() {
 					document.body.style.width = ( 2922 / document.getElementById('view').getAttribute('width') ) * document.getElementById('view').clientWidth + 'px';
 				}
 
-				scene
-					.init({
-						canvasId: 'view'
-					})
-
-				loader.load();
 				resizeViewPort();
-				setTimeout(function() {
-					window.scroll(0, 0);
-				}, 1000)
-
-				window.onscroll = function(e) {
-					scene.playGround.position.x = -2922 * window.pageXOffset / document.body.clientWidth;
-				}
 
 				window.addEventListener('resize', function() {
 					resizeViewPort();
 				})
 
+				/*setTimeout(function() {
+					window.scroll(0, 0);
+				}, 1000)
+
+				window.onscroll = function(e) {
+					scene.playGround.position.x = -2922 * window.pageXOffset / document.body.clientWidth;
+				}*/
+
 				/********************** DEBUGGER ************************/
-				document.querySelector('.debug__view').setAttribute('width', document.body.clientWidth / document.getElementById('view').clientHeight * 510 );
+				/*document.querySelector('.debug__view').setAttribute('width', document.body.clientWidth / document.getElementById('view').clientHeight * 510 );
 				document.querySelector('.debug__view').setAttribute('height', document.getElementById('view').getAttribute('height'));
-				debugTraect.paint();
+				debugTraect.paint();*/
 
 			})
 		</script>
@@ -80,7 +56,7 @@
 	</head>
 	<body>
 		<canvas id="view"></canvas>
-		<div class="debug" style="display: block">
+		<!--<div class="debug" style="display: block">
 			<div class="debug__control">
 				<div class="debug__control-traects">
 					<select id="" size="2" ></select>
@@ -94,8 +70,6 @@
 
 					<hr />
 					<button class="debug__button debug__button_add-model">Добавить модель</button>
-					<!--<button class="debug__button debug__button-model-forward">Вперед</button>
-					<button class="debug__button debug__button-model-backward">Назад</button>-->
 					<hr />
 					<button class="debug__button debug__button_toggle-overlay">Переключить оверлей</button>
 					<hr />
@@ -104,6 +78,6 @@
 			</div>
 
 			<canvas class="debug__view debug__view_hidden"></canvas>
-		</div>
+		</div>-->
 	</body>
 </html>

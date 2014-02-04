@@ -1,0 +1,329 @@
+var utils = (function() {
+	var paths = globals.paths;
+
+	return {
+
+		// Возвращает Эвклидово расстояния
+		//p.x1
+		//p.y1
+		//p.x2
+		//p.y2
+		getDistance: function( p ) {
+			var xDistance = p.x2 - p.x1,
+				yDistance = p.y2 - p.y1;
+
+			return Math.sqrt( xDistance*xDistance + yDistance*yDistance );
+		},
+
+		// Возвращает координаты точку на отрезке
+		//p.x1
+		//p.y1
+		//p.x2
+		//p.y2
+		//p.t
+		getLinePointCoords: function( p ) {
+			return {
+				x: (p.x2 - p.x1) * p.t + p.x1,
+				y: (p.y2 - p.y1) *  p.t + p.y1,
+			}
+		},
+
+		// Возвращает координаты точки в кривой Безье
+		//p.x1
+		//p.y1
+		//p.ax1
+		//p.ay1
+		//p.ax2
+		//p.ay2
+		//p.x2
+		//p.y2
+		//p.t
+		getBezierPointCoords: function( p ) {
+			function polynom(z) {
+				var at = (1 - p.t);
+
+				return (at * at * at * z.p0) + (3 * p.t * at * at * z.p1) + (3 * p.t * p.t * at * z.p2) + (p.t * p.t * p.t * z.p3);
+			}
+
+			return {
+				x: polynom( { p0: p.x1, p1: p.ax1, p2: p.ax2, p3: p.x2 } ),
+				y: polynom( { p0: p.y1, p1: p.ay1, p2: p.ay2, p3: p.y2 } )
+			}
+		},
+
+		// Возвращает позицию управляющих точек на кривой Безье
+		//p.x1
+		//p.y1
+		//p.x2
+		//p.y2
+		getAdditionalBezierPointsCoords: function( p ) {
+			var a1 = utils.getLinePointCoords({
+				x1: p.x1,
+				y1: p.y1,
+				x2: p.x2,
+				y2: p.y2,
+				t: 0.3
+			})
+
+			var a2 = utils.getLinePointCoords({
+				x1: p.x1,
+				y1: p.y1,
+				x2: p.x2,
+				y2: p.y2,
+				t: 0.7
+			})
+
+			return {
+				ax1: a1.x,
+				ay1: a1.y,
+				ax2: a2.x,
+				ay2: a2.y
+			}
+		},
+
+		// Строит рекурсивно атомарные шаги по заданной кривой Безье длиной не более допустимого расстояния
+		//p.x1
+		//p.y1
+		//p.ax1
+		//p.ay1
+		//p.ax2
+		//p.ay2
+		//p.x2
+		//p.y2
+		//p.t1,
+		//p.t2
+		buildCurveSteps: function( p ) {
+			// максимально допустимое расстояние в пикселах
+			var maxDistance = 1.4
+
+			var path = {};
+
+			// считаем среднюю точку в заданном интервале [t1, t2]
+			var middleT = p.t1 + (p.t2 - p.t1)/2;
+
+			// получаем координаты точек при t = t1, middleT, t2
+			var pointInT = utils.getBezierPointCoords({
+				x1: p.x1,
+				y1: p.y1,
+				ax1: p.ax1,
+				ay1: p.ay1,
+				ax2: p.ax2,
+				ay2: p.ay2,
+				x2: p.x2,
+				y2: p.y2,
+				t: middleT
+			});
+
+			var pointInT1 = utils.getBezierPointCoords({
+				x1: p.x1,
+				y1: p.y1,
+				ax1: p.ax1,
+				ay1: p.ay1,
+				ax2: p.ax2,
+				ay2: p.ay2,
+				x2: p.x2,
+				y2: p.y2,
+				t: p.t1
+			});
+
+			var pointInT2 = utils.getBezierPointCoords({
+				x1: p.x1,
+				y1: p.y1,
+				ax1: p.ax1,
+				ay1: p.ay1,
+				ax2: p.ax2,
+				ay2: p.ay2,
+				x2: p.x2,
+				y2: p.y2,
+				t: p.t2
+			});
+
+			// обход дерева слева
+			var leftDistance = utils.getDistance({
+				x1: pointInT1.x,
+				y1: pointInT1.y,
+				x2: pointInT.x,
+				y2: pointInT.y
+			})
+
+			if ( leftDistance > maxDistance ) {
+
+				// Если можно разбить ветвь дальше, рекурсивно разбиваем
+				var innerLeftSteps = utils.buildCurveSteps({
+					x1: p.x1,
+					y1: p.y1,
+					ax1: p.ax1,
+					ay1: p.ay1,
+					ax2: p.ax2,
+					ay2: p.ay2,
+					x2: p.x2,
+					y2: p.y2,
+					t1: p.t1,
+					t2: middleT
+				});
+
+				// добавляем полученные точки в текущий путь
+				for (var i in innerLeftSteps) {
+					path[i] = innerLeftSteps[i];
+				}
+
+			} else {
+
+				// Ветвь нельзя разбить дальше
+				// Добавляем полученную точку к пути и возвращаемся обратно по стеку
+				path[middleT] = pointInT;
+				return path;
+			}
+
+			// обход дерева справа
+			var rightDistance = utils.getDistance({
+				x1: pointInT.x,
+				y1: pointInT.y,
+				x2: pointInT2.x,
+				y2: pointInT2.y
+			})
+
+			if ( rightDistance >= maxDistance ) {
+
+				// Рекурсивно строим ветку (фактически работает только левый обход)
+				var innerRightSteps = utils.buildCurveSteps({
+					x1: p.x1,
+					y1: p.y1,
+					ax1: p.ax1,
+					ay1: p.ay1,
+					ax2: p.ax2,
+					ay2: p.ay2,
+					x2: p.x2,
+					y2: p.y2,
+					t1: middleT,
+					t2: p.t2
+				});
+
+				// Если ветвь можно разбить, добавляем полученные точки к текущему пути
+				for (var i in innerRightSteps) {
+					path[i] = innerRightSteps[i];
+				}
+			}
+
+			// Добавим текущую среднюю точку в путь, если её еще там нет
+			path[middleT] = {
+				x: pointInT.x,
+				y: pointInT.y
+			}
+
+			// Случай, когда весь путь уже построен
+			if ((p.t1 == 0) && (p.t2 == 1)) {
+
+				// Добавляем граничные точки
+				path[0] = {
+					x: p.x1,
+					y: p.y1
+				}
+
+				path[1] = {
+					x: p.x2,
+					y: p.y2
+				}
+
+				// Разворачиваем объект в сортированный массив
+				var keyArr = [],
+					result = [];
+
+				for (var i in path) {
+					keyArr.push(i);
+				}
+
+				keyArr = keyArr.sort();
+
+				for (var i = 0; i < keyArr.length; i++) {
+					result.push(path[keyArr[i]]);
+				}
+
+				// Финальный возврат пути в виде массива
+				return result;
+			}
+
+			// Рекурсивный возврат пути
+			return path;
+		},
+
+		// Генерирует управляющий контур для траектории
+		// p.pathId
+		buildControlPoligon: function( p ) {
+
+			var touchRadiusDistance = 100;
+			var currentPath = paths[p.pathId];
+
+			var controlPath = [];
+
+			/*var touchPointCount = Math.round( currentPath.steps.length / touchRadiusDistance );
+
+			for (var touchPoint = 0; touchPoint < touchPointCount; touchPoint++) {
+				var startTouchPoint = {
+					x: currentPath.steps[touchPoint*touchRadiusDistance].x - (touchRadiusDistance/2),
+					y: currentPath.steps[touchPoint*touchRadiusDistance].y - (touchRadiusDistance/2)
+				}
+				console.log(touchPoint*touchRadiusDistance);
+				ctx.rect( startTouchPoint.x, startTouchPoint.y, touchRadiusDistance, touchRadiusDistance );
+
+			}*/
+
+			var lastPoint = 0;
+
+			for (var i = 0; i < currentPath.steps.length; i++) {
+
+				var distance = utils.getDistance({
+					x1: currentPath.steps[lastPoint].x,
+					y1: currentPath.steps[lastPoint].y,
+					x2: currentPath.steps[i].x,
+					y2: currentPath.steps[i].y,
+				})
+
+				if (distance > touchRadiusDistance) {
+
+					// создание
+					var startTouchPoint = {
+						x: currentPath.steps[lastPoint].x - (touchRadiusDistance/2),
+						y: currentPath.steps[lastPoint].y - (touchRadiusDistance/2)
+					}
+
+					controlPath.push({
+						rect: new PIXI.Rectangle(startTouchPoint.x, startTouchPoint.y, touchRadiusDistance, touchRadiusDistance),
+						step: lastPoint
+					})
+
+					// Визуализация
+					ctx.rect( controlPath[ controlPath.length-1 ].rect.x, controlPath[ controlPath.length-1 ].rect.y, controlPath[ controlPath.length-1 ].rect.width, controlPath[ controlPath.length-1 ].rect.height );
+					ctx.rect( currentPath.steps[ controlPath[ controlPath.length-1 ].step ].x, currentPath.steps[ controlPath[ controlPath.length-1 ].step ].y,  6, 6 );
+
+					lastPoint = i;
+				}
+			}
+
+			var startTouchPoint = {
+				x: currentPath.steps[lastPoint].x - (touchRadiusDistance/2),
+				y: currentPath.steps[lastPoint].y - (touchRadiusDistance/2)
+			}
+
+			// создание
+			controlPath.push({
+				rect: new PIXI.Rectangle(startTouchPoint.x, startTouchPoint.y, currentPath.steps[currentPath.steps.length-1].x - startTouchPoint.x+ (touchRadiusDistance/2), currentPath.steps[currentPath.steps.length-1].y - startTouchPoint.y + (touchRadiusDistance/2)),
+				step: (currentPath.steps.length-1)
+			})
+
+			currentPath.controlPath = controlPath;
+
+			// Визуализация
+			/*ctx.rect( controlPath[ controlPath.length-1 ].rect.x, controlPath[ controlPath.length-1 ].rect.y, controlPath[ controlPath.length-1 ].rect.width, controlPath[ controlPath.length-1 ].rect.height );
+			ctx.rect( currentPath.steps[ controlPath[ controlPath.length-1 ].step ].x, currentPath.steps[ controlPath[ controlPath.length-1 ].step ].y,  6, 6 );
+
+			ctx.stroke();*/
+		}
+	}
+
+})();
+
+
+
+
+
