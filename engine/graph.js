@@ -1,8 +1,7 @@
 var graph = (function() {
 
 	var serviceGraph = {},
-		adjacencyMatrix,
-		paths;
+		adjacencyMatrix;
 
 	function makeIdByCoords(x, y) {
 
@@ -17,8 +16,8 @@ var graph = (function() {
 			};
 		}
 
-		if (serviceGraph[point1].link[path] === undefined  ) {
-			serviceGraph[point1].link[path] = linkToPathPoint1;
+		if (serviceGraph[point1].link[pathName] === undefined  ) {
+			serviceGraph[point1].link[pathName] = linkToPathPoint1;
 		}
 
 		if ( serviceGraph[point2] === undefined ) {
@@ -27,8 +26,8 @@ var graph = (function() {
 			};
 		}
 
-		if (serviceGraph[point2].link[path] === undefined  ) {
-			serviceGraph[point2].link[path] = linkToPathPoint2;
+		if (serviceGraph[point2].link[pathName] === undefined  ) {
+			serviceGraph[point2].link[pathName] = linkToPathPoint2;
 		}
 
 		if ( serviceGraph[point1][point2] === undefined ) {
@@ -110,7 +109,7 @@ var graph = (function() {
 
 		for (var point = 0; point < reference.length; point++) {
 
-			global.graph[point] = {
+			globals.graph[point] = {
 				targets: {},
 				links: {}
 			}
@@ -119,7 +118,7 @@ var graph = (function() {
 
 				serviceGraph[ reference[point] ].link[linkId].graphId = point;
 
-				global.graph[point].links[linkId] = serviceGraph[ reference[point] ].link[linkId];
+				globals.graph[point].links[linkId] = serviceGraph[ reference[point] ].link[linkId];
 
 				for (var otherId = 0; otherId < reference.length; otherId++) {
 					//console.log(reference[point], reference[otherId]);
@@ -127,14 +126,14 @@ var graph = (function() {
 						? serviceGraph[ reference[point] ][ reference[otherId] ].path
 						: false;
 
-					global.graph[point].targets[ otherId ] = {
+					globals.graph[point].targets[ otherId ] = {
 						distance: adjacencyMatrix[point][otherId].distance,
 						path: [],
 						pathName: pathName
 					}
 
 					for (var graphPath = 0; graphPath < adjacencyMatrix[point][otherId].path.length; graphPath++) {
-						global.graph[point].targets[otherId].path.push( adjacencyMatrix[point][otherId].path[graphPath] );
+						globals.graph[point].targets[otherId].path.push( adjacencyMatrix[point][otherId].path[graphPath] );
 					}
 				}
 
@@ -148,14 +147,13 @@ var graph = (function() {
 
 	return {
 		buildGraph: function( p ) {
-			paths = globals.paths;
-// тут уже нужен результат генерации шагов
-			for (var path in paths) {
-				var point1 = paths[path].dots[0].mainHandle;
-				var point2 = paths[path].dots[ paths[path].dots.length-1 ].mainHandle;
-				var distance = paths[path].steps.length;
 
-				addToGraph(path, paths[path].dots[0], paths[path].dots[ paths[path].dots.length-1 ], makeIdByCoords(point1.x, point1.y), makeIdByCoords(point2.x, point2.y), distance);
+			for (var path in globals.paths) {
+				var point1 = globals.paths[path].dots[0].mainHandle;
+				var point2 = globals.paths[path].dots[ globals.paths[path].dots.length-1 ].mainHandle;
+				var distance = globals.paths[path].steps.length;
+
+				addToGraph(path, globals.paths[path].dots[0], globals.paths[path].dots[ globals.paths[path].dots.length-1 ], makeIdByCoords(point1.x, point1.y), makeIdByCoords(point2.x, point2.y), distance);
 			}
 
 			buildAdjacencyMatrix( p );

@@ -1,6 +1,4 @@
 var pathfinder = (function() {
-	var paths,
-		hero;
 
 	// Движение объекта
 	var movement = {
@@ -17,11 +15,12 @@ var pathfinder = (function() {
 	function move( p ) {
 
 		var currentPath = p.currentPath,
-			callback = p.callback || function() {};
+			callback = p.callback || function() {},
+			animationName = 'new';
 
 		// Объект пришел в конечную точку (возможно, конечную точку промежуточной траектории)
-		if (Math.abs(hero.step - p.targetStep) < p.speed) {
-			hero.image.state.setAnimationByName("stop", false);
+		if (Math.abs(globals.hero.step - p.targetStep) < p.speed) {
+			globals.hero.image.state.setAnimationByName("stop", false);
 			movement.current = false;
 			callback();
 			return;
@@ -39,26 +38,26 @@ var pathfinder = (function() {
 		}
 
 		// Анимация запукается циклически
-		if (hero.image.state.isComplete()) {
-			hero.image.state.setAnimationByName( animationName , false);
+		if (globals.hero.image.state.isComplete()) {
+			globals.hero.image.state.setAnimationByName( animationName , false);
 		}
 
 		// Флаг того, что объект сейчас в движении
 		movement.current = true;
 
-		hero.step = hero.step + p.direction * p.speed;
+		globals.hero.step = globals.hero.step + p.direction * p.speed;
 
 		// Если возникла ошибка в перемещении, останавливаемся
-		if (currentPath.steps[ hero.step ] === undefined) {
-			hero.image.state.setAnimationByName("stop", false);
+		if (currentPath.steps[ globals.hero.step ] === undefined) {
+			globals.hero.image.state.setAnimationByName("stop", false);
 			movement.current = false;
 			callback();
 			return;
 		}
 
-		hero.move({
-			x: currentPath.steps[ hero.step ].x,
-			y: currentPath.steps[ hero.step ].y,
+		globals.hero.move({
+			x: currentPath.steps[ globals.hero.step ].x,
+			y: currentPath.steps[ globals.hero.step ].y,
 		})
 
 		// Рекурсивное достижение точки
@@ -76,10 +75,11 @@ var pathfinder = (function() {
 	// Запуск движения модели к заданному шагу
 	function processControlPoint( p ) {
 
-		var modelStep = hero.step,
-			currentPath = paths[ p.pathName ],
+		var modelStep = globals.hero.step,
+			currentPath = globals.paths[ p.pathName ],
 			targetStep = currentPath.controlPath[ p.chain ].step,
-			callback = p.callback || function() {};
+			callback = p.callback || function() {},
+			animationName = 'new';
 
 		if (modelStep == targetStep ) {
 			callback();
@@ -87,13 +87,13 @@ var pathfinder = (function() {
 		}
 
 		// Направление движения
-		var stepDirection = currentPath.controlPath[ p.chain ].step - hero.step;
+		var stepDirection = currentPath.controlPath[ p.chain ].step - globals.hero.step;
 		stepDirection != 0
 			? stepDirection = stepDirection / Math.abs(stepDirection)
 			: false;
 
 		// включили анимацию перед движением
-		hero.image.state.setAnimationByName( animationName , false);
+		globals.hero.image.state.setAnimationByName( animationName , false);
 
 		if (!movement.current) {
 			move({
@@ -133,23 +133,23 @@ var pathfinder = (function() {
 				serviceStep;
 
 			var path0point1 = {
-				x: paths[ path0 ].dots[0].mainHandle.x,
-				y: paths[ path0 ].dots[0].mainHandle.y
+				x: globals.paths[ path0 ].dots[0].mainHandle.x,
+				y: globals.paths[ path0 ].dots[0].mainHandle.y
 			}
 
 			var path0point2 = {
-				x: paths[ path0 ].dots[ paths[ path0 ].dots.length-1 ].mainHandle.x,
-				y: paths[ path0 ].dots[ paths[ path0 ].dots.length-1 ].mainHandle.y
+				x: globals.paths[ path0 ].dots[ globals.paths[ path0 ].dots.length-1 ].mainHandle.x,
+				y: globals.paths[ path0 ].dots[ globals.paths[ path0 ].dots.length-1 ].mainHandle.y
 			}
 
 			var path1point1 = {
-				x: paths[ path1 ].dots[0].mainHandle.x,
-				y: paths[ path1 ].dots[0].mainHandle.y,
+				x: globals.paths[ path1 ].dots[0].mainHandle.x,
+				y: globals.paths[ path1 ].dots[0].mainHandle.y,
 			}
 
 			var path1point2 = {
-				x: paths[ path1 ].dots[ paths[ path1 ].dots.length-1 ].mainHandle.x,
-				y: paths[ path1 ].dots[ paths[ path1 ].dots.length-1 ].mainHandle.y
+				x: globals.paths[ path1 ].dots[ globals.paths[ path1 ].dots.length-1 ].mainHandle.x,
+				y: globals.paths[ path1 ].dots[ globals.paths[ path1 ].dots.length-1 ].mainHandle.y
 			}
 
 			if ( (path0point1.x == path1point1.x) && (path0point1.y == path1point1.y) ) {
@@ -159,17 +159,17 @@ var pathfinder = (function() {
 
 			if ( (path0point1.x == path1point2.x) && (path0point1.y == path1point2.y) ) {
 				serviceChain = 0;
-				serviceStep = paths[ path1 ].steps.length;
+				serviceStep = globals.paths[ path1 ].steps.length;
 			}
 
 			if ( (path0point2.x == path1point1.x) && (path0point2.y == path1point1.y) ) {
-				serviceChain = paths[ path0 ].controlPath.length-1;
+				serviceChain = globals.paths[ path0 ].controlPath.length-1;
 				serviceStep = 0;
 			}
 
 			if ( (path0point2.x == path1point2.x) && (path0point2.y == path1point2.y) ) {
-				serviceChain = paths[ path0 ].controlPath.length-1;
-				serviceStep = paths[ path1 ].steps.length;
+				serviceChain = globals.paths[ path0 ].controlPath.length-1;
+				serviceStep = globals.paths[ path1 ].steps.length;
 			}
 
 			return {
@@ -189,8 +189,8 @@ var pathfinder = (function() {
 				callback: function() {
 					// По завершению перехода переключиться на следующий путь
 					// установить новое значения шага
-					hero.path = pathArray[1];
-					hero.step = servicePoints.serviceStep;
+					globals.hero.path = pathArray[1];
+					globals.hero.step = servicePoints.serviceStep;
 
 					var trash = pathArray.shift();
 					processPaths( pathArray, targetChain );
@@ -211,29 +211,27 @@ var pathfinder = (function() {
 	* Перемещает объект точку, заданную координатами клика
 	* @param {Event} e
 	*/
-	function moveHero(e) {
-		if (hero === undefined) return false;
+	function moveHero( p ) {
+		if (globals.hero === undefined) return false;
 
 		// Анимации для перемещения
-		var animations = hero.image.state.data.skeletonData.animations,
+		var animations = globals.hero.image.state.data.skeletonData.animations,
 			animationName = 'new';
 
 		// Скорость перехода между анимациями
-		hero.image.stateData.setMixByName("new", "stop", 0.8);
+		globals.hero.image.stateData.setMixByName("new", "stop", 0.8);
 
 		// Поиск шага, сопоставленного с областью клика
-
-
 
 		// Отражает количество шагов от объекта до ближайших двух вершин графа
 		var currentPath = [
 			{
-				steps: hero.step,
-				graphId: paths[ hero.path ].dots[0].graphId
+				steps: globals.hero.step,
+				graphId: globals.paths[ globals.hero.path ].dots[0].graphId
 			},
 			{
-				steps: paths[ hero.path ].steps.length - hero.step,
-				graphId: paths[ hero.path ].dots[ paths[ hero.path ].dots.length-1 ].graphId
+				steps: globals.paths[ globals.hero.path ].steps.length - globals.hero.step,
+				graphId: globals.paths[ globals.hero.path ].dots[ globals.paths[ globals.hero.path ].dots.length-1 ].graphId
 			}
 		];
 
@@ -246,19 +244,19 @@ var pathfinder = (function() {
 		}
 
 		// перебрать все траектории, понять, на которых из них может лежать целевая точка
-		for (path in paths) {
-			for (var chain = 0; chain < paths[path].controlPath.length; chain++) {
-				if (paths[path].controlPath[chain].rect.contains( targetX * scale, targetY * scale )) {
+		for (path in globals.paths) {
+			for (var chain = 0; chain < globals.paths[path].controlPath.length; chain++) {
+				if (globals.paths[path].controlPath[chain].rect.contains( p.x * globals.scale, p.y * globals.scale )) {
 
 					// Поиск ближайшей вершины графа из попадающих в область клика
 					var	candidatePath = [
 						{
-							steps: paths[path].controlPath[chain].step,
-							graphId: paths[path].dots[0].graphId
+							steps: globals.paths[path].controlPath[chain].step,
+							graphId: globals.paths[path].dots[0].graphId
 						},
 						{
-							steps: paths[path].steps.length - paths[path].controlPath[chain].step,
-							graphId: paths[path].dots[ paths[path].dots.length-1 ].graphId
+							steps: globals.paths[path].steps.length - globals.paths[path].controlPath[chain].step,
+							graphId: globals.paths[path].dots[ globals.paths[path].dots.length-1 ].graphId
 						}
 					]
 
@@ -274,7 +272,7 @@ var pathfinder = (function() {
 
 							var tDistance = currentPath[currentPathVar].steps +
 								candidatePath[candidatePathVar].steps +
-								graph[ currentPath[currentPathVar].graphId ].targets[ candidatePath[candidatePathVar].graphId ].distance;
+								globals.graph[ currentPath[currentPathVar].graphId ].targets[ candidatePath[candidatePathVar].graphId ].distance;
 
 							if ( (tDistance) < minPath.steps ) {
 
@@ -305,17 +303,17 @@ var pathfinder = (function() {
 
 		// Построение списка путей, необходимых для достижения конечной вершины графа
 		if (resultPath.graphIdEnd == null) return false;
-		var targetPath = graph[resultPath.graphIdStart].targets[resultPath.graphIdEnd],
+		var targetPath = globals.graph[resultPath.graphIdStart].targets[resultPath.graphIdEnd],
 			pathArray = [];
 
 		for (var pathSteps = 1; pathSteps < targetPath.path.length; pathSteps++ ) {
-			pathArray.push(graph[ targetPath.path[pathSteps-1] ].targets[ targetPath.path[pathSteps] ].pathName );
+			pathArray.push(globals.graph[ targetPath.path[pathSteps-1] ].targets[ targetPath.path[pathSteps] ].pathName );
 		}
 
 		pathArray.push( resultPath.path );
 
-		if (pathArray[0] !== hero.path) {
-			pathArray.unshift(hero.path);
+		if (pathArray[0] !== globals.hero.path) {
+			pathArray.unshift(globals.hero.path);
 		}
 
 		// Если в момент клика объект движется, нужно прервать движение и запустить просчет
@@ -337,14 +335,14 @@ var pathfinder = (function() {
 	function attachPathFinderListeners() {
 		document.body.addEventListener('click', function(e) {
 			moveHero({
-				x: e.pageX,
+				x: e.pageX - (scene.playGround.position.x / globals.scale),
 				y: e.pageY
 			})
 		})
 
 		document.body.addEventListener('touchend', function(e) {
 			moveHero({
-				x: e.changedTouches[0].pageX,
+				x: e.changedTouches[0].pageX - scene.playGround.position.x,
 				y: e.changedTouches[0].pageY
 			})
 		})
@@ -352,9 +350,6 @@ var pathfinder = (function() {
 
 	return {
 		start: function() {
-			paths = globals.paths;
-			hero = globals.hero;
-
 			attachPathFinderListeners();
 		}
 	}

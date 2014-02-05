@@ -2,5 +2,6 @@ var globals = {
 
 	paths: {},
 	graph: {},
-	hero: false
+	hero: false,
+	scale: 1
 }

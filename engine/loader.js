@@ -23,17 +23,21 @@ var loader = (function() {
 			if (readTraect.readyState==4) {
 				globals.paths = JSON.parse(readTraect.responseText);
 
-				//utils.buildCurveSteps();
-				//utils.buildControlPoligon();
-
-				//Debug Traect here
-
-				graph.buildGraph({
+				// Построить траектории
+				utils.processPaths({
 					callback: function() {
-						callback();
-						pathfinder.start();
+
+						// Построить граф
+						graph.buildGraph({
+							callback: function() {
+								callback();
+								pathfinder.start();
+							}
+						});
+
 					}
 				});
+
 			}
 		};
 
@@ -44,7 +48,7 @@ var loader = (function() {
 	return {
 
 		init: function( p ) {
-			var callback = callback || function() {};
+			var callback = p.callback || function() {};
 
 			// предзагрузить ресурсы
 			init({
@@ -94,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 			//globals.hero.image.state.clearAnimation();
 
-			global.scene
+			scene
 				.init({
 					canvasId: 'view'
 				})

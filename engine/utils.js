@@ -1,5 +1,4 @@
 var utils = (function() {
-	var paths = globals.paths;
 
 	return {
 
@@ -252,7 +251,7 @@ var utils = (function() {
 		buildControlPoligon: function( p ) {
 
 			var touchRadiusDistance = 100;
-			var currentPath = paths[p.pathId];
+			var currentPath = globals.paths[p.pathId];
 
 			var controlPath = [];
 
@@ -293,8 +292,8 @@ var utils = (function() {
 					})
 
 					// Визуализация
-					ctx.rect( controlPath[ controlPath.length-1 ].rect.x, controlPath[ controlPath.length-1 ].rect.y, controlPath[ controlPath.length-1 ].rect.width, controlPath[ controlPath.length-1 ].rect.height );
-					ctx.rect( currentPath.steps[ controlPath[ controlPath.length-1 ].step ].x, currentPath.steps[ controlPath[ controlPath.length-1 ].step ].y,  6, 6 );
+					/*ctx.rect( controlPath[ controlPath.length-1 ].rect.x, controlPath[ controlPath.length-1 ].rect.y, controlPath[ controlPath.length-1 ].rect.width, controlPath[ controlPath.length-1 ].rect.height );
+					ctx.rect( currentPath.steps[ controlPath[ controlPath.length-1 ].step ].x, currentPath.steps[ controlPath[ controlPath.length-1 ].step ].y,  6, 6 );*/
 
 					lastPoint = i;
 				}
@@ -318,6 +317,53 @@ var utils = (function() {
 			ctx.rect( currentPath.steps[ controlPath[ controlPath.length-1 ].step ].x, currentPath.steps[ controlPath[ controlPath.length-1 ].step ].y,  6, 6 );
 
 			ctx.stroke();*/
+		},
+
+		processPaths: function( p ) {
+			var callback = p.callback || function() {};
+
+			globals.scale = 510 / document.body.clientHeight;
+
+			for (path in globals.paths) {
+				if (globals.paths[path].dots.length) {
+
+					globals.paths[path].steps = [];
+					for (var i = 1; i < globals.paths[path].dots.length; i++) {
+
+						var stepsArray = utils.buildCurveSteps({
+							x1: globals.paths[path].dots[i-1].mainHandle.x,
+							y1: globals.paths[path].dots[i-1].mainHandle.y,
+							ax1: globals.paths[path].dots[i-1].nextHandle.x,
+							ay1: globals.paths[path].dots[i-1].nextHandle.y,
+							ax2: globals.paths[path].dots[i].prevHandle.x,
+							ay2: globals.paths[path].dots[i].prevHandle.y,
+							x2: globals.paths[path].dots[i].mainHandle.x,
+							y2: globals.paths[path].dots[i].mainHandle.y,
+							t1: 0,
+							t2: 1
+						})
+
+						for (var j = 0; j < stepsArray.length; j++) {
+							globals.paths[path].steps.push({
+								x: stepsArray[j].x,
+								y: stepsArray[j].y
+							})
+						}
+					}
+
+					// генерация управляющей области
+					if (globals.paths[path].steps.length) {
+						utils.buildControlPoligon({
+							pathId: path
+						})
+					}
+
+				}
+
+			}
+
+			callback();
+
 		}
 	}
 
