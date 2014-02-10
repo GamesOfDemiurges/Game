@@ -121,7 +121,7 @@ function obj() {
 
 				if ( (_this.hero) && ((Math.abs(_this.image.position.x - scene.playGround.position.x)) > scene.width/2) ) {
 					scene.move({
-						dx: _this.image.position.x + scene.playGround.position.x - scene.width/2
+						dx: dx /2 //_this.image.position.x + scene.playGround.position.x - scene.width/2
 					})
 				}
 			}

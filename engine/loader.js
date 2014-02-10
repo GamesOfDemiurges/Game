@@ -105,6 +105,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				.addObj(background)
 				.addObj(globals.hero);
 
+			debugTraect.init();
+
 		}
 	})
 

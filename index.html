@@ -21,34 +21,19 @@
 		<script type="text/javascript" src="engine/pathfinder.js"></script>
 		<script type="text/javascript" src="engine/loader.js"></script>
 
-		<!--<script type="text/javascript" src="engine/classlist.js"></script>-->
-		<!--<script type="text/javascript" src="tools/debugTraect.js"></script>-->
+		<script type="text/javascript" src="engine/classlist.js"></script>
+		<script type="text/javascript" src="tools/debugTraect.js"></script>
 
 		<script type="text/javascript">
 			document.addEventListener("DOMContentLoaded", function() {
 
-				function resizeViewPort() {
-					document.body.style.width = ( 2922 / document.getElementById('view').getAttribute('width') ) * document.getElementById('view').clientWidth + 'px';
-				}
-
-				resizeViewPort();
-
-				window.addEventListener('resize', function() {
-					resizeViewPort();
-				})
-
-				/*setTimeout(function() {
-					window.scroll(0, 0);
-				}, 1000)
-
+/*
 				window.onscroll = function(e) {
 					scene.playGround.position.x = -2922 * window.pageXOffset / document.body.clientWidth;
 				}*/
 
 				/********************** DEBUGGER ************************/
-				/*document.querySelector('.debug__view').setAttribute('width', document.body.clientWidth / document.getElementById('view').clientHeight * 510 );
-				document.querySelector('.debug__view').setAttribute('height', document.getElementById('view').getAttribute('height'));
-				debugTraect.paint();*/
+
 
 			})
 		</script>
@@ -56,28 +41,32 @@
 	</head>
 	<body>
 		<canvas id="view"></canvas>
-		<!--<div class="debug" style="display: block">
-			<div class="debug__control">
-				<div class="debug__control-traects">
-					<select id="" size="2" ></select>
+
+		<div class="debug__wrap">
+			<div class="debug" style="display: block">
+				<div class="debug__control">
+					<div class="debug__control-traects">
+						<select id="" size="2" ></select>
+					</div>
+
+					<div class="debug__control-objects"></div>
+
+					<div class="debug__control-buttons">
+						<button class="debug__button debug__button_add">Добавить траекторию</button>
+						<button class="debug__button debug__button_remove">Удалить траекторию</button>
+
+						<hr />
+						<button class="debug__button debug__button_add-model">Добавить модель</button>
+						<hr />
+						<button class="debug__button debug__button_toggle-overlay">Переключить оверлей</button>
+						<hr />
+						<button class="debug__button debug__button_save">Записать в файл</button>
+					</div>
 				</div>
 
-				<div class="debug__control-objects"></div>
-
-				<div class="debug__control-buttons">
-					<button class="debug__button debug__button_add">Добавить траекторию</button>
-					<button class="debug__button debug__button_remove">Удалить траекторию</button>
-
-					<hr />
-					<button class="debug__button debug__button_add-model">Добавить модель</button>
-					<hr />
-					<button class="debug__button debug__button_toggle-overlay">Переключить оверлей</button>
-					<hr />
-					<button class="debug__button debug__button_save">Записать в файл</button>
-				</div>
+				<canvas class="debug__view debug__view_hidden"></canvas>
 			</div>
 
-			<canvas class="debug__view debug__view_hidden"></canvas>
-		</div>-->
+		</div>
 	</body>
 </html>

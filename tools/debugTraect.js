@@ -1,18 +1,14 @@
 var repaint = false,
 	debugPanel,
 	canvas,
-	ctx,
-	scale;
-
-var paths = {},
-	graph = {};
+	ctx;
 
 var debugTraect = function debugTraect() {
 
 	var _this = this;
 
 	// Перерисовка служебного холста
-	var render = function render() {
+	function render() {
 		if (repaint) {
 			paint();
 			repaint = false;
@@ -26,63 +22,67 @@ var debugTraect = function debugTraect() {
 			tempPoint,
 			pathList = document.querySelector('.debug__control-traects select');
 
-		for (var path in paths) {
+		for (var path in globals.paths) {
 			newItem = document.createElement('option');
 
-			newItem.textContent = paths[path].name;
-			newItem.setAttribute('value', paths[path].name);
+			newItem.textContent = globals.paths[path].name;
+			newItem.setAttribute('value', globals.paths[path].name);
 			newItem.selected = true;
 
 			pathList.appendChild(newItem);
 
-			for (var dot = 0; dot < paths[path].dots.length; dot++) {
+			for (var dot = 0; dot < globals.paths[path].dots.length; dot++) {
 
 				// создаем DOM-представление для новой точки
 
-				if (paths[path].dots[dot].prevHandle !== null) {
+				if (globals.paths[path].dots[dot].prevHandle !== null) {
 
 					tempPoint = document.createElement('div');
 					tempPoint.className = 'debug__point-handle';
-					tempPoint.style.top = paths[path].dots[dot].prevHandle.y / scale + 'px';
-					tempPoint.style.left = paths[path].dots[dot].prevHandle.x / scale + 'px';
-					paths[path].dots[dot].prevHandle.dom = tempPoint;
+					tempPoint.style.top = globals.paths[path].dots[dot].prevHandle.y / globals.scale + 'px';
+					tempPoint.style.left = globals.paths[path].dots[dot].prevHandle.x / globals.scale + 'px';
+					globals.paths[path].dots[dot].prevHandle.dom = tempPoint;
 
 					debugPanel.appendChild(tempPoint);
 				}
 
 				tempPoint = document.createElement('div');
 				tempPoint.className = 'debug__point';
-				tempPoint.style.top = paths[path].dots[dot].mainHandle.y / scale+ 'px';
-				tempPoint.style.left = paths[path].dots[dot].mainHandle.x / scale + 'px';
-				paths[path].dots[dot].mainHandle.dom = tempPoint;
+				tempPoint.style.top = globals.paths[path].dots[dot].mainHandle.y / globals.scale+ 'px';
+				tempPoint.style.left = globals.paths[path].dots[dot].mainHandle.x / globals.scale + 'px';
+				globals.paths[path].dots[dot].mainHandle.dom = tempPoint;
 
 				debugPanel.appendChild(tempPoint);
 
-				if (paths[path].dots[dot].nextHandle !== null) {
+				if (globals.paths[path].dots[dot].nextHandle !== null) {
 					tempPoint = document.createElement('div');
 					tempPoint.className = 'debug__point-handle';
-					tempPoint.style.top = paths[path].dots[dot].nextHandle.y / scale + 'px';
-					tempPoint.style.left = paths[path].dots[dot].nextHandle.x / scale + 'px';
-					paths[path].dots[dot].nextHandle.dom = tempPoint;
+					tempPoint.style.top = globals.paths[path].dots[dot].nextHandle.y / globals.scale + 'px';
+					tempPoint.style.left = globals.paths[path].dots[dot].nextHandle.x / globals.scale + 'px';
+					globals.paths[path].dots[dot].nextHandle.dom = tempPoint;
 
 					debugPanel.appendChild(tempPoint);
 				}
 			}
-			paths[path].dots[0].mainHandle.dom.classList.add('debug__point_first');
+			globals.paths[path].dots[0].mainHandle.dom.classList.add('debug__point_first');
 		}
 
 		repaint = true;
 	}
 
-	var paint = function paint() {
+	function readTraect() {
+		buildInterfaceFromPaths();
+	}
+
+	function paint() {
 
 		// Возвращает координаты точки на холсте,
 		// взятые от координаты DOM-узла токи и нормированные на масштаб
 		function getCoordsFromCss( dom ) {
 
 			return {
-				x: dom.style.left.replace('px', '') * scale,
-				y: dom.style.top.replace('px', '') * scale
+				x: dom.style.left.replace('px', '') * globals.scale,
+				y: dom.style.top.replace('px', '') * globals.scale
 			}
 		};
 
@@ -92,7 +92,7 @@ var debugTraect = function debugTraect() {
 		// Выводим линии
 		// Перебираем текущие узлы и получаем их координаты.
 		// Узлы образуют траектории, отдельных траекторий может быть много
-		for (path in paths) {
+		for (path in globals.paths) {
 			// IE умирает от setStrokeColor
 			if ( (document.querySelector('.debug__view_hidden') === null) && (document.querySelector('.debug__control-traects option[value="' + path + '"]').selected) ) {
 				ctx.setStrokeColor('#383');
@@ -101,90 +101,72 @@ var debugTraect = function debugTraect() {
 			}
 
 			// Работаем с каждой траекторией в списке
-			if (paths[path].dots.length) {
-
-				paths[path].steps = [];
+			if (globals.paths[path].dots.length) {
 
 				// Характеристики линии
 				// смещение к началу рисования траектории
 				ctx.lineWidth = "1";
 				ctx.beginPath();
-				ctx.moveTo( paths[path].dots[0].mainHandle.x, paths[path].dots[0].mainHandle.y );
+				ctx.moveTo( globals.paths[path].dots[0].mainHandle.x, globals.paths[path].dots[0].mainHandle.y );
 
 				// Обновляем координаты точки из DOM
-				paths[path].dots[0].mainHandle.x = getCoordsFromCss( paths[path].dots[0].mainHandle.dom ).x;
-				paths[path].dots[0].mainHandle.y = getCoordsFromCss( paths[path].dots[0].mainHandle.dom ).y;
-				paths[path].dots[0].mainHandle.dom.classList.add('debug__point_first');
+				globals.paths[path].dots[0].mainHandle.x = getCoordsFromCss( globals.paths[path].dots[0].mainHandle.dom ).x;
+				globals.paths[path].dots[0].mainHandle.y = getCoordsFromCss( globals.paths[path].dots[0].mainHandle.dom ).y;
+				globals.paths[path].dots[0].mainHandle.dom.classList.add('debug__point_first');
 
 				// Если у первой точки есть рычаг
-				if (paths[path].dots[0].nextHandle !== null) {
+				if (globals.paths[path].dots[0].nextHandle !== null) {
 					// Обновляем его координаты из DOM
-					paths[path].dots[0].nextHandle.x = getCoordsFromCss( paths[path].dots[0].nextHandle.dom ).x;
-					paths[path].dots[0].nextHandle.y = getCoordsFromCss( paths[path].dots[0].nextHandle.dom ).y;
+					globals.paths[path].dots[0].nextHandle.x = getCoordsFromCss( globals.paths[path].dots[0].nextHandle.dom ).x;
+					globals.paths[path].dots[0].nextHandle.y = getCoordsFromCss( globals.paths[path].dots[0].nextHandle.dom ).y;
 
 					// рисуем
-					ctx.lineTo(paths[path].dots[0].nextHandle.x, paths[path].dots[0].nextHandle.y);
+					ctx.lineTo(globals.paths[path].dots[0].nextHandle.x, globals.paths[path].dots[0].nextHandle.y);
 
 					// Возвращаем перо к точке траектории
-					ctx.moveTo( paths[path].dots[0].mainHandle.x, paths[path].dots[0].mainHandle.y );
+					ctx.moveTo( globals.paths[path].dots[0].mainHandle.x, globals.paths[path].dots[0].mainHandle.y );
 				}
 
 				// Отрисовка точек, начиная со второй
 				// отдельно, потому что между двумя точками уже можно провести линию
-				for (var i = 1; i < paths[path].dots.length; i++) {
+				for (var i = 1; i < globals.paths[path].dots.length; i++) {
 					// обновить координаты точки из DOM
-					paths[path].dots[i].mainHandle.x = getCoordsFromCss( paths[path].dots[i].mainHandle.dom ).x;
-					paths[path].dots[i].mainHandle.y = getCoordsFromCss( paths[path].dots[i].mainHandle.dom ).y;
+					globals.paths[path].dots[i].mainHandle.x = getCoordsFromCss( globals.paths[path].dots[i].mainHandle.dom ).x;
+					globals.paths[path].dots[i].mainHandle.y = getCoordsFromCss( globals.paths[path].dots[i].mainHandle.dom ).y;
 
 					// Если следующий рычаг существует, обновить его координаты из DOM
-					if (paths[path].dots[i].nextHandle !== null) {
-						paths[path].dots[i].nextHandle.x = getCoordsFromCss( paths[path].dots[i].nextHandle.dom ).x;
-						paths[path].dots[i].nextHandle.y = getCoordsFromCss( paths[path].dots[i].nextHandle.dom ).y;
+					if (globals.paths[path].dots[i].nextHandle !== null) {
+						globals.paths[path].dots[i].nextHandle.x = getCoordsFromCss( globals.paths[path].dots[i].nextHandle.dom ).x;
+						globals.paths[path].dots[i].nextHandle.y = getCoordsFromCss( globals.paths[path].dots[i].nextHandle.dom ).y;
 					}
 
 					// Координаты управляющей точки предыдущего отрезка
-					paths[path].dots[i].prevHandle.x = getCoordsFromCss( paths[path].dots[i].prevHandle.dom ).x;
-					paths[path].dots[i].prevHandle.y = getCoordsFromCss( paths[path].dots[i].prevHandle.dom ).y;
+					globals.paths[path].dots[i].prevHandle.x = getCoordsFromCss( globals.paths[path].dots[i].prevHandle.dom ).x;
+					globals.paths[path].dots[i].prevHandle.y = getCoordsFromCss( globals.paths[path].dots[i].prevHandle.dom ).y;
 
 					// Сама кривая
 					//ctx.bezierCurveTo( paths[path].dots[i-1].nextHandle.x, paths[path].dots[i-1].nextHandle.y, paths[path].dots[i].prevHandle.x, paths[path].dots[i].prevHandle.y, paths[path].dots[i].mainHandle.x, paths[path].dots[i].mainHandle.y )
-					ctx.moveTo(paths[path].dots[i].mainHandle.x, paths[path].dots[i].mainHandle.y);
+					ctx.moveTo(globals.paths[path].dots[i].mainHandle.x, globals.paths[path].dots[i].mainHandle.y);
 
 					// Нарисовать рычаг предыдущего отрезка
-					ctx.lineTo(paths[path].dots[i].prevHandle.x, paths[path].dots[i].prevHandle.y);
+					ctx.lineTo(globals.paths[path].dots[i].prevHandle.x, globals.paths[path].dots[i].prevHandle.y);
 
 					// Если есть следующая точка, то есть рычаг следующего отрезка
-					if (paths[path].dots[i].nextHandle !== null) {
+					if (globals.paths[path].dots[i].nextHandle !== null) {
 
 						// нарисовать его
-						ctx.moveTo( paths[path].dots[i].mainHandle.x, paths[path].dots[i].mainHandle.y )
-						ctx.lineTo(paths[path].dots[i].nextHandle.x, paths[path].dots[i].nextHandle.y);
+						ctx.moveTo( globals.paths[path].dots[i].mainHandle.x, globals.paths[path].dots[i].mainHandle.y )
+						ctx.lineTo(globals.paths[path].dots[i].nextHandle.x, globals.paths[path].dots[i].nextHandle.y);
 
 						// вернуть перо в точку завершения отрисовки кривой
-						ctx.moveTo( paths[path].dots[i].mainHandle.x, paths[path].dots[i].mainHandle.y )
+						ctx.moveTo( globals.paths[path].dots[i].mainHandle.x, globals.paths[path].dots[i].mainHandle.y )
 					}
 
-					var stepsArray = buildCurveSteps({
-						x1: paths[path].dots[i-1].mainHandle.x,
-						y1: paths[path].dots[i-1].mainHandle.y,
-						ax1: paths[path].dots[i-1].nextHandle.x,
-						ay1: paths[path].dots[i-1].nextHandle.y,
-						ax2: paths[path].dots[i].prevHandle.x,
-						ay2: paths[path].dots[i].prevHandle.y,
-						x2: paths[path].dots[i].mainHandle.x,
-						y2: paths[path].dots[i].mainHandle.y,
-						t1: 0,
-						t2: 1
-					})
-
-					for (var j = 0; j < stepsArray.length; j++) {
-						ctx.rect( stepsArray[j].x, stepsArray[j].y, 1, 1 );
-
-						paths[path].steps.push({
-							x: stepsArray[j].x,
-							y: stepsArray[j].y
-						})
+					// Отрисовка шагов
+					for (var j = 0; j < globals.paths[path].steps.length; j++) {
+						ctx.rect( globals.paths[path].steps[j].x, globals.paths[path].steps[j].y, 1, 1 );
 					}
+
 
 					// Проверка на плотность шагов
 					/*console.clear();
@@ -204,21 +186,21 @@ var debugTraect = function debugTraect() {
 
 				// отрендерить все линии
 				ctx.stroke();
-
+/*
 				// генерация управляющей области
 				if (paths[path].steps.length) {
 					buildControlPoligon({
 						pathId: path
 					})
-				}
+				} */
 			}
 		}
 
 	}
 
 	// Добавляем в список траекторий новую, с заданным именем
-	var addPath = function addPath(p) {
-		paths[p.name] = {
+	function addPath(p) {
+		globals.paths[p.name] = {
 			dots: [],
 			steps: [],
 			name: p.name
@@ -228,7 +210,7 @@ var debugTraect = function debugTraect() {
 	// Добавляет точку на холст с заданными координатами
 	//p.x
 	//p.y
-	var addPoint = function addPoint(p) {
+	function addPoint(p) {
 		var pathList = document.querySelectorAll('.debug__control-traects option'),
 			currentPathId,
 			currentPath,
@@ -237,8 +219,8 @@ var debugTraect = function debugTraect() {
 			tempPoint,
 			newPoint = {
 				mainHandle: {
-					x: p.x * scale,
-					y: p.y * scale
+					x: p.x * globals.scale,
+					y: p.y * globals.scale
 				},
 				prevHandle: null,
 				nextHandle: null
@@ -273,7 +255,7 @@ var debugTraect = function debugTraect() {
 		}
 
 		// Если вообще ничего не выделено, не добавляем точку
-		if (!paths[currentPathId]) return false;
+		if (!globals.paths[currentPathId]) return false;
 
 		// Если в траектории уже есть точки,
 		// значит добавление новой точки неявно повлечет создание кривой между ними,
@@ -283,18 +265,18 @@ var debugTraect = function debugTraect() {
 		}
 
 		// Добавили самую последнюю точку — только что созданную
-		paths[currentPathId].dots.push(newPoint);
-		lastPathPoint = paths[currentPathId].dots[ paths[currentPathId].dots.length-1 ];
+		globals.paths[currentPathId].dots.push(newPoint);
+		lastPathPoint = globals.paths[currentPathId].dots[ globals.paths[currentPathId].dots.length-1 ];
 
 		// Если точек в пути теперь больше одной, создаем управляющие рычаги для кривой
 		if (!!preLastPathPoint) {
 
 			// (x1, y1) и (x2, y2) — координаты управлящих точек
 			var addBezierPoint = utils.getAdditionalBezierPointsCoords({
-				x1: preLastPathPoint.mainHandle.x / scale,
-				y1: preLastPathPoint.mainHandle.y / scale,
-				x2: lastPathPoint.mainHandle.x / scale,
-				y2: lastPathPoint.mainHandle.y / scale
+				x1: preLastPathPoint.mainHandle.x / globals.scale,
+				y1: preLastPathPoint.mainHandle.y / globals.scale,
+				x2: lastPathPoint.mainHandle.x / globals.scale,
+				y2: lastPathPoint.mainHandle.y / globals.scale
 			})
 
 			// Создаем DOM-представление для рычага предыдущей точки
@@ -343,11 +325,340 @@ var debugTraect = function debugTraect() {
 		}
 	}
 
+	function defineDOMVars() {
+		debugPanel = document.querySelector('.debug');
+		canvas = document.querySelector('.debug__view');
+		dots = document.querySelectorAll('.debug__point');
+		ctx = canvas.getContext('2d');
+
+		canvas.setAttribute('width', debugPanel.clientWidth / document.getElementById('view').clientHeight * 510 );
+		canvas.setAttribute('height', document.getElementById('view').getAttribute('height'));
+
+		document.body.classList.add('_noscroll');
+	}
+
+	function attachEvents() {
+		var currentTarget;
+
+		var pathList = document.querySelector('.debug__control-traects select'),
+			tempPoint = {
+				x: 0,
+				y: 0
+			}
+
+		// возвращает выбранный в списке путь или false
+		function getCurrentPath() {
+			var pathListItem = document.querySelectorAll('.debug__control-traects option'),
+				currentPathId,
+				currentPath = false;;
+
+			for (var i = 0; i < pathListItem.length; i++) {
+				if (!!pathListItem[i].selected) {
+					currentPathId = pathListItem[i].getAttribute('value');
+					break;
+				}
+			}
+
+			if (!!globals.paths[currentPathId]) {
+				currentPath = globals.paths[currentPathId];
+			}
+
+			return currentPath;
+		}
+
+		debugPanel.addEventListener("mousedown", function(e) {
+			e.stopPropagation();
+
+			// Событие начала перетаскивания
+			// Точка
+			if ( e.target.classList.contains('debug__point') ) {
+				tempPoint.x = e.pageX;
+				tempPoint.y = e.pageY;
+
+				e.target.isDragged = true;
+				currentTarget = e.target;
+
+				e.target.classList.add('debug__point_dragged');
+			}
+
+			// Контрольный рычаг
+			if ( e.target.classList.contains('debug__point-handle' )) {
+				e.target.isDragged = true;
+				currentTarget = e.target;
+			}
+		})
+
+		debugPanel.addEventListener("mouseup", function(e) {
+			e.stopPropagation();
+
+			// Событие завершение перетаскивания
+			// обрабатывается одинаково точкой и рычагом
+			if ( (e.target.classList.contains('debug__point')) || (e.target.classList.contains('debug__point-handle')) ) {
+				e.target.isDragged = undefined;
+				currentTarget = undefined;
+				e.target.classList.remove('debug__point_dragged');
+			}
+		})
+
+		debugPanel.addEventListener("mousemove", function(e) {
+
+			// Событие факта перетаскивания
+			if (currentTarget !== undefined) {
+				currentTarget.style.top = e.pageY + 'px';
+				currentTarget.style.left = e.pageX + 'px';
+
+				// Залипание точки
+				if ( (e.target.classList.contains('debug__point')) && (e.target !== currentTarget) ) {
+					currentTarget.style.top = e.target.style.top;
+					currentTarget.style.left = e.target.style.left;
+				}
+
+				// При перетаскивании точки её рычаги переносятся аналогично
+				if (currentTarget.classList.contains('debug__point')) {
+					var d = {
+						x: Number(currentTarget.style.left.replace('px', '')) - tempPoint.x,
+						y: Number(currentTarget.style.top.replace('px', '')) - tempPoint.y,
+					}
+					tempPoint = {
+						x: e.pageX,
+						y: e.pageY
+					}
+
+					if ( (currentTarget.nextSibling !== null) && (currentTarget.nextSibling.className == 'debug__point-handle') ) {
+						currentTarget.nextSibling.style.top = Number(currentTarget.nextSibling.style.top.replace('px', '')) + d.y + 'px';
+						currentTarget.nextSibling.style.left = Number(currentTarget.nextSibling.style.left.replace('px', '')) + d.x + 'px';
+					}
+
+					if ( (currentTarget.previousSibling !== null) && (currentTarget.previousSibling.className == 'debug__point-handle') ) {
+						currentTarget.previousSibling.style.top = Number(currentTarget.previousSibling.style.top.replace('px', '')) + d.y + 'px';
+						currentTarget.previousSibling.style.left = Number(currentTarget.previousSibling.style.left.replace('px', '')) + d.x + 'px';
+					}
+				}
+
+				// Требуется перерисовка
+				repaint = true;
+			}
+		})
+
+		debugPanel.addEventListener("dblclick", function(e) {
+			if (e.target.classList.contains('debug__point') ) {
+				e.stopPropagation();
+
+				// TODO: удаление точки
+				console.log('point dbl click');
+			}
+
+			// Даблклик по холсту создает новую точку
+			if (e.target.classList.contains('debug__view') ) {
+				e.stopPropagation();
+
+				debugTraect.addPoint({
+					x: e.pageX,
+					y: e.pageY
+				})
+			}
+		})
+
+		debugPanel.addEventListener("click", function(e) {
+
+			// переключить оверлей
+			if (e.target.classList.contains('debug__button_toggle-overlay')) {
+				e.stopPropagation();
+
+				if ( canvas.classList.contains('debug__view_hidden') ) {
+					canvas.classList.remove('debug__view_hidden');
+				} else {
+					canvas.classList.add('debug__view_hidden');
+				}
+			}
+
+			// Добавление траектории
+			if (e.target.classList.contains('debug__button_add')) {
+				e.stopPropagation();
+
+				var name = Math.random(),
+					newItem = document.createElement('option');
+
+				newItem.textContent = name;
+				newItem.setAttribute('value', name);
+				newItem.selected = true;
+
+				pathList.appendChild(newItem);
+
+				debugTraect.addPath({
+					name: name
+				});
+			}
+
+			// Переключение траектории
+			if (e.target.tagName == 'OPTION') {
+				e.stopPropagation();
+
+				paint();
+			}
+
+			// Удаление траектории
+			if (e.target.classList.contains('debug__button_remove')) {
+				e.stopPropagation();
+
+				var pathListItem = document.querySelectorAll('.debug__control-traects option'),
+					currentPathId,
+					currentPath = false;;
+
+				for (var i = 0; i < pathListItem.length; i++) {
+					if (!!pathListItem[i].selected) {
+						currentPathId = pathListItem[i].getAttribute('value');
+						break;
+					}
+				}
+
+				pathList.removeChild( pathListItem[i] );
+
+				if (!!globals.paths[currentPathId]) {
+
+					for (var i = 0; i < globals.paths[currentPathId].dots.length; i++) {
+
+						if ( globals.paths[currentPathId].dots[i].mainHandle !== null  ) {
+							debugPanel.removeChild( globals.paths[currentPathId].dots[i].mainHandle.dom );
+						}
+
+						if ( globals.paths[currentPathId].dots[i].prevHandle !== null ) {
+							debugPanel.removeChild( globals.paths[currentPathId].dots[i].prevHandle.dom );
+						}
+
+						if ( globals.paths[currentPathId].dots[i].nextHandle !== null ) {
+							debugPanel.removeChild( globals.paths[currentPathId].dots[i].nextHandle.dom );
+						}
+					}
+
+					delete globals.paths[currentPathId];
+				}
+
+				repaint = true;
+			}
+
+			// Добавление модели
+			if (e.target.classList.contains('debug__button_add-model')) {
+				e.stopPropagation();
+
+				var currentPath = getCurrentPath();
+				if (!currentPath) return false;
+
+				/*if (currentPath.steps.length) {
+					newObj = obj().create({
+							src: 'assets/models/hero/images/hero_final.anim',
+							x: currentPath.steps[0].x,
+							y: currentPath.steps[0].y,
+							z: 15,
+							scale: 0.5,
+							hero: true,
+							step: 0,
+							path: currentPath.name
+						});
+
+					newObj.image.state.clearAnimation();
+
+					scene.addObj(newObj);
+				}*/
+			}
+
+			// Сохранение в файл
+			if (e.target.classList.contains('debug__button_save')) {
+				e.stopPropagation();
+
+				// Создаем упрощенную версию пути без ссылок на DOM-узлы
+				var smallPaths = {};
+
+				for (var path in globals.paths) {
+					smallPaths[path] = {
+						name: path,
+						dots: []
+					};
+
+					for (var dot = 0; dot < globals.paths[path].dots.length; dot++) {
+						var prevHandle = null,
+							nextHandle = null;
+
+						var mainHandle = {
+							x: globals.paths[path].dots[dot].mainHandle.x,
+							y: globals.paths[path].dots[dot].mainHandle.y
+						}
+
+						if (globals.paths[path].dots[dot].prevHandle !== null) {
+							prevHandle = {
+								x: globals.paths[path].dots[dot].prevHandle.x,
+								y: globals.paths[path].dots[dot].prevHandle.y
+							}
+						}
+
+						if (globals.paths[path].dots[dot].nextHandle !== null) {
+							nextHandle = {
+								x: globals.paths[path].dots[dot].nextHandle.x,
+								y: globals.paths[path].dots[dot].nextHandle.y
+							}
+						}
+
+						smallPaths[path].dots.push({
+							mainHandle: mainHandle,
+							nextHandle: nextHandle,
+							prevHandle: prevHandle
+						})
+					}
+				}
+
+				// Создаем XHR
+				var req = new XMLHttpRequest;
+				var param = 'data=' + JSON.stringify(smallPaths);
+				req.open("POST", '/tools/writeTraectToFile.php');
+				req.onreadystatechange = function() {
+
+					if ((req.status == 200) && (req.readyState==4)) {
+						console.log(req.responseText)
+					}
+				};
+
+				req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+				req.send(param);
+			}
+
+			if (e.target.classList.contains('debug__point') || e.target.classList.contains('debug__point-handle')) {
+				e.stopPropagation();
+			}
+
+		})
+	}
+
+	/* Init */;
+	function resizeViewPort() {
+		var attrWidth = document.getElementById('view').getAttribute('width');
+		document.querySelector('.debug').style.width = ( 2922 / attrWidth ) * document.getElementById('view').clientWidth + 'px';
+	}
+
+	function startDebugger() {
+		var attrWidth = document.getElementById('view').getAttribute('width');
+
+		if (attrWidth == null) {
+			setTimeout(function() {
+				startDebugger();
+			}, 1000)
+			return false;
+		}
+
+		window.addEventListener('resize', function() {
+			resizeViewPort();
+		})
+		resizeViewPort();
+
+		defineDOMVars();
+		readTraect();
+		attachEvents();
+		render();
+	}
+	/* /Init */
+
 	return {
 		init: function() {
-			readTraectFromFile();
-			render();
-
+			startDebugger();
 			return this;
 		},
 
@@ -370,334 +681,3 @@ var debugTraect = function debugTraect() {
 		}
 	}
 }()
-
-document.addEventListener("DOMContentLoaded", function(e) {
-
-	var currentTarget;
-
-	debugPanel = document.querySelector('.debug');
-	canvas = document.querySelector('.debug__view');
-	dots = document.querySelectorAll('.debug__point');
-	ctx = canvas.getContext('2d');
-
-	scale = 510 / canvas.clientHeight;
-
-	var pathList = document.querySelector('.debug__control-traects select'),
-		tempPoint = {
-			x: 0,
-			y: 0
-		}
-
-	var newObj;
-
-	// возвращает выбранный в списке путь или false
-	function getCurrentPath() {
-		var pathListItem = document.querySelectorAll('.debug__control-traects option'),
-			currentPathId,
-			currentPath = false;;
-
-		for (var i = 0; i < pathListItem.length; i++) {
-			if (!!pathListItem[i].selected) {
-				currentPathId = pathListItem[i].getAttribute('value');
-				break;
-			}
-		}
-
-		if (!!paths[currentPathId]) {
-			currentPath = paths[currentPathId];
-		}
-
-		return currentPath;
-	}
-
-	debugPanel.addEventListener("mousedown", function(e) {
-		e.stopPropagation();
-
-		// Событие начала перетаскивания
-		// Точка
-		if ( e.target.classList.contains('debug__point') ) {
-			tempPoint.x = e.pageX;
-			tempPoint.y = e.pageY;
-
-			e.target.isDragged = true;
-			currentTarget = e.target;
-
-			e.target.classList.add('debug__point_dragged');
-		}
-
-		// Контрольный рычаг
-		if ( e.target.classList.contains('debug__point-handle' )) {
-			e.target.isDragged = true;
-			currentTarget = e.target;
-		}
-	})
-
-	debugPanel.addEventListener("mouseup", function(e) {
-		e.stopPropagation();
-
-		// Событие завершение перетаскивания
-		// обрабатывается одинаково точкой и рычагом
-		if ( (e.target.classList.contains('debug__point')) || (e.target.classList.contains('debug__point-handle')) ) {
-			e.target.isDragged = undefined;
-			currentTarget = undefined;
-			e.target.classList.remove('debug__point_dragged');
-		}
-	})
-
-	debugPanel.addEventListener("mousemove", function(e) {
-
-		// Событие факта перетаскивания
-		if (currentTarget !== undefined) {
-			currentTarget.style.top = e.pageY + 'px';
-			currentTarget.style.left = e.pageX + 'px';
-
-			// Залипание точки
-			if ( (e.target.classList.contains('debug__point')) && (e.target !== currentTarget) ) {
-				currentTarget.style.top = e.target.style.top;
-				currentTarget.style.left = e.target.style.left;
-			}
-
-			// При перетаскивании точки её рычаги переносятся аналогично
-			if (currentTarget.classList.contains('debug__point')) {
-				var d = {
-					x: Number(currentTarget.style.left.replace('px', '')) - tempPoint.x,
-					y: Number(currentTarget.style.top.replace('px', '')) - tempPoint.y,
-				}
-				tempPoint = {
-					x: e.pageX,
-					y: e.pageY
-				}
-
-				if ( (currentTarget.nextSibling !== null) && (currentTarget.nextSibling.className == 'debug__point-handle') ) {
-					currentTarget.nextSibling.style.top = Number(currentTarget.nextSibling.style.top.replace('px', '')) + d.y + 'px';
-					currentTarget.nextSibling.style.left = Number(currentTarget.nextSibling.style.left.replace('px', '')) + d.x + 'px';
-				}
-
-				if ( (currentTarget.previousSibling !== null) && (currentTarget.previousSibling.className == 'debug__point-handle') ) {
-					currentTarget.previousSibling.style.top = Number(currentTarget.previousSibling.style.top.replace('px', '')) + d.y + 'px';
-					currentTarget.previousSibling.style.left = Number(currentTarget.previousSibling.style.left.replace('px', '')) + d.x + 'px';
-				}
-			}
-
-			// Требуется перерисовка
-			repaint = true;
-		}
-	})
-
-	debugPanel.addEventListener("dblclick", function(e) {
-		if (e.target.classList.contains('debug__point') ) {
-			e.stopPropagation();
-
-			// TODO: удаление точки
-			console.log('point dbl click');
-		}
-
-		// Даблклик по холсту создает новую точку
-		if (e.target.classList.contains('debug__view') ) {
-			e.stopPropagation();
-
-			debugTraect.addPoint({
-				x: e.pageX,
-				y: e.pageY
-			})
-		}
-	})
-
-	debugPanel.addEventListener("click", function(e) {
-
-		// переключить оверлей
-		if (e.target.classList.contains('debug__button_toggle-overlay')) {
-			e.stopPropagation();
-
-			if ( canvas.classList.contains('debug__view_hidden') ) {
-				canvas.classList.remove('debug__view_hidden');
-			} else {
-				canvas.classList.add('debug__view_hidden');
-			}
-		}
-
-		// Добавление траектории
-		if (e.target.classList.contains('debug__button_add')) {
-			e.stopPropagation();
-
-			var name = Math.random(),
-				newItem = document.createElement('option');
-
-			newItem.textContent = name;
-			newItem.setAttribute('value', name);
-			newItem.selected = true;
-
-			pathList.appendChild(newItem);
-
-			debugTraect.addPath({
-				name: name
-			});
-		}
-
-		// Переключение траектории
-		if (e.target.tagName == 'OPTION') {
-			e.stopPropagation();
-
-			debugTraect.paint();
-		}
-
-		// Удаление траектории
-		if (e.target.classList.contains('debug__button_remove')) {
-			e.stopPropagation();
-
-			var pathListItem = document.querySelectorAll('.debug__control-traects option'),
-				currentPathId,
-				currentPath = false;;
-
-			for (var i = 0; i < pathListItem.length; i++) {
-				if (!!pathListItem[i].selected) {
-					currentPathId = pathListItem[i].getAttribute('value');
-					break;
-				}
-			}
-
-			pathList.removeChild( pathListItem[i] );
-
-			if (!!paths[currentPathId]) {
-
-				for (var i = 0; i < paths[currentPathId].dots.length; i++) {
-
-					if ( paths[currentPathId].dots[i].mainHandle !== null  ) {
-						debugPanel.removeChild( paths[currentPathId].dots[i].mainHandle.dom );
-					}
-
-					if ( paths[currentPathId].dots[i].prevHandle !== null ) {
-						debugPanel.removeChild( paths[currentPathId].dots[i].prevHandle.dom );
-					}
-
-					if ( paths[currentPathId].dots[i].nextHandle !== null ) {
-						debugPanel.removeChild( paths[currentPathId].dots[i].nextHandle.dom );
-					}
-				}
-
-				delete paths[currentPathId];
-			}
-
-			repaint = true;
-		}
-
-		// Добавление модели
-		if (e.target.classList.contains('debug__button_add-model')) {
-			e.stopPropagation();
-
-			var currentPath = getCurrentPath();
-			if (!currentPath) return false;
-
-			if (currentPath.steps.length) {
-				newObj = obj().create({
-						src: 'assets/models/hero/images/hero_final.anim',
-						x: currentPath.steps[0].x,
-						y: currentPath.steps[0].y,
-						z: 15,
-						scale: 0.5,
-						hero: true,
-						step: 0,
-						path: currentPath.name
-					});
-
-				newObj.image.state.clearAnimation();
-
-				scene.addObj(newObj);
-			}
-		}
-
-		// Сохранение в файл
-		if (e.target.classList.contains('debug__button_save')) {
-			e.stopPropagation();
-
-			// Создаем упрощенную версию пути без ссылок на DOM-узлы
-			var smallPaths = {};
-
-			for (var path in paths) {
-				smallPaths[path] = {
-					name: path,
-					dots: []
-				};
-
-				for (var dot = 0; dot < paths[path].dots.length; dot++) {
-					var prevHandle = null,
-						nextHandle = null;
-
-					var mainHandle = {
-						x: paths[path].dots[dot].mainHandle.x,
-						y: paths[path].dots[dot].mainHandle.y
-					}
-
-					if (paths[path].dots[dot].prevHandle !== null) {
-						prevHandle = {
-							x: paths[path].dots[dot].prevHandle.x,
-							y: paths[path].dots[dot].prevHandle.y
-						}
-					}
-
-					if (paths[path].dots[dot].nextHandle !== null) {
-						nextHandle = {
-							x: paths[path].dots[dot].nextHandle.x,
-							y: paths[path].dots[dot].nextHandle.y
-						}
-					}
-
-					smallPaths[path].dots.push({
-						mainHandle: mainHandle,
-						nextHandle: nextHandle,
-						prevHandle: prevHandle
-					})
-				}
-			}
-
-			// Создаем XHR
-			var req = new XMLHttpRequest;
-			var param = 'data=' + JSON.stringify(smallPaths);
-			req.open("POST", '/tools/writeTraectToFile.php');
-			req.onreadystatechange = function() {
-
-				if ((req.status == 200) && (req.readyState==4)) {
-					console.log(req.responseText)
-				}
-			};
-
-			req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-			req.send(param);
-		}
-
-		if (e.target.classList.contains('debug__point') || e.target.classList.contains('debug__point-handle')) {
-			e.stopPropagation();
-		}
-
-	})
-
-
-
-	// Автодобавление объекта
-	setTimeout( function() {
-		var currentPath = paths[ document.querySelector('.debug__control-traects option').getAttribute('value') ];
-		if (!currentPath) return false;
-
-		if (currentPath.steps.length) {
-			newObj = obj().create({
-					src: 'assets/models/hero/images/hero_final.anim',
-					x: currentPath.steps[0].x,
-					y: currentPath.steps[0].y,
-					z: 15,
-					scale: 0.5,
-					hero: true,
-					step: 0,
-					path: currentPath.name
-				});
-
-			//newObj.image.state.clearAnimation();
-
-			scene.addObj(newObj);
-		}
-
-	}, 2000 )
-
-	// инициализация траектории
-	debugTraect
-		.init();
-})
