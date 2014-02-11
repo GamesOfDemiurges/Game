@@ -77,20 +77,9 @@ var scene = function scene() {
 		move: function ( p ) {
 			var _this = this;
 
-			if ( _this.playGround.position.x - p.dx > 0) {
-				//window.scroll(0, 0);
-				return _this;
-			}
-
-			if ( _this.playGround.position.x + 2922 - p.dx < _this.width ) {
-				//window.scroll(document.body.clientWidth, 0);
-				return _this;
-			}
-
 			_this.playGround.position.x -= (p.dx || 0);
 			_this.playGround.position.y -= (p.dy || 0);
 
-			//window.scroll( (_this.playGround.position.x -= (p.dx || 0)) * document.body.clientWidth / -2922, 0 )
 			document.querySelector('.debug__wrap').scrollLeft = ( (_this.playGround.position.x -= (p.dx || 0)) / globals.scale * (-1));
 
 			return _this;

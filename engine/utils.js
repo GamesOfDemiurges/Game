@@ -291,10 +291,6 @@ var utils = (function() {
 						step: lastPoint
 					})
 
-					// Визуализация
-					/*ctx.rect( controlPath[ controlPath.length-1 ].rect.x, controlPath[ controlPath.length-1 ].rect.y, controlPath[ controlPath.length-1 ].rect.width, controlPath[ controlPath.length-1 ].rect.height );
-					ctx.rect( currentPath.steps[ controlPath[ controlPath.length-1 ].step ].x, currentPath.steps[ controlPath[ controlPath.length-1 ].step ].y,  6, 6 );*/
-
 					lastPoint = i;
 				}
 			}
@@ -311,18 +307,12 @@ var utils = (function() {
 			})
 
 			currentPath.controlPath = controlPath;
-
-			// Визуализация
-			/*ctx.rect( controlPath[ controlPath.length-1 ].rect.x, controlPath[ controlPath.length-1 ].rect.y, controlPath[ controlPath.length-1 ].rect.width, controlPath[ controlPath.length-1 ].rect.height );
-			ctx.rect( currentPath.steps[ controlPath[ controlPath.length-1 ].step ].x, currentPath.steps[ controlPath[ controlPath.length-1 ].step ].y,  6, 6 );
-
-			ctx.stroke();*/
 		},
 
 		processPaths: function( p ) {
-			var callback = p.callback || function() {};
-
-			globals.scale = 510 / document.body.clientHeight;
+			var callback = p
+				? p.callback || function() {}
+				: function() {};
 
 			for (path in globals.paths) {
 				if (globals.paths[path].dots.length) {

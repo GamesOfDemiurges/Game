@@ -10,8 +10,12 @@ var debugTraect = function debugTraect() {
 	// Перерисовка служебного холста
 	function render() {
 		if (repaint) {
-			paint();
-			repaint = false;
+			utils.processPaths({
+				callback: function() {
+					paint();
+					repaint = false;
+				}
+			});
 		}
 
 		requestAnimFrame(render);
@@ -93,7 +97,7 @@ var debugTraect = function debugTraect() {
 		// Перебираем текущие узлы и получаем их координаты.
 		// Узлы образуют траектории, отдельных траекторий может быть много
 		for (path in globals.paths) {
-			// IE умирает от setStrokeColor
+			// IE и FF умирает от setStrokeColor
 			if ( (document.querySelector('.debug__view_hidden') === null) && (document.querySelector('.debug__control-traects option[value="' + path + '"]').selected) ) {
 				ctx.setStrokeColor('#383');
 			} else {
@@ -125,6 +129,11 @@ var debugTraect = function debugTraect() {
 
 					// Возвращаем перо к точке траектории
 					ctx.moveTo( globals.paths[path].dots[0].mainHandle.x, globals.paths[path].dots[0].mainHandle.y );
+				}
+
+				// Нулевая вершина графа
+				if (globals.paths[path].dots[0].graphId !== undefined) {
+					ctx.strokeText( globals.paths[path].dots[0].graphId, globals.paths[path].dots[0].mainHandle.x, globals.paths[path].dots[0].mainHandle.y-10 );
 				}
 
 				// Отрисовка точек, начиная со второй
@@ -167,6 +176,18 @@ var debugTraect = function debugTraect() {
 						ctx.rect( globals.paths[path].steps[j].x, globals.paths[path].steps[j].y, 1, 1 );
 					}
 
+					// Активные области
+					for (var j = 0; j < globals.paths[path].controlPath.length; j++) {
+							// Визуализация
+						ctx.rect( globals.paths[path].controlPath[ j ].rect.x, globals.paths[path].controlPath[ j ].rect.y, globals.paths[path].controlPath[ j ].rect.width, globals.paths[path].controlPath[ j ].rect.height );
+						ctx.rect( globals.paths[path].steps[ globals.paths[path].controlPath[ j ].step ].x, globals.paths[path].steps[ globals.paths[path].controlPath[ j ].step ].y,  6, 6 );
+					}
+
+					// Вершины графа
+					if (globals.paths[path].dots[i].graphId !== undefined) {
+						ctx.strokeText( globals.paths[path].dots[i].graphId, globals.paths[path].dots[i].mainHandle.x, globals.paths[path].dots[i].mainHandle.y-10 );
+					}
+
 
 					// Проверка на плотность шагов
 					/*console.clear();
@@ -182,17 +203,12 @@ var debugTraect = function debugTraect() {
 							console.log(j);
 						}
 					}*/
+
+
 				}
 
 				// отрендерить все линии
 				ctx.stroke();
-/*
-				// генерация управляющей области
-				if (paths[path].steps.length) {
-					buildControlPoligon({
-						pathId: path
-					})
-				} */
 			}
 		}
 
@@ -219,8 +235,8 @@ var debugTraect = function debugTraect() {
 			tempPoint,
 			newPoint = {
 				mainHandle: {
-					x: p.x * globals.scale,
-					y: p.y * globals.scale
+					x: p.x * globals.scale - scene.playGround.position.x,
+					y: p.y * globals.scale - scene.playGround.position.y
 				},
 				prevHandle: null,
 				nextHandle: null
@@ -240,7 +256,7 @@ var debugTraect = function debugTraect() {
 				name: name
 			});
 
-			currentPathId = name
+			currentPathId = name;
 		} else {
 			// Поиск по списку созданных траекторий
 			// активная та, что имеет свойство .selected
@@ -260,8 +276,12 @@ var debugTraect = function debugTraect() {
 		// Если в траектории уже есть точки,
 		// значит добавление новой точки неявно повлечет создание кривой между ними,
 		// значит нужно поработать с парой последних точек в траектории
-		if ( paths[currentPathId].dots.length ) {
-			preLastPathPoint = paths[currentPathId].dots[ paths[currentPathId].dots.length-1 ];
+		if ( globals.paths[currentPathId].dots.length ) {
+			preLastPathPoint = globals.paths[currentPathId].dots[ globals.paths[currentPathId].dots.length-1 ];
+
+			if (globals.paths[currentPathId].dots.length > 1) {
+				delete(globals.paths[currentPathId].dots[ globals.paths[currentPathId].dots.length-1 ].graphId);
+			}
 		}
 
 		// Добавили самую последнюю точку — только что созданную
@@ -285,7 +305,10 @@ var debugTraect = function debugTraect() {
 			tempPoint.style.top = addBezierPoint.ay1 + 'px';
 			tempPoint.style.left = addBezierPoint.ax1 + 'px';
 			preLastPathPoint.nextHandle = {
-				dom: tempPoint
+				dom: tempPoint,
+				x: addBezierPoint.ax1 * globals.scale,
+				y: addBezierPoint.ay1 * globals.scale
+
 			}
 
 			debugPanel.appendChild(tempPoint);
@@ -296,7 +319,9 @@ var debugTraect = function debugTraect() {
 			tempPoint.style.top = addBezierPoint.ay2 + 'px';
 			tempPoint.style.left = addBezierPoint.ax2 + 'px';
 			lastPathPoint.prevHandle = {
-				dom: tempPoint
+				dom: tempPoint,
+				x: addBezierPoint.ax2 * globals.scale,
+				y: addBezierPoint.ay2 * globals.scale
 			}
 
 			debugPanel.appendChild(tempPoint);
@@ -305,24 +330,26 @@ var debugTraect = function debugTraect() {
 		// создаем DOM-представление для новой точки
 		var tempPoint = document.createElement('div');
 		tempPoint.className = 'debug__point';
-		tempPoint.style.top = p.y + 'px';
-		tempPoint.style.left = p.x + 'px';
+		tempPoint.style.top = p.y - scene.playGround.position.y / globals.scale + 'px';
+		tempPoint.style.left = p.x - scene.playGround.position.x / globals.scale + 'px';
 		lastPathPoint.mainHandle.dom = tempPoint;
 
 		debugPanel.appendChild(tempPoint);
 
-		// нужна перерисовка сцены
-		repaint = true;
+		// Построить траектории
+		utils.processPaths({
+			callback: function() {
 
-	}
+				// Построить граф
+				graph.buildGraph({
+					callback: function() {
 
-	function visualizeGraph(arr) {
-		for (var i = 0; i < arr.length; i++) {
-			var x = arr[i].split('_')[0];
-			var y = arr[i].split('_')[1];
-
-			ctx.strokeText( i, x, y-10 );
-		}
+						// нужна перерисовка сцены
+						repaint = true;
+					}
+				});
+			}
+		});
 	}
 
 	function defineDOMVars() {
@@ -338,7 +365,8 @@ var debugTraect = function debugTraect() {
 	}
 
 	function attachEvents() {
-		var currentTarget;
+		var currentTarget,
+			debugWrap = document.querySelector('.debug__wrap');
 
 		var pathList = document.querySelector('.debug__control-traects select'),
 			tempPoint = {
@@ -372,8 +400,8 @@ var debugTraect = function debugTraect() {
 			// Событие начала перетаскивания
 			// Точка
 			if ( e.target.classList.contains('debug__point') ) {
-				tempPoint.x = e.pageX;
-				tempPoint.y = e.pageY;
+				tempPoint.x = e.pageX - scene.playGround.position.x / globals.scale;
+				tempPoint.y = e.pageY - scene.playGround.position.y / globals.scale;
 
 				e.target.isDragged = true;
 				currentTarget = e.target;
@@ -404,8 +432,8 @@ var debugTraect = function debugTraect() {
 
 			// Событие факта перетаскивания
 			if (currentTarget !== undefined) {
-				currentTarget.style.top = e.pageY + 'px';
-				currentTarget.style.left = e.pageX + 'px';
+				currentTarget.style.top = e.pageY - scene.playGround.position.y / globals.scale  + 'px';
+				currentTarget.style.left = e.pageX - scene.playGround.position.x / globals.scale + 'px';
 
 				// Залипание точки
 				if ( (e.target.classList.contains('debug__point')) && (e.target !== currentTarget) ) {
@@ -420,8 +448,8 @@ var debugTraect = function debugTraect() {
 						y: Number(currentTarget.style.top.replace('px', '')) - tempPoint.y,
 					}
 					tempPoint = {
-						x: e.pageX,
-						y: e.pageY
+						x: e.pageX - scene.playGround.position.x / globals.scale,
+						y: e.pageY - scene.playGround.position.y / globals.scale
 					}
 
 					if ( (currentTarget.nextSibling !== null) && (currentTarget.nextSibling.className == 'debug__point-handle') ) {
@@ -435,8 +463,20 @@ var debugTraect = function debugTraect() {
 					}
 				}
 
-				// Требуется перерисовка
-				repaint = true;
+				// Построить траектории
+				utils.processPaths({
+					callback: function() {
+
+						// Построить граф
+						graph.buildGraph({
+							callback: function() {
+
+								// нужна перерисовка сцены
+								repaint = true;
+							}
+						});
+					}
+				});
 			}
 		})
 
@@ -452,7 +492,7 @@ var debugTraect = function debugTraect() {
 			if (e.target.classList.contains('debug__view') ) {
 				e.stopPropagation();
 
-				debugTraect.addPoint({
+				addPoint({
 					x: e.pageX,
 					y: e.pageY
 				})
@@ -485,7 +525,7 @@ var debugTraect = function debugTraect() {
 
 				pathList.appendChild(newItem);
 
-				debugTraect.addPath({
+				addPath({
 					name: name
 				});
 			}
@@ -494,7 +534,7 @@ var debugTraect = function debugTraect() {
 			if (e.target.tagName == 'OPTION') {
 				e.stopPropagation();
 
-				paint();
+				repaint = true;
 			}
 
 			// Удаление траектории
@@ -503,7 +543,7 @@ var debugTraect = function debugTraect() {
 
 				var pathListItem = document.querySelectorAll('.debug__control-traects option'),
 					currentPathId,
-					currentPath = false;;
+					currentPath = false;
 
 				for (var i = 0; i < pathListItem.length; i++) {
 					if (!!pathListItem[i].selected) {
@@ -626,6 +666,11 @@ var debugTraect = function debugTraect() {
 			}
 
 		})
+
+		debugWrap.onscroll = function(e) {
+			scene.playGround.position.x = (-1) * globals.scale * debugWrap.scrollLeft;
+		}
+
 	}
 
 	/* Init */;

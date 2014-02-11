@@ -1,6 +1,6 @@
 var graph = (function() {
 
-	var serviceGraph = {},
+	var serviceGraph,
 		adjacencyMatrix;
 
 	function makeIdByCoords(x, y) {
@@ -80,8 +80,6 @@ var graph = (function() {
 			reference.push(point);
 		}
 
-		//visualizeGraph(reference);
-
 		adjacencyMatrix = new Array(reference.length);
 
 		for (var i = 0; i < reference.length; i++) {
@@ -148,6 +146,10 @@ var graph = (function() {
 	return {
 		buildGraph: function( p ) {
 
+			globals.graph = {},
+			serviceGraph = {},
+			adjacencyMatrix = {};
+
 			for (var path in globals.paths) {
 				var point1 = globals.paths[path].dots[0].mainHandle;
 				var point2 = globals.paths[path].dots[ globals.paths[path].dots.length-1 ].mainHandle;
@@ -157,6 +159,11 @@ var graph = (function() {
 			}
 
 			buildAdjacencyMatrix( p );
+		},
+
+		getAdjacencyMatrix: function() {
+
+			return adjacencyMatrix;
 		}
 	}
 })();

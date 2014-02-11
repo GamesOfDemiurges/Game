@@ -245,6 +245,8 @@ var pathfinder = (function() {
 
 		// перебрать все траектории, понять, на которых из них может лежать целевая точка
 		for (path in globals.paths) {
+			if ( !globals.paths[path].controlPath ) continue;
+
 			for (var chain = 0; chain < globals.paths[path].controlPath.length; chain++) {
 				if (globals.paths[path].controlPath[chain].rect.contains( p.x * globals.scale, p.y * globals.scale )) {
 

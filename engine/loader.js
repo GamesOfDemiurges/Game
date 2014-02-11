@@ -54,6 +54,7 @@ var loader = (function() {
 			init({
 				resources: p.resources,
 				callback: function() {
+					globals.scale = 510 / document.body.clientHeight;
 
 					// загрузить траектории
 					readTraectFromFile({
