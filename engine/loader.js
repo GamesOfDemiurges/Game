@@ -54,6 +54,11 @@ var loader = (function() {
 			init({
 				resources: p.resources,
 				callback: function() {
+
+					if (!debug) {
+						document.body.classList.add('_noscroll');
+					}
+
 					globals.scale = 510 / document.body.clientHeight;
 
 					// загрузить траектории
@@ -106,7 +111,10 @@ document.addEventListener("DOMContentLoaded", function() {
 				.addObj(background)
 				.addObj(globals.hero);
 
-			debugTraect.init();
+			if (debug) {
+				document.querySelector('.debug__wrap' ).style.display = "block";
+				debugTraect.init();
+			}
 
 		}
 	})

@@ -80,7 +80,9 @@ var scene = function scene() {
 			_this.playGround.position.x -= (p.dx || 0);
 			_this.playGround.position.y -= (p.dy || 0);
 
-			document.querySelector('.debug__wrap').scrollLeft = ( (_this.playGround.position.x -= (p.dx || 0)) / globals.scale * (-1));
+			if (debug) {
+				document.querySelector('.debug__wrap').scrollLeft = ( (_this.playGround.position.x -= (p.dx || 0)) / globals.scale * (-1));
+			}
 
 			return _this;
 		}

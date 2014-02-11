@@ -24,11 +24,10 @@ body._noscroll {
 	position: relative;
 	height: 100%;
 	width: 100%;
-
-	overflow-x: scroll;
 }
 
 .debug__wrap {
+	display: none;
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -39,7 +38,7 @@ body._noscroll {
 }
 
 .debug {
-	display: none;
+	display: block;
 	position: relative;
 }
 
