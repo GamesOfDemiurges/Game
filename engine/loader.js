@@ -111,6 +111,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				.addObj(background)
 				.addObj(globals.hero);
 
+			relay.listen('breakpoint');
+
 			if (debug) {
 				document.querySelector('.debug__wrap' ).style.display = "block";
 				debugTraect.init();

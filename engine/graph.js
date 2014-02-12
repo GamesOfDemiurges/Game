@@ -164,6 +164,15 @@ var graph = (function() {
 		getAdjacencyMatrix: function() {
 
 			return adjacencyMatrix;
+		},
+
+		getGraphIdByStep: function( p ) {
+
+			if (p.step == 0) {
+				return globals.paths[p.path].dots[0].graphId;
+			} else {
+				return globals.paths[p.path].dots[ globals.paths[p.path].dots.length-1 ].graphId;
+			}
 		}
 	}
 })();

@@ -192,6 +192,15 @@ var pathfinder = (function() {
 					globals.hero.path = pathArray[1];
 					globals.hero.step = servicePoints.serviceStep;
 
+					relay.drop({
+						obj: globals.hero,
+						graphId: graph.getGraphIdByStep({
+							path: pathArray[0],
+							step: servicePoints.serviceChain.step
+						}),
+						type: 'breakpoint'
+					});
+
 					var trash = pathArray.shift();
 					processPaths( pathArray, targetChain );
 				}
