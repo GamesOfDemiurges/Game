@@ -168,10 +168,12 @@ var graph = (function() {
 
 		getGraphIdByStep: function( p ) {
 
-			if (p.step == 0) {
-				return globals.paths[p.path].dots[0].graphId;
-			} else {
+			if (p.step < 5) {
+				return globals.paths[p.path].dots[ 0 ].graphId;
+			} else if ( (globals.paths[p.path].steps.length-1) - p.step < 5  ) {
 				return globals.paths[p.path].dots[ globals.paths[p.path].dots.length-1 ].graphId;
+			} else {
+				return undefined;
 			}
 		}
 	}

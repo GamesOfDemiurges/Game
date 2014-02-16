@@ -47,18 +47,28 @@ function obj() {
 				}
 			}
 
-			function setHero() {
-				_this.hero = p.hero || false;
-				if (_this.hero) {
-					_this.image.state.setAnimationByName("stop", false);
+			function generateRandomObjectId() {
+				var objectId = Math.random().toString();
+				if ( globals.objects[objectId] !== undefined) {
+					return generateRandomObjectId();
+				} else {
+					return objectId;
 				}
 			}
 
 			if (p.src.indexOf('.anim') !== -1) {
+
+				var id = p.name
+					? p.name
+					: generateRandomObjectId();
+
 				_this.type = 'spine';
 				_this.src = p.src;
 				_this.image = new PIXI.Spine( p.src );
-				_this.animated = p.animated || false;
+				_this.id = id;
+				_this.image.state.setAnimationByName("stop", false);
+
+				globals.objects[ id ] = _this;
 
 				/*if (_this.animated) {
 					var animations = _this.image.state.data.skeletonData.animations;
@@ -78,7 +88,6 @@ function obj() {
 			setObjectPosition();
 			setObjectScale();
 			setReverse();
-			setHero();
 
 			return _this;
 		},
@@ -119,7 +128,7 @@ function obj() {
 
 				_this.image.position.x = p.x;
 
-				if ( (_this.hero) && ((Math.abs(_this.image.position.x - scene.playGround.position.x)) > scene.width/2) ) {
+				if ( (_this.id == 'hero') && ((Math.abs(_this.image.position.x - scene.playGround.position.x)) > scene.width/2) ) {
 
 					scene.playGround.position.x = scene.width/2 - _this.image.position.x;
 

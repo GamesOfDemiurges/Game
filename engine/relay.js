@@ -12,7 +12,7 @@ var relay = (function() {
 				event.initCustomEvent(p.type, true, true, p );
 			}
 
-			document.body.dispatchEvent(event);
+			document.dispatchEvent(event);
 
 			return _this;
 
@@ -21,7 +21,7 @@ var relay = (function() {
 		listen: function( eventName) {
 			var _this = this;
 
-			document.body.addEventListener(eventName, function( p ) {
+			document.addEventListener(eventName, function( p ) {
 				console.log( p.detail )
 			})
 

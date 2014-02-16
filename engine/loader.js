@@ -83,6 +83,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		callback: function() {
 
 			var currentPath = globals.paths['0.29949478153139353'];
+			var currentPath1 = globals.paths['0.08568654861301184'];
 
 			var background = obj().create({
 				src: 'assets/background/lvl1_1.png',
@@ -91,15 +92,27 @@ document.addEventListener("DOMContentLoaded", function() {
 				z: 5
 			});
 
-			globals.hero = obj().create({
+			var hero = obj().create({
+				name: 'hero',
 				src: 'assets/models/hero/images/hero_final.anim',
 				x: currentPath.steps[0].x,
 				y: currentPath.steps[0].y,
 				z: 15,
+				pz: 5,
 				scale: 0.5,
-				hero: true,
 				step: 0,
 				path: currentPath.name
+			});
+
+			var hero1 = obj().create({
+				name: 'hero1',
+				src: 'assets/models/hero/images/hero_final.anim',
+				x: currentPath1.steps[0].x,
+				y: currentPath1.steps[0].y,
+				z: 15,
+				scale: 0.5,
+				step: 0,
+				path: currentPath1.name
 			});
 
 			//globals.hero.image.state.clearAnimation();
@@ -109,14 +122,29 @@ document.addEventListener("DOMContentLoaded", function() {
 					canvasId: 'view'
 				})
 				.addObj(background)
-				.addObj(globals.hero);
+				.addObj(hero)
+				.addObj(hero1);
 
-			relay.listen('breakpoint');
+			queue.startQueue();
+
+			relay
+				.listen('breakpoint')
+				.listen('start')
+				.listen('stop');
 
 			if (debug) {
 				document.querySelector('.debug__wrap' ).style.display = "block";
 				debugTraect.init();
 			}
+
+			setTimeout(function() {
+
+				pathfinder.moveObjectByChain( {
+					id: 'hero1',
+					path: '0.06227287882938981',
+					chain: 3
+				})
+			}, 1000);
 
 		}
 	})

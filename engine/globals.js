@@ -2,6 +2,9 @@ var globals = {
 
 	paths: {},
 	graph: {},
-	hero: false,
+	objects: {},
+	triggers: {
+		thirdHeroAdded: false
+	},
 	scale: 1
 }
