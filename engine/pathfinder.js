@@ -89,45 +89,6 @@ var pathfinder = (function() {
 			objectId: p.currentObject.id,
 			paths: resultPath
 		})
-
-
-
-/*console.log('!!!', pathArray, targetChain); return;
-		// Если есть промежуточные пути
-		if (pathArray.length > 1) {
-
-			servicePoints = getServicePoint( pathArray[0], pathArray[1] );
-
-			processControlPoint({
-				pathName: pathArray[0],
-				chain: servicePoints.serviceChain,
-				callback: function() {
-					// По завершению перехода переключиться на следующий путь
-					// установить новое значения шага
-					globals.hero.path = pathArray[1];
-					globals.hero.step = servicePoints.serviceStep;
-
-					relay.drop({
-						obj: globals.hero,
-						graphId: graph.getGraphIdByStep({
-							path: pathArray[0],
-							step: servicePoints.serviceChain.step
-						}),
-						type: 'breakpoint'
-					});
-
-					var trash = pathArray.shift();
-					processPaths( pathArray, targetChain );
-				}
-			});
-			movement.current = true;
-		} else {
-			// Промежуточных путей нет
-			processControlPoint({
-				pathName: pathArray[0],
-				chain: targetChain
-			});
-		}*/
 	}
 
 	function buildPathArray( p ) {
@@ -249,7 +210,7 @@ var pathfinder = (function() {
 
 		// перебрать все траектории, понять, на которых из них может лежать целевая точка
 		for (path in globals.paths) {
-			if ( !globals.paths[path].controlPath ) continue;
+			if ( !globals.paths[path].controlPath || globals.paths[path].breakpath ) continue;
 
 			for (var chain = 0; chain < globals.paths[path].controlPath.length; chain++) {
 				if (globals.paths[path].controlPath[chain].rect.contains( p.x * globals.scale, p.y * globals.scale )) {
@@ -268,26 +229,6 @@ var pathfinder = (function() {
 			resultPath: resultPath,
 			currentObject: currentObject
 		} )
-
-		/*move.setMovement({
-			path: pathArray,
-			chain: resultPath.chain
-		})*/
-
-		// Если в момент клика объект движется, нужно прервать движение и запустить просчет
-		// графа с текущей точки
-/*		if (movement.current) {
-			movement = {
-				switchFx: true,
-				noCallback: true,
-				fx: function() {
-					processPaths(pathArray, resultPath.chain);
-				}
-			}
-		} else {
-			processPaths(pathArray, resultPath.chain);
-		} */
-
 	}
 
 	function moveObjectByChain( p ) {

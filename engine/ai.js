@@ -1,4 +1,17 @@
 document.addEventListener('stop', function( p ) {
+	if (p.detail.obj == 'hero' && p.detail.graphId == '4') {
+		globals.paths['0.19820178672671318'].breakpath = false;
+
+		graph.buildGraph({
+			callback: function() {
+				console.log('unlocked!');
+			}
+		});
+	}
+})
+
+/*
+document.addEventListener('stop', function( p ) {
 	if (p.detail.obj == 'hero1') {
 		if (p.detail.graphId == '3') {
 			setTimeout(function() {
@@ -73,3 +86,4 @@ document.addEventListener('stop', function( p ) {
 		})
 	}
 })
+*/

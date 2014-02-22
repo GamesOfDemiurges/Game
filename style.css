@@ -119,5 +119,14 @@ body._noscroll {
 .debug__control-traects select {
 	display: block;
 	width: 90%;
-	margin: 0 auto 10px;
+	margin: 0 auto 3px;
+}
+
+.debug__control-traects-label {
+	background-color: rgba(255, 255, 255, 0.5);
+	padding: 2px;
+	display: block;
+	font-size: 12px;
+	font-family: Verdana, sans-serif;
+	margin: 5px 10px 7px;
 }

@@ -153,7 +153,9 @@ var graph = (function() {
 			for (var path in globals.paths) {
 				var point1 = globals.paths[path].dots[0].mainHandle;
 				var point2 = globals.paths[path].dots[ globals.paths[path].dots.length-1 ].mainHandle;
-				var distance = globals.paths[path].steps.length;
+				var distance = (globals.paths[path].breakpath)
+					? Number.POSITIVE_INFINITY
+					: globals.paths[path].steps.length;
 
 				addToGraph(path, globals.paths[path].dots[0], globals.paths[path].dots[ globals.paths[path].dots.length-1 ], makeIdByCoords(point1.x, point1.y), makeIdByCoords(point2.x, point2.y), distance);
 			}

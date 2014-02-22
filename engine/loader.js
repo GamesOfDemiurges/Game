@@ -104,16 +104,16 @@ document.addEventListener("DOMContentLoaded", function() {
 				path: currentPath.name
 			});
 
-			var hero1 = obj().create({
+			/*var hero1 = obj().create({
 				name: 'hero1',
 				src: 'assets/models/hero/images/hero_final.anim',
 				x: currentPath1.steps[0].x,
 				y: currentPath1.steps[0].y,
 				z: 15,
-				scale: 0.5,
+				scale: 0.35,
 				step: 0,
 				path: currentPath1.name
-			});
+			});*/
 
 			//globals.hero.image.state.clearAnimation();
 
@@ -122,8 +122,8 @@ document.addEventListener("DOMContentLoaded", function() {
 					canvasId: 'view'
 				})
 				.addObj(background)
-				.addObj(hero)
-				.addObj(hero1);
+				.addObj(hero);
+				//.addObj(hero1);
 
 			queue.startQueue();
 
@@ -137,14 +137,14 @@ document.addEventListener("DOMContentLoaded", function() {
 				debugTraect.init();
 			}
 
-			setTimeout(function() {
+			/*setTimeout(function() {
 
 				pathfinder.moveObjectByChain( {
 					id: 'hero1',
 					path: '0.06227287882938981',
 					chain: 3
 				})
-			}, 1000);
+			}, 1000);*/
 
 		}
 	})

@@ -21,6 +21,41 @@ var debugTraect = function debugTraect() {
 		requestAnimFrame(render);
 	}
 
+	// возвращает выбранный в списке путь или false
+	function getCurrentPath() {
+		var pathListItem = document.querySelectorAll('.debug__control-traects option'),
+			currentPathId,
+			currentPath = false;
+
+		for (var i = 0; i < pathListItem.length; i++) {
+			if (!!pathListItem[i].selected) {
+				currentPathId = pathListItem[i].getAttribute('value');
+				break;
+			}
+		}
+
+		if (!!globals.paths[currentPathId]) {
+			currentPath = globals.paths[currentPathId];
+		}
+
+		return currentPath;
+	}
+
+	function checkForBreakpath() {
+		var currentPath = getCurrentPath(),
+			checkbox = document.querySelector('.debug__control-traects-break');
+
+		if (currentPath) {
+			checkbox.removeAttribute('disabled');
+
+			if (currentPath.breakpath) {
+				checkbox.checked = true;
+			} else {
+				checkbox.checked = false;
+			}
+		}
+	}
+
 	function buildInterfaceFromPaths() {
 		var newItem,
 			tempPoint,
@@ -34,6 +69,8 @@ var debugTraect = function debugTraect() {
 			newItem.selected = true;
 
 			pathList.appendChild(newItem);
+
+			checkForBreakpath();
 
 			for (var dot = 0; dot < globals.paths[path].dots.length; dot++) {
 
@@ -374,26 +411,6 @@ var debugTraect = function debugTraect() {
 				y: 0
 			}
 
-		// возвращает выбранный в списке путь или false
-		function getCurrentPath() {
-			var pathListItem = document.querySelectorAll('.debug__control-traects option'),
-				currentPathId,
-				currentPath = false;;
-
-			for (var i = 0; i < pathListItem.length; i++) {
-				if (!!pathListItem[i].selected) {
-					currentPathId = pathListItem[i].getAttribute('value');
-					break;
-				}
-			}
-
-			if (!!globals.paths[currentPathId]) {
-				currentPath = globals.paths[currentPathId];
-			}
-
-			return currentPath;
-		}
-
 		debugPanel.addEventListener("mousedown", function(e) {
 			e.stopPropagation();
 
@@ -501,6 +518,35 @@ var debugTraect = function debugTraect() {
 
 		debugPanel.addEventListener("click", function(e) {
 
+			if (e.target.classList.contains('debug__control-traects-label') || e.target.classList.contains('debug__control-traects-break')) {
+				e.stopPropagation();
+
+				if (e.target.classList.contains('debug__control-traects-break')) {
+					var currentPath = getCurrentPath();
+					currentPath.breakpath = (currentPath.breakpath)
+						? false
+						: true
+
+					checkForBreakpath();
+
+					// Построить траектории
+					utils.processPaths({
+						callback: function() {
+
+							// Построить граф
+							graph.buildGraph({
+								callback: function() {
+
+									// нужна перерисовка сцены
+									repaint = true;
+								}
+							});
+						}
+					});
+
+				}
+			}
+
 			// переключить оверлей
 			if (e.target.classList.contains('debug__button_toggle-overlay')) {
 				e.stopPropagation();
@@ -525,6 +571,8 @@ var debugTraect = function debugTraect() {
 
 				pathList.appendChild(newItem);
 
+				checkForBreakpath();
+
 				addPath({
 					name: name
 				});
@@ -534,6 +582,7 @@ var debugTraect = function debugTraect() {
 			if (e.target.tagName == 'OPTION') {
 				e.stopPropagation();
 
+				checkForBreakpath();
 				repaint = true;
 			}
 
@@ -612,7 +661,8 @@ var debugTraect = function debugTraect() {
 				for (var path in globals.paths) {
 					smallPaths[path] = {
 						name: path,
-						dots: []
+						dots: [],
+						breakpath: globals.paths[path].breakpath || false
 					};
 
 					for (var dot = 0; dot < globals.paths[path].dots.length; dot++) {
