@@ -130,11 +130,13 @@ function obj() {
 
 				if ( (_this.id == 'hero') && ((Math.abs(_this.image.position.x - scene.playGround.position.x)) > scene.width/2) ) {
 
-					scene.playGround.position.x = scene.width/2 - _this.image.position.x;
+					if (scene.playGround.position.x > -2150  ) { // TODO: Clean
+						scene.playGround.position.x = scene.width/2 - _this.image.position.x;
 
-					scene.move({
-						dx: dx /2
-					})
+						scene.move({
+							dx: dx /2
+						})
+					}
 				}
 			}
 

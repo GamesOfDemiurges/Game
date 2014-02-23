@@ -1,14 +1,71 @@
 document.addEventListener('stop', function( p ) {
 	if (p.detail.obj == 'hero' && p.detail.graphId == '4') {
-		globals.paths['0.19820178672671318'].breakpath = false;
+		globals.paths['0.2527436772361398'].breakpath = false;
 
 		graph.buildGraph({
 			callback: function() {
-				console.log('unlocked!');
+				alert('Ведро! Автоспуск');
+
+				pathfinder.moveObjectByChain( {
+					id: 'hero',
+					path: '0.35202742647379637',
+					chain: 0
+				})
 			}
 		});
 	}
 })
+
+document.addEventListener('stop', function( p ) {
+	if (p.detail.obj == 'hero' && p.detail.graphId == '15') {
+		globals.paths['0.1525857609231025'].breakpath = false;
+
+		graph.buildGraph({
+			callback: function() {
+				alert('Камень!');
+			}
+		});
+	}
+})
+
+document.addEventListener('stop', function( p ) {
+	if (p.detail.obj == 'hero' && p.detail.graphId == '20') {
+		globals.paths['0.048842963529750705'].breakpath = false;
+
+		graph.buildGraph({
+			callback: function() {
+				alert('Телевизор!');
+			}
+		});
+	}
+})
+
+document.addEventListener('stop', function( p ) {
+	if (p.detail.obj == 'hero' && p.detail.graphId == '19') {
+		globals.paths['0.4269534260965884'].breakpath = false;
+
+		graph.buildGraph({
+			callback: function() {
+				alert('Телевизор2!');
+			}
+		});
+	}
+})
+
+document.addEventListener('stop', function( p ) {
+	if (p.detail.obj == 'hero' && p.detail.graphId == '28') {
+		globals.paths['0.9639693887438625'].breakpath = false;
+
+		graph.buildGraph({
+			callback: function() {
+				alert('Мусор!');
+			}
+		});
+	}
+})
+
+
+
 
 /*
 document.addEventListener('stop', function( p ) {

@@ -82,8 +82,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		],
 		callback: function() {
 
-			var currentPath = globals.paths['0.29949478153139353'];
-			var currentPath1 = globals.paths['0.08568654861301184'];
+			var currentPath = globals.paths['0.021916289813816547'];
 
 			var background = obj().create({
 				src: 'assets/background/lvl1_1.png',
@@ -104,17 +103,6 @@ document.addEventListener("DOMContentLoaded", function() {
 				path: currentPath.name
 			});
 
-			/*var hero1 = obj().create({
-				name: 'hero1',
-				src: 'assets/models/hero/images/hero_final.anim',
-				x: currentPath1.steps[0].x,
-				y: currentPath1.steps[0].y,
-				z: 15,
-				scale: 0.35,
-				step: 0,
-				path: currentPath1.name
-			});*/
-
 			//globals.hero.image.state.clearAnimation();
 
 			scene
@@ -123,7 +111,6 @@ document.addEventListener("DOMContentLoaded", function() {
 				})
 				.addObj(background)
 				.addObj(hero);
-				//.addObj(hero1);
 
 			queue.startQueue();
 
@@ -138,15 +125,6 @@ document.addEventListener("DOMContentLoaded", function() {
 				document.querySelector('.debug__wrap' ).style.display = "block";
 				debugTraect.init();
 			}
-
-			/*setTimeout(function() {
-
-				pathfinder.moveObjectByChain( {
-					id: 'hero1',
-					path: '0.06227287882938981',
-					chain: 3
-				})
-			}, 1000);*/
 
 		}
 	})
