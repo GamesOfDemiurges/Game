@@ -150,6 +150,33 @@ function obj() {
 			}
 
 			return _this;
+		},
+
+		//p.animation
+		animate: function( p ) {
+			var _this = this;
+
+			_this.image.state.setAnimationByName( p.animation , false);
+			var duration = _this.image.state.current.duration * 1000,
+				animationId = Math.random();
+
+			setTimeout(function() {
+				relay.drop({
+					obj: _this,
+					type: 'endAnimation',
+					animation: p.animation,
+					id: animationId
+				});
+			}, duration)
+
+			relay.drop({
+				obj: _this,
+				type: 'startAnimation',
+				animation: p.animation,
+				id: animationId
+			});
+
+			return _this;
 		}
 	}
 }

@@ -130,7 +130,9 @@ document.addEventListener("DOMContentLoaded", function() {
 			relay
 				.listen('breakpoint')
 				.listen('start')
-				.listen('stop');
+				.listen('stop')
+				.listen('startAnimation')
+				.listen('endAnimation');
 
 			if (debug) {
 				document.querySelector('.debug__wrap' ).style.display = "block";
