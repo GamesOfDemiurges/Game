@@ -94,13 +94,12 @@ document.addEventListener("DOMContentLoaded", function() {
 			var hero = obj().create({
 				name: 'hero',
 				src: 'assets/models/hero/images/hero_final.anim',
-				x: currentPath.steps[0].x,
-				y: currentPath.steps[0].y,
 				z: 15,
 				pz: 5,
 				scale: 0.5,
 				step: 0,
-				path: currentPath.name
+				path: currentPath.name,
+				interactive: true
 			});
 
 			//globals.hero.image.state.clearAnimation();
@@ -119,7 +118,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				.listen('start')
 				.listen('stop')
 				.listen('startAnimation')
-				.listen('endAnimation');
+				.listen('endAnimation')
+				.listen('objectClick');
 
 			if (debug) {
 				document.querySelector('.debug__wrap' ).style.display = "block";

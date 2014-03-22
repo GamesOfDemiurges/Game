@@ -249,6 +249,8 @@ var pathfinder = (function() {
 
 	function attachPathFinderListeners() {
 		document.body.addEventListener('click', function(e) {
+			if (globals.objectClicked) return false;
+
 			moveObjectByCoords({
 				id: 'hero',
 				x: e.pageX - (scene.playGround.position.x / globals.scale),
@@ -257,6 +259,8 @@ var pathfinder = (function() {
 		})
 
 		document.body.addEventListener('touchend', function(e) {
+			if (globals.objectClicked) return false;
+
 			moveObjectByCoords({
 				id: 'hero',
 				x: e.changedTouches[0].pageX - scene.playGround.position.x,

@@ -6,5 +6,6 @@ var globals = {
 	triggers: {
 		thirdHeroAdded: false
 	},
+	objectClicked: false,
 	scale: 1
 }

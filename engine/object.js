@@ -32,8 +32,16 @@ function obj() {
 				_this.z = (p.z !== undefined) ? p.z : z;
 				_this.pz = (p.pz !== undefined) ? p.pz : pz;
 
+				// Если объект расположен на траектории, нет необходимости явно задавать его координаты
 				_this.step = (p.step !== undefined) ? p.step : step;
 				_this.path = (p.path !== undefined) ? p.path : path;
+
+				if ( (_this.step !== null) && (_this.path !== null) ) {
+					if ( (p.x === undefined) || (p.y === undefined) ) {
+						_this.image.position.x = globals.paths[ _this.path ].steps[ _this.step ].x;
+						_this.image.position.y = globals.paths[ _this.path ].steps[ _this.step ].y;
+					}
+				}
 			}
 
 			function setObjectScale() {
@@ -53,6 +61,24 @@ function obj() {
 					return generateRandomObjectId();
 				} else {
 					return objectId;
+				}
+			}
+
+			function setInteractive() {
+				if (p.interactive) {
+					_this.image.setInteractive(true);
+
+					_this.image.click = function(data) {
+						globals.objectClicked = true;
+						setTimeout(function() {
+							globals.objectClicked = false;
+						}, 50)
+
+						relay.drop({
+							obj: _this.id,
+							type: 'objectClick'
+						});
+					}
 				}
 			}
 
@@ -79,6 +105,7 @@ function obj() {
 					_this.image.skeleton.setSkinByName("goblin");
 					_this.image.skeleton.setSlotsToSetupPose();
 				}*/
+
 			} else {
 				_this.type = 'image';
 				_this.src = p.src;
@@ -88,6 +115,7 @@ function obj() {
 			setObjectPosition();
 			setObjectScale();
 			setReverse();
+			setInteractive();
 
 			return _this;
 		},
