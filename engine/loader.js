@@ -75,14 +75,25 @@ var loader = (function() {
 document.addEventListener("DOMContentLoaded", function() {
 	loader.init({
 		resources: [
-			"assets/models/hero/images/hero_final.json",
-			"assets/models/hero/images/hero_final.anim",
+			"assets/models/ready/hero/hero.json",
+			"assets/models/ready/hero/hero.anim",
+
+			"assets/models/ready/bird/bird.json",
+			"assets/models/ready/bird/bird.anim",
+
+			"assets/models/ready/villain/villain.json",
+			"assets/models/ready/villain/villain.anim",
+
+			"assets/models/ready/villain2/villain2.json",
+			"assets/models/ready/villain2/villain2.anim",
 
 			"assets/background/background.png"
 		],
 		callback: function() {
 
-			var currentPath = globals.paths['0.021916289813816547'];
+			var currentPath = globals.paths['0.021916289813816547'],
+				birdPath = globals.paths['0.04654977540485561'],
+				groundPath = globals.paths['0.02847454440779984'];
 
 			var background = obj().create({
 				src: 'assets/background/background.png',
@@ -93,14 +104,41 @@ document.addEventListener("DOMContentLoaded", function() {
 
 			var hero = obj().create({
 				name: 'hero',
-				src: 'assets/models/hero/images/hero_final.anim',
-				x: currentPath.steps[0].x,
-				y: currentPath.steps[0].y,
+				src: 'assets/models/ready/hero/hero.anim',
 				z: 15,
 				pz: 5,
-				scale: 0.5,
+				scale: 0.4,
 				step: 0,
 				path: currentPath.name
+			});
+
+			var villain = obj().create({
+				name: 'villain',
+				src: 'assets/models/ready/villain/villain.anim',
+				z: 15,
+				pz: 5,
+				scale: 0.4,
+				step: 0,
+				path: groundPath.name
+			});
+
+			var villain2 = obj().create({
+				name: 'villain2',
+				src: 'assets/models/ready/villain2/villain2.anim',
+				z: 15,
+				pz: 5,
+				scale: 1,
+				step: 500,
+				path: groundPath.name
+			});
+
+			var bird = obj().create({
+				name: 'bird',
+				src: 'assets/models/ready/bird/bird.anim',
+				z: 15,
+				pz: 5,
+				step: 0,
+				path: birdPath.name
 			});
 
 			//globals.hero.image.state.clearAnimation();
@@ -110,7 +148,10 @@ document.addEventListener("DOMContentLoaded", function() {
 					canvasId: 'view'
 				})
 				.addObj(background)
-				.addObj(hero);
+				.addObj(hero)
+				.addObj(villain)
+				.addObj(villain2)
+				.addObj(bird);
 
 			queue.startQueue();
 
@@ -120,6 +161,12 @@ document.addEventListener("DOMContentLoaded", function() {
 				.listen('stop')
 				.listen('startAnimation')
 				.listen('endAnimation');
+
+	pathfinder.moveObjectByChain( {
+		id: 'bird',
+		path: '0.04654977540485561',
+		chain: 3
+	})
 
 			if (debug) {
 				document.querySelector('.debug__wrap' ).style.display = "block";

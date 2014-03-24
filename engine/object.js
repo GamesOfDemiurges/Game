@@ -92,7 +92,7 @@ function obj() {
 				_this.src = p.src;
 				_this.image = new PIXI.Spine( p.src );
 				_this.id = id;
-				_this.image.state.setAnimationByName("stop", false);
+				//_this.image.state.setAnimationByName("stop", false); // STOP
 
 				globals.objects[ id ] = _this;
 

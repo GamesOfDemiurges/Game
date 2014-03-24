@@ -29,7 +29,7 @@ var queue = (function() {
 						var oldPath = objects[obj].shift();
 
 						if (!objects[obj].length) {
-							globals.objects[ obj ].image.state.setAnimationByName("stop", false);
+							//globals.objects[ obj ].image.state.setAnimationByName("stop", false); // STOP
 
 							relay.drop({
 								obj: obj,

@@ -1,3 +1,32 @@
+// Bird
+document.addEventListener('stop', function( p ) {
+	if (p.detail.obj == 'bird' && p.detail.graphId == '9') {
+
+		setTimeout(function() {
+			pathfinder.moveObjectByChain( {
+				id: 'bird',
+				path: '0.04654977540485561',
+				chain: 0
+			})
+
+		}, 1000)
+	}
+
+	if (p.detail.obj == 'bird' && p.detail.graphId == '8') {
+
+		setTimeout(function() {
+			pathfinder.moveObjectByChain( {
+				id: 'bird',
+				path: '0.04654977540485561',
+				chain: 3
+			})
+
+		}, 1000)
+
+	}
+})
+
+/*
 document.addEventListener('stop', function( p ) {
 	if (p.detail.obj == 'hero' && p.detail.graphId == '4') {
 		globals.paths['0.2527436772361398'].breakpath = false;
@@ -15,6 +44,7 @@ document.addEventListener('stop', function( p ) {
 		});
 	}
 })
+
 
 document.addEventListener('stop', function( p ) {
 	if (p.detail.obj == 'hero' && p.detail.graphId == '15') {
@@ -63,7 +93,7 @@ document.addEventListener('stop', function( p ) {
 		});
 	}
 })
-
+*/
 
 
 

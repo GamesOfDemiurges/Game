@@ -68,8 +68,8 @@ var pathfinder = (function() {
 				resultPath.push({
 					pathId: p.pathArray[i-1],
 					targetChain: servicePoints.serviceChain,
-					animation: 'new',
-					speed: '2',
+					animation: 'bird',
+					speed: '4',
 					step: step
 				})
 
@@ -80,8 +80,8 @@ var pathfinder = (function() {
 		resultPath.push({
 			pathId: p.pathArray[ p.pathArray.length-1 ],
 			targetChain: p.targetChain,
-			animation: 'new',
-			speed: '2',
+			animation: 'bird',
+			speed: '4',
 			step: step
 		})
 
