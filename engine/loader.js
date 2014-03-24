@@ -109,7 +109,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				pz: 5,
 				scale: 0.4,
 				step: 0,
-				path: currentPath.name
+				path: currentPath.name,
+				interactive: true
 			});
 
 			var villain = obj().create({
@@ -119,7 +120,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				pz: 5,
 				scale: 0.4,
 				step: 0,
-				path: groundPath.name
+				path: groundPath.name,
+				interactive: true
 			});
 
 			var villain2 = obj().create({
@@ -129,7 +131,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				pz: 5,
 				scale: 1,
 				step: 500,
-				path: groundPath.name
+				path: groundPath.name,
+				interactive: true
 			});
 
 			var bird = obj().create({
@@ -138,7 +141,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				z: 15,
 				pz: 5,
 				step: 0,
-				path: birdPath.name
+				path: birdPath.name,
+				interactive: true
 			});
 
 			//globals.hero.image.state.clearAnimation();
@@ -160,13 +164,14 @@ document.addEventListener("DOMContentLoaded", function() {
 				.listen('start')
 				.listen('stop')
 				.listen('startAnimation')
-				.listen('endAnimation');
+				.listen('endAnimation')
+				.listen('objectClick');
 
-	pathfinder.moveObjectByChain( {
-		id: 'bird',
-		path: '0.04654977540485561',
-		chain: 3
-	})
+			pathfinder.moveObjectByChain( {
+				id: 'bird',
+				path: '0.04654977540485561',
+				chain: 3
+			})
 
 			if (debug) {
 				document.querySelector('.debug__wrap' ).style.display = "block";
