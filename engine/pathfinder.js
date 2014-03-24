@@ -249,7 +249,10 @@ var pathfinder = (function() {
 
 	function attachPathFinderListeners() {
 		document.body.addEventListener('click', function(e) {
-			if (globals.objectClicked) return false;
+			if (globals.objectClicked) {
+				globals.objectClicked = false;
+				return false;
+			}
 
 			moveObjectByCoords({
 				id: 'hero',
@@ -259,7 +262,10 @@ var pathfinder = (function() {
 		})
 
 		document.body.addEventListener('touchend', function(e) {
-			if (globals.objectClicked) return false;
+			if (globals.objectClicked) {
+				globals.objectClicked = false;
+				return false;
+			}
 
 			moveObjectByCoords({
 				id: 'hero',

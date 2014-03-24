@@ -70,9 +70,6 @@ function obj() {
 
 					_this.image.click = function(data) {
 						globals.objectClicked = true;
-						setTimeout(function() {
-							globals.objectClicked = false;
-						}, 50)
 
 						relay.drop({
 							obj: _this.id,
