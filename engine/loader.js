@@ -59,7 +59,7 @@ var loader = (function() {
 						document.body.classList.add('_noscroll');
 					}
 
-					globals.scale = 510 / document.body.clientHeight;
+					globals.scale = 800 / document.body.clientHeight;
 
 					// загрузить траектории
 					readTraectFromFile({
@@ -78,14 +78,14 @@ document.addEventListener("DOMContentLoaded", function() {
 			"assets/models/hero/images/hero_final.json",
 			"assets/models/hero/images/hero_final.anim",
 
-			"assets/background/lvl1_1.png"
+			"assets/background/background.png"
 		],
 		callback: function() {
 
 			var currentPath = globals.paths['0.021916289813816547'];
 
 			var background = obj().create({
-				src: 'assets/background/lvl1_1.png',
+				src: 'assets/background/background.png',
 				x: 0,
 				y: 0,
 				z: 5
@@ -94,12 +94,13 @@ document.addEventListener("DOMContentLoaded", function() {
 			var hero = obj().create({
 				name: 'hero',
 				src: 'assets/models/hero/images/hero_final.anim',
+				x: currentPath.steps[0].x,
+				y: currentPath.steps[0].y,
 				z: 15,
 				pz: 5,
 				scale: 0.5,
 				step: 0,
-				path: currentPath.name,
-				interactive: true
+				path: currentPath.name
 			});
 
 			//globals.hero.image.state.clearAnimation();
@@ -118,8 +119,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				.listen('start')
 				.listen('stop')
 				.listen('startAnimation')
-				.listen('endAnimation')
-				.listen('objectClick');
+				.listen('endAnimation');
 
 			if (debug) {
 				document.querySelector('.debug__wrap' ).style.display = "block";

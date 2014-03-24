@@ -395,7 +395,7 @@ var debugTraect = function debugTraect() {
 		dots = document.querySelectorAll('.debug__point');
 		ctx = canvas.getContext('2d');
 
-		canvas.setAttribute('width', debugPanel.clientWidth / document.getElementById('view').clientHeight * 510 );
+		canvas.setAttribute('width', debugPanel.clientWidth / document.getElementById('view').clientHeight * 800 );
 		canvas.setAttribute('height', document.getElementById('view').getAttribute('height'));
 
 		document.body.classList.add('_noscroll');
@@ -726,7 +726,7 @@ var debugTraect = function debugTraect() {
 	/* Init */;
 	function resizeViewPort() {
 		var attrWidth = document.getElementById('view').getAttribute('width');
-		document.querySelector('.debug').style.width = ( 2922 / attrWidth ) * document.getElementById('view').clientWidth + 'px';
+		document.querySelector('.debug').style.width = ( 3828 / attrWidth ) * document.getElementById('view').clientWidth + 'px';
 	}
 
 	function startDebugger() {

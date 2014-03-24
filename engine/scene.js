@@ -31,15 +31,15 @@ var scene = function scene() {
 			masterCanvas = document.getElementById(p.canvasId); // указатель на DOM
 			stage = new PIXI.Stage(0xFFFFFF, true); // Корневая сцена
 
-			_this.scale = 510/masterCanvas.clientHeight;
+			_this.scale = 800/masterCanvas.clientHeight;
 			_this.width = _this.scale * masterCanvas.clientWidth;
 
-			renderer = new PIXI.CanvasRenderer(_this.width, 510, masterCanvas, false); // Оператор рендеринга 900x510 native
+			renderer = new PIXI.CanvasRenderer(_this.width, 800, masterCanvas, false);
 			window.addEventListener('resize', function() {
-				_this.scale = 510/masterCanvas.clientHeight;
+				_this.scale = 800/masterCanvas.clientHeight;
 				_this.width = _this.scale * masterCanvas.clientWidth;
 
-				renderer.resize(_this.width, 510);
+				renderer.resize(_this.width, 800);
 			})
 
 			// Контейнер сцены
