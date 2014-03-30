@@ -69,6 +69,8 @@ function obj() {
 					_this.image.setInteractive(true);
 
 					_this.image.click = function(data) {
+						if (globals.viewport.resize) return false;
+
 						globals.objectClicked = true;
 
 						relay.drop({

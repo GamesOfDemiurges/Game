@@ -7,5 +7,9 @@ var globals = {
 		thirdHeroAdded: false
 	},
 	objectClicked: false,
+	viewport: {
+		resize: false,
+		scale: 1
+	},
 	scale: 1
 }

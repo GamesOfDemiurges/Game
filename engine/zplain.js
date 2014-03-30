@@ -168,7 +168,7 @@ var Z = function() {
 			var currentPlain = zindex.base.next;
 
 			// Оч. грубо — удалим все элементы и нарисуем из списка всё заново
-			while (playGround.children.length) {
+			while (scene.playGround.children.length) {
 				playGround.removeChild(playGround.children[0]);
 			}
 
@@ -176,7 +176,7 @@ var Z = function() {
 				var currentPriorityPlain = currentPlain.children.base.next;
 
 				while (currentPriorityPlain !== null) {
-					playGround.addChild( currentPriorityPlain.data.image );
+					scene.playGround.addChild( currentPriorityPlain.data.image );
 					currentPriorityPlain = currentPriorityPlain.next;
 				}
 

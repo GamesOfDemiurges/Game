@@ -44,7 +44,7 @@ var scene = function scene() {
 
 			// Контейнер сцены
 			// его будем двигать для смещения сцены относительно вьюпорта
-			playGround = new PIXI.DisplayObjectContainer();
+			var playGround = new PIXI.DisplayObjectContainer();
 			playGround.position.x = x;
 			playGround.position.y = y;
 

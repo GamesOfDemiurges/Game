@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				name: 'hero',
 				src: 'assets/models/ready/hero/hero.anim',
 				z: 15,
-				pz: 5,
+				pz: 10,
 				scale: 0.4,
 				step: 0,
 				path: currentPath.name,
@@ -157,6 +157,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				.addObj(villain2)
 				.addObj(bird);
 
+			viewport.init();
+
 			queue.startQueue();
 
 			relay
@@ -166,13 +168,13 @@ document.addEventListener("DOMContentLoaded", function() {
 				.listen('startAnimation')
 				.listen('endAnimation')
 				.listen('objectClick');
-
+/*
 			pathfinder.moveObjectByChain( {
 				id: 'bird',
 				path: '0.04654977540485561',
 				chain: 3
 			})
-
+*/
 			if (debug) {
 				document.querySelector('.debug__wrap' ).style.display = "block";
 				debugTraect.init();

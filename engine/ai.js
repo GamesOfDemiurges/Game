@@ -1,5 +1,5 @@
 // Bird
-document.addEventListener('stop', function( p ) {
+/*document.addEventListener('stop', function( p ) {
 	if (p.detail.obj == 'bird' && p.detail.graphId == '9') {
 
 		setTimeout(function() {
@@ -24,7 +24,7 @@ document.addEventListener('stop', function( p ) {
 		}, 1000)
 
 	}
-})
+})*/
 
 /*
 document.addEventListener('stop', function( p ) {

@@ -68,8 +68,8 @@ var pathfinder = (function() {
 				resultPath.push({
 					pathId: p.pathArray[i-1],
 					targetChain: servicePoints.serviceChain,
-					animation: 'bird',
-					speed: '4',
+					animation: 'new',
+					speed: '2',
 					step: step
 				})
 
@@ -80,8 +80,8 @@ var pathfinder = (function() {
 		resultPath.push({
 			pathId: p.pathArray[ p.pathArray.length-1 ],
 			targetChain: p.targetChain,
-			animation: 'bird',
-			speed: '4',
+			animation: 'new',
+			speed: '1',
 			step: step
 		})
 
@@ -248,31 +248,41 @@ var pathfinder = (function() {
 	}
 
 	function attachPathFinderListeners() {
-		document.body.addEventListener('click', function(e) {
-			if (globals.objectClicked) {
-				globals.objectClicked = false;
-				return false;
-			}
 
-			moveObjectByCoords({
-				id: 'hero',
-				x: e.pageX - (scene.playGround.position.x / globals.scale),
-				y: e.pageY
+		if ('ontouchend' in document) {
+
+			window.addEventListener('touchend', function(e) {
+				if (globals.objectClicked || globals.viewport.resize) {
+					globals.objectClicked = false;
+					globals.viewport.resize = false;
+					return false;
+				}
+
+				moveObjectByCoords({
+					id: 'hero',
+					x: (e.changedTouches[0].pageX - scene.playGround.position.x) / globals.viewport.scale ,
+					y: e.changedTouches[0].pageY
+				})
 			})
-		})
 
-		document.body.addEventListener('touchend', function(e) {
-			if (globals.objectClicked) {
-				globals.objectClicked = false;
-				return false;
-			}
+		} else {
 
-			moveObjectByCoords({
-				id: 'hero',
-				x: e.changedTouches[0].pageX - scene.playGround.position.x,
-				y: e.changedTouches[0].pageY
+			window.addEventListener('click', function(e) {
+				if (globals.objectClicked || globals.viewport.resize) {
+					globals.objectClicked = false;
+					globals.viewport.resize = false;
+					return false;
+				}
+
+				moveObjectByCoords({
+					id: 'hero',
+					x: (e.pageX - (scene.playGround.position.x / globals.scale)) / globals.viewport.scale,
+					y: e.pageY
+				})
 			})
-		})
+
+		}
+
 	}
 
 	return {
