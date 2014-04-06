@@ -87,6 +87,9 @@ document.addEventListener("DOMContentLoaded", function() {
 			"assets/models/ready/villain2/villain2.json",
 			"assets/models/ready/villain2/villain2.anim",
 
+			"assets/models/ready/bucket/bucket.json",
+			"assets/models/ready/bucket/bucket.anim",
+
 			"assets/background/background.png"
 		],
 		callback: function() {
@@ -102,7 +105,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 			var currentPath = globals.paths['newTraect'], //0.021916289813816547
 				birdPath = globals.paths['0.04654977540485561'],
-				groundPath = globals.paths['0.02847454440779984'];
+				groundPath = globals.paths['0.02847454440779984'],
+				bucketPath = globals.paths['0.2392671168781817'];
 
 			var background = obj().create({
 				src: 'assets/background/background.png',
@@ -154,6 +158,18 @@ document.addEventListener("DOMContentLoaded", function() {
 				interactive: true
 			});
 
+			var bucket = obj().create({
+				name: 'bucket',
+				src: 'assets/models/ready/bucket/bucket.anim',
+				x: 540,
+				y: 853,
+				z: 13,
+				pz: 5,
+				//step: 0,
+				//path: bucketPath.name,
+				interactive: false
+			});
+
 			//globals.hero.image.state.clearAnimation();
 
 			scene
@@ -162,9 +178,10 @@ document.addEventListener("DOMContentLoaded", function() {
 				})
 				.addObj(background)
 				.addObj(hero)
-				.addObj(villain)
-				.addObj(villain2)
-				.addObj(bird);
+				//.addObj(villain)
+				//.addObj(villain2)
+				//.addObj(bird)
+				.addObj(bucket);
 
 			viewport.init();
 
