@@ -1,8 +1,13 @@
 var viewport = (function() {
+	var magicYHeroShift = -150;
+
 
 	function viewportInitScale( p ) {
 		globals.viewport.resize = true;
 		globals.viewport.distance = Math.sqrt( ( p.x1 - p.x2 )*( p.x1 - p.x2 ) + ( p.y1 - p.y2 )*( p.y1 - p.y2 ) );
+
+		globals.viewport.sceneX = scene.playGround.position.x - globals.objects['hero'].image.position.x * (1 - globals.viewport.scale);
+		globals.viewport.sceneY = scene.playGround.position.y - (globals.objects['hero'].image.position.y + magicYHeroShift) * (1 - globals.viewport.scale);
 	}
 
 	function viewportProcessScale( p ) {
@@ -16,15 +21,33 @@ var viewport = (function() {
 		}
 
 		var x = (globals.objects['hero'].image.position.x) * (1-k),
-			y = (globals.objects['hero'].image.position.y - 150) * (1-k); // Magic number
+			y = (globals.objects['hero'].image.position.y + magicYHeroShift) * (1-k),
+			rx = globals.viewport.sceneX + x,
+			ry = globals.viewport.sceneY + y,
+			maxYShift = 800 * (1 - globals.scale * k);
+
+		rx = (rx > 0)
+			? 0
+			: rx;
+
+		ry = ry < maxYShift
+			? maxYShift
+			: ry;
+
+		ry = (ry > 0)
+			? 0
+			: ry;
 
 		scene.playGround.scale = {
 			x: k,
 			y: k
 		};
 
-		scene.playGround.position.x = x;
-		scene.playGround.position.y = y;
+		scene.playGround.position.x = rx;
+		scene.playGround.position.y = ry;
+
+		globals.viewport.x = x;
+		globals.viewport.y = y;
 	}
 
 	function viewportSaveScale() {

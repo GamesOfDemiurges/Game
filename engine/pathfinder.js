@@ -8,6 +8,29 @@ var pathfinder = (function() {
 			step = p.currentObject.step,
 			resultPath = [];
 
+		function getAnimation( p ) {
+			var resultAnimation = {
+				animation: p.animation,
+				speed: p.speed
+			}
+
+			// Приоритет анимаций —
+			// 1. Задана явно
+			// 2. Взята из параметров траектории для этого объкта
+			// 3. Первая анимация из всех доступных для этого объекта
+			if (!resultAnimation.animation || !resultAnimation.speed) {
+				if (!!globals.paths[ p.pathId ].objects && !!globals.paths[ p.pathId ].objects[ p.obj ] ) {
+					resultAnimation.animation = globals.paths[ p.pathId ].objects[ p.obj ].animation;
+					resultAnimation.speed = globals.paths[ p.pathId ].objects[ p.obj ].speed;
+				} else {
+					resultAnimation.animation = globals.objects[ p.obj ].image.spineData.animations[0].name
+					resultAnimation.speed = 0;
+				}
+			}
+
+			return resultAnimation;
+		}
+
 		// Вычисляет целевой targetChain на промежуточных путях, а также шаг,
 		// возникающий после достижения этого targetChain
 		function getServicePoint(path0, path1) {
@@ -61,15 +84,22 @@ var pathfinder = (function() {
 		}
 
 		if (p.pathArray.length > 1) {
-
 			for (var i = 1; i < p.pathArray.length; i++) {
+				var pathId = p.pathArray[i-1],
+					objectAnimation = getAnimation({
+						obj: p.currentObject.id,
+						pathId: pathId,
+						animation: p.animationName,
+						speed: p.speedValue
+					});
+
 				servicePoints = getServicePoint( p.pathArray[i-1], p.pathArray[i] );
 
 				resultPath.push({
-					pathId: p.pathArray[i-1],
+					pathId: pathId,
 					targetChain: servicePoints.serviceChain,
-					animation: 'new',
-					speed: '2',
+					animation: objectAnimation.animation,
+					speed: objectAnimation.speed,
 					step: step
 				})
 
@@ -77,11 +107,21 @@ var pathfinder = (function() {
 			}
 		}
 
+
+
+		var pathId = p.pathArray[ p.pathArray.length-1 ],
+			objectAnimation = getAnimation({
+				obj: p.currentObject.id,
+				pathId: pathId,
+				animation: p.animationName,
+				speed: p.speedValue
+			});
+
 		resultPath.push({
-			pathId: p.pathArray[ p.pathArray.length-1 ],
+			pathId: pathId,
 			targetChain: p.targetChain,
-			animation: 'new',
-			speed: '1',
+			animation: objectAnimation.animation,
+			speed: objectAnimation.speed,
 			step: step
 		})
 
@@ -110,7 +150,9 @@ var pathfinder = (function() {
 		processPaths( {
 			pathArray: pathArray,
 			targetChain: p.resultPath.chain,
-			currentObject: p.currentObject
+			currentObject: p.currentObject,
+			animationName: p.animationName,
+			speedValue: p.speedValue
 		} );
 	}
 
@@ -191,7 +233,7 @@ var pathfinder = (function() {
 
 	/**
 	* Перемещает объект точку, заданную координатами клика
-	* @param {Event} e
+	* @param
 	*/
 	function moveObjectByCoords( p ) {
 		var currentObject = globals.objects[p.id];
@@ -243,7 +285,9 @@ var pathfinder = (function() {
 
 		buildPathArray( {
 			resultPath: resultPath,
-			currentObject: currentObject
+			currentObject: currentObject,
+			animationName: p.animationName,
+			speedValue: p.speedValue
 		} )
 	}
 
@@ -261,7 +305,7 @@ var pathfinder = (function() {
 				moveObjectByCoords({
 					id: 'hero',
 					x: (e.changedTouches[0].pageX - scene.playGround.position.x) / globals.viewport.scale ,
-					y: e.changedTouches[0].pageY
+					y: (e.changedTouches[0].pageY - (scene.playGround.position.y / globals.scale)) / globals.viewport.scale
 				})
 			})
 
@@ -277,8 +321,10 @@ var pathfinder = (function() {
 				moveObjectByCoords({
 					id: 'hero',
 					x: (e.pageX - (scene.playGround.position.x / globals.scale)) / globals.viewport.scale,
-					y: e.pageY
+					y: (e.pageY - (scene.playGround.position.y / globals.scale)) / globals.viewport.scale
 				})
+
+
 			})
 
 		}

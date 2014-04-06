@@ -1,5 +1,3 @@
-/* canvas { -webkit-transform: scale3d(2, 2, 0) translate3d(200px, 110px, 0); }		*/
-
 html {
 	margin: 0;
 	padding: 0;
@@ -98,7 +96,6 @@ body._noscroll {
 	z-index: 10;
 	top: 100px;
 	right: 10px;
-	width: 150px;
 	background-color: rgba(255, 255, 255, 0.5);
 	border: 1px black solid;
 	text-align: center;
@@ -116,7 +113,22 @@ body._noscroll {
 	}
 }
 
-.debug__control-traects select {
+.debug__control-data {
+	overflow: hidden;
+}
+
+.debug__control-traects,
+.debug__control-objects {
+	width: 150px;
+	float: left;
+}
+
+.debug__control-traects {
+	/*margin-right: 10px;*/
+}
+
+.debug__control-traects select,
+.debug__control-objects select {
 	display: block;
 	width: 90%;
 	margin: 0 auto 3px;
@@ -129,4 +141,9 @@ body._noscroll {
 	font-size: 12px;
 	font-family: Verdana, sans-serif;
 	margin: 5px 10px 7px;
+}
+
+.debug__control-traects-speed {
+	width: 30px;
+	margin-right: 5px;
 }

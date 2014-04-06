@@ -95,6 +95,11 @@ function obj() {
 
 				globals.objects[ id ] = _this;
 
+				relay.drop({
+					obj: id,
+					type: 'objectAdded'
+				});
+
 				/*if (_this.animated) {
 					var animations = _this.image.state.data.skeletonData.animations;
 					_this.image.state.setAnimationByName( animations[animations.length-1].name , true);
@@ -132,8 +137,12 @@ function obj() {
 		move: function ( p ) {
 			var _this = this;
 
+			if (p.y !== undefined) {
+				_this.image.position.y = p.y;
+			}
+
 			if (p.x !== undefined) {
-				var dx = p.x - _this.image.position.x
+				var dx = p.x - _this.image.position.x;
 
 				// Идем назад
 				if ( dx < 0 ) {
@@ -155,20 +164,20 @@ function obj() {
 
 				_this.image.position.x = p.x;
 
-				if ( (_this.id == 'hero') && ((Math.abs(_this.image.position.x - scene.playGround.position.x)) > scene.width/2) ) {
+				if ( _this.id == 'hero' ) {
 
-					if (scene.playGround.position.x > -2150  ) { // TODO: Clean
-						scene.playGround.position.x = scene.width/2 - _this.image.position.x;
+					var screenHalfWidth = scene.width / 2 / globals.viewport.scale,
+						screenHalfHeight = scene.height / 2 / globals.viewport.scale,
+						dx1 = (_this.image.position.x - screenHalfWidth ) * globals.viewport.scale,
+						dy1 = (_this.image.position.y - (150/globals.scale) - screenHalfHeight ) * globals.viewport.scale;
 
-						scene.move({
-							dx: dx /2
-						})
-					}
+					scene.move({
+						dx: (0-dx1),
+						dy: (0-dy1)
+					})
+
 				}
-			}
 
-			if (p.y !== undefined) {
-				_this.image.position.y = p.y;
 			}
 
 			if (p.z !== undefined) {
@@ -183,13 +192,16 @@ function obj() {
 
 		//p.animation
 		animate: function( p ) {
-			var _this = this;
+			var _this = this,
+				callback = p.callback || function() {};
 
 			_this.image.state.setAnimationByName( p.animation , false);
 			var duration = _this.image.state.current.duration * 1000,
 				animationId = Math.random();
 
 			setTimeout(function() {
+				callback();
+
 				relay.drop({
 					obj: _this,
 					type: 'endAnimation',

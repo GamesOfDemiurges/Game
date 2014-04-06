@@ -5,62 +5,124 @@ var queue = (function() {
 	function processQueue() {
 		var removedObjects = [];
 
+		// Очистка исполненных объектов
 		function removeObjects() {
 			for (var i = 0; i < removedObjects.length; i++) {
 				delete objects[removedObjects[i]];
 			}
 		}
 
+		// Перебираются все анимируемые объекты (всё, что есть в очереди)
 		for (var obj in objects) {
 			var objectPathsLength = objects[obj].length;
 
+			// Если у текущего объекта в очереди есть цепочки анимаций на исполнение,
+			// обрабатывается текущая первая из них
 			if (objectPathsLength) {
-				move.setMovement({
-					id: obj,
-					path: objects[obj][0].pathId,
-					chain: objects[obj][0].targetChain,
-					animation: objects[obj][0].animation || 'new',
-					speed: objects[obj][0].speed || 1,
-					callback: function() {
-						globals.objects[obj].step = objects[obj][1]
-							? objects[obj][1].step
-							: globals.objects[obj].step;
 
-						var oldPath = objects[obj].shift();
+				// Если анимация происходит на месте,
+				// просто вызовем метод однократного проигрывания анимации.
+				// на время проигрывания анимации выставим временный флаг, предотвращающий исполнение
+				// следующих анимаций в очереди, после завершения проигрывания снимем этот флаг
+				if (!objects[obj][0].speed) {
 
-						if (!objects[obj].length) {
-							//globals.objects[ obj ].image.state.setAnimationByName("stop", false); // STOP
+					if (!objects[obj][0].playingNow) {
+						globals.objects[obj].animate({
+							animation: objects[obj][0].animation,
+							callback: function() {
+								// Сохраняем путь
+								globals.objects[obj].path = objects[obj][0].pathId;
 
-							relay.drop({
-								obj: obj,
-								graphId: graph.getGraphIdByStep({
-									path: globals.objects[obj].path,
-									step: globals.objects[obj].step
-								}),
-								type: 'stop'
-							});
+								// Если только что завершенная анимация объекта не последняя в его цепочке,
+								// значение текущего шага устанавливается на первое из следующей анимации в цепочке
+								globals.objects[obj].step = objects[obj][1]
+									? objects[obj][1].step
+									: globals.objects[obj].step;
 
-						} else {
-							relay.drop({
-								obj: obj,
-								graphId: graph.getGraphIdByStep({
-									path: objects[obj][0].pathId,
-									step: globals.objects[obj].step
-								}),
-								type: 'breakpoint'
-							});
-						}
+								// После завершения исполнения анимации выкинуть её из цепочки объекта
+								// а также те идущие непосредственно за ней, если их скорость == 0
+								while (!objects[obj][0].speed) {
+									var oldPath = objects[obj].shift();
+								}
+
+								relay.drop({
+									obj: obj,
+									graphId: graph.getGraphIdByStep({
+										path: globals.objects[obj].path,
+										step: globals.objects[obj].step
+									}),
+									type: 'stop'
+								});
+							}
+						})
+						objects[obj][0].playingNow = true;
+					} else {
+						continue;
 					}
-				})
+
+				} else {
+					// Анимация происходит поступательно — задана скорость перемещения
+
+					move.setMovement({
+						id: obj,
+						path: objects[obj][0].pathId,
+						chain: objects[obj][0].targetChain,
+						animation: objects[obj][0].animation,
+						speed: objects[obj][0].speed,
+						callback: function() {
+							// Если только что завершенная анимация объекта не последняя в его цепочке,
+							// значение текущего шага устанавливается на первое из следующей анимации в цепочке
+							globals.objects[obj].step = objects[obj][1]
+								? objects[obj][1].step
+								: globals.objects[obj].step;
+
+							// После завершения исполнения анимации выкинуть её из цепочки объекта
+							var oldPath = objects[obj].shift();
+
+							if (!objects[obj].length) {
+								// Цепочка анимаций закончилась, нужно остановиться
+
+								//globals.objects[ obj ].image.state.setAnimationByName("stop", false); // STOP
+
+								relay.drop({
+									obj: obj,
+									graphId: graph.getGraphIdByStep({
+										path: globals.objects[obj].path,
+										step: globals.objects[obj].step
+									}),
+									type: 'stop'
+								});
+
+							} else {
+								// Закончилась только текущая анимация, промежуточное сообщение
+
+								relay.drop({
+									obj: obj,
+									graphId: graph.getGraphIdByStep({
+										path: objects[obj][0].pathId,
+										step: globals.objects[obj].step
+									}),
+									type: 'breakpoint'
+								});
+							}
+						}
+					})
+
+				}
+
 
 			} else {
+				// Если цепочка анимаций для объекта пустая, добавляем его на вычистку из очереди
+				// Удалять будем по завершении цикла всё вместе, поэтому массив
 				removedObjects.push(obj);
 			}
 
 		}
 
+		// Удалить объекты без цепочек анимаций
 		removeObjects();
 
+		// Запустить цикл очереди заново
 		requestAnimationFrame( function() {
 			processQueue();
 		} );
@@ -68,6 +130,12 @@ var queue = (function() {
 
 	return {
 
+		// Добавляет анимацию в очередь.
+		// Если такой объект уже есть в очереди,
+		// добавленная анимация будет выполнена сразу же после уже запланированных для данного объекта.
+		// Очередь обрабатывает все анимируемые объекты со скоростью ~ 60 раз в секунду.
+		// После того, как цепочка анимаций для объекта полностью выполнена, он автоматически выкидывается из очереди
+		//
 		// p.objectId
 		// p.paths
 		addToObjPaths: function( p ) {
@@ -85,6 +153,9 @@ var queue = (function() {
 			return this;
 		},
 
+		// Запускает агент очереди;
+		// Агент крутится в фоне и следит за добавлением объектов в очереди
+		// Как только в очередь добавляется объект, начинается исполнение его анимации
 		startQueue: function() {
 			processQueue();
 

@@ -1,12 +1,14 @@
 // Bird
-/*document.addEventListener('stop', function( p ) {
+document.addEventListener('stop', function( p ) {
 	if (p.detail.obj == 'bird' && p.detail.graphId == '9') {
 
 		setTimeout(function() {
 			pathfinder.moveObjectByChain( {
 				id: 'bird',
 				path: '0.04654977540485561',
-				chain: 0
+				chain: 0,
+				animationName: 'bird',
+				speedValue: 4
 			})
 
 		}, 1000)
@@ -18,13 +20,15 @@
 			pathfinder.moveObjectByChain( {
 				id: 'bird',
 				path: '0.04654977540485561',
-				chain: 3
+				chain: 3,
+				animationName: 'bird',
+				speedValue: 4
 			})
 
 		}, 1000)
 
 	}
-})*/
+})
 
 /*
 document.addEventListener('stop', function( p ) {

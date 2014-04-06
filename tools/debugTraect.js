@@ -41,6 +41,39 @@ var debugTraect = function debugTraect() {
 		return currentPath;
 	}
 
+	function getCurrentObject() {
+		var objectsListItem = document.querySelectorAll('.debug__control-objects-list option'),
+			objectId,
+			currentObject = false;
+
+		for (var i = 0; i < objectsListItem.length; i++) {
+			if (!!objectsListItem[i].selected) {
+				objectId = objectsListItem[i].getAttribute('value');
+				break;
+			}
+		}
+
+		if (!!globals.objects[objectId]) {
+			currentObject = globals.objects[objectId];
+		}
+
+		return currentObject;
+	}
+
+	function getCurrentAnimation() {
+		var animationListItem = document.querySelectorAll('.debug__control-objects-anim option'),
+			animationId = false;
+
+		for (var i = 0; i < animationListItem.length; i++) {
+			if (!!animationListItem[i].selected) {
+				animationId = animationListItem[i].getAttribute('value');
+				break;
+			}
+		}
+
+		return animationId;
+	}
+
 	function checkForBreakpath() {
 		var currentPath = getCurrentPath(),
 			checkbox = document.querySelector('.debug__control-traects-break');
@@ -56,10 +89,36 @@ var debugTraect = function debugTraect() {
 		}
 	}
 
+	function setDetachButtonStatus() {
+		var currentPath = getCurrentPath(),
+			currentObject = getCurrentObject(),
+			detachButton = document.querySelector('.debug__button_remove-object'),
+			animationListItem = document.querySelectorAll('.debug__control-objects-anim option'),
+			animationSpeedInput = document.querySelector('.debug__control-traects-speed');
+
+		if ( (!!currentPath.objects) && (currentPath.objects[currentObject.id]) ) {
+			detachButton.disabled = false;
+
+			animationSpeedInput.value = 0;
+			for (var i = 0; i < animationListItem.length; i++) {
+
+				if (animationListItem[i].getAttribute('value') == currentPath.objects[currentObject.id].animation ) {
+					animationListItem[i].selected = true;
+
+					animationSpeedInput.value = currentPath.objects[currentObject.id].speed;
+					break;
+				}
+			}
+		} else {
+			detachButton.disabled = true;
+			animationSpeedInput.value = 0;
+		}
+	}
+
 	function buildInterfaceFromPaths() {
 		var newItem,
 			tempPoint,
-			pathList = document.querySelector('.debug__control-traects select');
+			pathList = document.querySelector('.debug__control-traects .debug__control-traects-list');
 
 		for (var path in globals.paths) {
 			newItem = document.createElement('option');
@@ -287,7 +346,7 @@ var debugTraect = function debugTraect() {
 			newItem.setAttribute('value', name);
 			newItem.selected = true;
 
-			document.querySelector('.debug__control-traects select').appendChild(newItem);
+			document.querySelector('.debug__control-traects .debug__control-traects-list').appendChild(newItem);
 
 			addPath({
 				name: name
@@ -405,7 +464,7 @@ var debugTraect = function debugTraect() {
 		var currentTarget,
 			debugWrap = document.querySelector('.debug__wrap');
 
-		var pathList = document.querySelector('.debug__control-traects select'),
+		var pathList = document.querySelector('.debug__control-traects .debug__control-traects-list'),
 			tempPoint = {
 				x: 0,
 				y: 0
@@ -514,6 +573,46 @@ var debugTraect = function debugTraect() {
 					y: e.pageY
 				})
 			}
+
+			if (e.target.parentNode.className == 'debug__control-traects-list') {
+				e.stopPropagation();
+
+				var oldTraectName = e.target.getAttribute('value'),
+					newTraectName = window.prompt('Новое имя траектории: ', oldTraectName);
+
+				console.log(newTraectName);
+
+				// Заменить имя и id в списке траекторий отладчика
+				e.target.innerHTML = newTraectName;
+				e.target.setAttribute('value', newTraectName);
+
+				// Обновить глобальный список траекторий
+				globals.paths[newTraectName] = globals.paths[oldTraectName]; //JSON.parse( JSON.stringify( globals.paths[oldTraectName] ) );
+				globals.paths[newTraectName].name = newTraectName;
+				delete globals.paths[oldTraectName];
+
+				// Заменить id у всех объектов
+				for (var obj in globals.objects) {
+					if (globals.objects[obj].path == oldTraectName) {
+						globals.objects[obj].path = newTraectName;
+					}
+				}
+
+				// Перестроить траектории
+				utils.processPaths({
+					callback: function() {
+
+						// Построить граф
+						graph.buildGraph({
+							callback: function() {
+								//callback();
+								pathfinder.start();
+							}
+						});
+
+					}
+				});
+			}
 		})
 
 		debugPanel.addEventListener("click", function(e) {
@@ -578,12 +677,37 @@ var debugTraect = function debugTraect() {
 				});
 			}
 
-			// Переключение траектории
+			// Переключение траектории, выбор объектов, анимаций
 			if (e.target.tagName == 'OPTION') {
 				e.stopPropagation();
 
-				checkForBreakpath();
-				repaint = true;
+				if (e.target.parentNode.className == 'debug__control-traects-list') {
+					checkForBreakpath();
+					setDetachButtonStatus();
+					repaint = true;
+				}
+
+				if (e.target.parentNode.className == 'debug__control-objects-list') {
+					readObjectAnimations( e.target );
+					setDetachButtonStatus();
+				}
+
+				if (e.target.parentNode.className == 'debug__control-objects-anim') {
+					var currentObject = getCurrentObject(),
+						animationName = e.target.getAttribute('value');
+
+					if (currentObject !== false) {
+						currentObject.animate({
+							animation: animationName
+						})
+					}
+				}
+
+
+			}
+
+			if (e.target.tagName == 'SELECT') {
+				e.stopPropagation();
 			}
 
 			// Удаление траектории
@@ -626,31 +750,6 @@ var debugTraect = function debugTraect() {
 				repaint = true;
 			}
 
-			// Добавление модели
-			if (e.target.classList.contains('debug__button_add-model')) {
-				e.stopPropagation();
-
-				var currentPath = getCurrentPath();
-				if (!currentPath) return false;
-
-				/*if (currentPath.steps.length) {
-					newObj = obj().create({
-							src: 'assets/models/hero/images/hero_final.anim',
-							x: currentPath.steps[0].x,
-							y: currentPath.steps[0].y,
-							z: 15,
-							scale: 0.5,
-							hero: true,
-							step: 0,
-							path: currentPath.name
-						});
-
-					newObj.image.state.clearAnimation();
-
-					scene.addObj(newObj);
-				}*/
-			}
-
 			// Сохранение в файл
 			if (e.target.classList.contains('debug__button_save')) {
 				e.stopPropagation();
@@ -662,7 +761,7 @@ var debugTraect = function debugTraect() {
 					smallPaths[path] = {
 						name: path,
 						dots: [],
-						breakpath: globals.paths[path].breakpath || false
+						breakpath: globals.paths[path].breakpath || false,
 					};
 
 					for (var dot = 0; dot < globals.paths[path].dots.length; dot++) {
@@ -694,6 +793,10 @@ var debugTraect = function debugTraect() {
 							prevHandle: prevHandle
 						})
 					}
+
+					if ( (!!globals.paths[path].objects) && (Object.keys(globals.paths[path].objects).length) ) {
+						smallPaths[path].objects = JSON.parse( JSON.stringify(globals.paths[path].objects) )
+					}
 				}
 
 				// Создаем XHR
@@ -711,6 +814,48 @@ var debugTraect = function debugTraect() {
 				req.send(param);
 			}
 
+			// Счетчик скорости анимации
+			if (e.target.classList.contains('debug__control-traects-speed')) {
+				e.stopPropagation();
+			}
+
+			// Привязка анимации объекта к траектории
+			if (e.target.classList.contains('debug__button_remember-animation')) {
+				e.stopPropagation();
+
+				var currentPath = getCurrentPath(),
+					currentObject = getCurrentObject(),
+					currentAnimation = getCurrentAnimation();
+
+				if (currentPath && currentObject && currentAnimation) {
+					currentPath.objects = currentPath.objects || {};
+					currentPath.objects[currentObject.id] = {
+						animation: currentAnimation,
+						speed: parseInt(document.querySelector('.debug__control-traects-speed').value)
+					};
+				}
+
+				setDetachButtonStatus();
+
+			}
+
+			// Удаление объекта из привязки к пути
+			if (e.target.classList.contains('debug__button_remove-object')) {
+				e.stopPropagation();
+
+				var currentPath = getCurrentPath(),
+					currentObject = getCurrentObject()
+
+				delete currentPath.objects[currentObject.id];
+
+				if (!Object.keys( currentPath.objects ).length) {
+					delete currentPath.objects;
+				}
+
+				setDetachButtonStatus();
+			}
+
+			// Управляющие точки
 			if (e.target.classList.contains('debug__point') || e.target.classList.contains('debug__point-handle')) {
 				e.stopPropagation();
 			}
@@ -721,6 +866,40 @@ var debugTraect = function debugTraect() {
 			scene.playGround.position.x = (-1) * globals.scale * debugWrap.scrollLeft;
 		}
 
+	}
+
+	function readObjectAnimations( option ) {
+		var heroId = option.getAttribute('value'),
+			animationList = document.querySelector('.debug__control-objects-anim');
+
+		animationList.innerHTML = '';
+
+		for (var animation in globals.objects[heroId].image.spineData.animations) {
+			var newObject = document.createElement('option');
+			newObject.innerHTML = globals.objects[heroId].image.spineData.animations[animation].name;
+			newObject.setAttribute('value', globals.objects[heroId].image.spineData.animations[animation].name);
+
+			animationList.appendChild(newObject);
+		}
+	}
+
+	function readObjects() {
+		var objectList = document.querySelector('.debug__control-objects-list');
+
+		for (var object in globals.objects) {
+			var newObject = document.createElement('option');
+			newObject.innerHTML = globals.objects[object].id;
+			newObject.setAttribute('value', globals.objects[object].id);
+
+			objectList.appendChild(newObject);
+		}
+
+		var firstElement = document.querySelector('.debug__control-objects-list option');
+
+		if (firstElement !== null) {
+			firstElement.selected = true;;
+			readObjectAnimations(firstElement);
+		}
 	}
 
 	/* Init */;
@@ -746,6 +925,7 @@ var debugTraect = function debugTraect() {
 
 		defineDOMVars();
 		readTraect();
+		readObjects();
 		attachEvents();
 		render();
 	}

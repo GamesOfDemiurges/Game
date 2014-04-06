@@ -33,11 +33,13 @@ var scene = function scene() {
 
 			_this.scale = 800/masterCanvas.clientHeight;
 			_this.width = _this.scale * masterCanvas.clientWidth;
+			_this.height = _this.scale * masterCanvas.clientHeight;
 
 			renderer = new PIXI.CanvasRenderer(_this.width, 800, masterCanvas, false);
 			window.addEventListener('resize', function() {
 				_this.scale = 800/masterCanvas.clientHeight;
 				_this.width = _this.scale * masterCanvas.clientWidth;
+				_this.width = _this.scale * masterCanvas.clientHeight;
 
 				renderer.resize(_this.width, 800);
 			})
@@ -75,13 +77,26 @@ var scene = function scene() {
 		// p.dx
 		// p.dy
 		move: function ( p ) {
-			var _this = this;
+			var _this = this,
+				maxYShift = 800 * (1 - globals.scale * globals.viewport.scale);
 
-			_this.playGround.position.x -= (p.dx || 0);
-			_this.playGround.position.y -= (p.dy || 0);
+			_this.playGround.position.x = ( p.dx || _this.playGround.position.x );
+			_this.playGround.position.y = ( p.dy || _this.playGround.position.y );
+
+			_this.playGround.position.x = _this.playGround.position.x > 0
+				? 0
+				: _this.playGround.position.x;
+
+			_this.playGround.position.y = _this.playGround.position.y < maxYShift
+				? maxYShift
+				: _this.playGround.position.y;
+
+			_this.playGround.position.y = _this.playGround.position.y > 0
+				? 0
+				: _this.playGround.position.y;
 
 			if (debug) {
-				document.querySelector('.debug__wrap').scrollLeft = ( (_this.playGround.position.x -= (p.dx || 0)) / globals.scale * (-1));
+				document.querySelector('.debug__wrap').scrollLeft = (( p.dx || _this.playGround.position.x ) / globals.scale * (-1));
 			}
 
 			return _this;

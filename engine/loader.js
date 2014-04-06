@@ -91,7 +91,16 @@ document.addEventListener("DOMContentLoaded", function() {
 		],
 		callback: function() {
 
-			var currentPath = globals.paths['0.021916289813816547'],
+			relay
+				.listen('breakpoint')
+				.listen('start')
+				.listen('stop')
+				.listen('startAnimation')
+				.listen('endAnimation')
+				.listen('objectClick')
+				.listen('objectAdded');
+
+			var currentPath = globals.paths['newTraect'], //0.021916289813816547
 				birdPath = globals.paths['0.04654977540485561'],
 				groundPath = globals.paths['0.02847454440779984'];
 
@@ -161,24 +170,20 @@ document.addEventListener("DOMContentLoaded", function() {
 
 			queue.startQueue();
 
-			relay
-				.listen('breakpoint')
-				.listen('start')
-				.listen('stop')
-				.listen('startAnimation')
-				.listen('endAnimation')
-				.listen('objectClick');
-/*
-			pathfinder.moveObjectByChain( {
-				id: 'bird',
-				path: '0.04654977540485561',
-				chain: 3
-			})
-*/
 			if (debug) {
 				document.querySelector('.debug__wrap' ).style.display = "block";
 				debugTraect.init();
 			}
+
+/*
+			pathfinder.moveObjectByChain( {
+				id: 'bird',
+				path: '0.04654977540485561',
+				chain: 3,
+				animationName: 'bird',
+				speedValue: 4
+			})
+*/
 
 		}
 	})
