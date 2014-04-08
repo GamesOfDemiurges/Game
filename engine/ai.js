@@ -5,7 +5,7 @@ document.addEventListener('stop', function( p ) {
 		setTimeout(function() {
 			pathfinder.moveObjectByChain( {
 				id: 'bird',
-				path: '0.04654977540485561',
+				path: 'birdTreePath',
 				chain: 0,
 				animationName: 'bird',
 				speedValue: 4
@@ -19,7 +19,7 @@ document.addEventListener('stop', function( p ) {
 		setTimeout(function() {
 			pathfinder.moveObjectByChain( {
 				id: 'bird',
-				path: '0.04654977540485561',
+				path: 'birdTreePath',
 				chain: 3,
 				animationName: 'bird',
 				speedValue: 4

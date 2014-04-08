@@ -103,10 +103,9 @@ document.addEventListener("DOMContentLoaded", function() {
 				.listen('objectClick')
 				.listen('objectAdded');
 
-			var currentPath = globals.paths['newTraect'], //0.021916289813816547
-				birdPath = globals.paths['0.04654977540485561'],
-				groundPath = globals.paths['0.02847454440779984'],
-				bucketPath = globals.paths['0.2392671168781817'];
+			var currentPath = 'stair2',
+				birdPath = 'birdTreePath',
+				groundPath = 'groundTreeToLeft';
 
 			var background = obj().create({
 				src: 'assets/background/background.png',
@@ -122,7 +121,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				pz: 10,
 				scale: 0.4,
 				step: 0,
-				path: currentPath.name,
+				path: currentPath,
 				interactive: true
 			});
 
@@ -133,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				pz: 5,
 				scale: 0.4,
 				step: 0,
-				path: groundPath.name,
+				path: groundPath,
 				interactive: true
 			});
 
@@ -144,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				pz: 5,
 				scale: 1,
 				step: 500,
-				path: groundPath.name,
+				path: groundPath,
 				interactive: true
 			});
 
@@ -154,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				z: 15,
 				pz: 5,
 				step: 0,
-				path: birdPath.name,
+				path: birdPath,
 				interactive: true
 			});
 
@@ -178,9 +177,9 @@ document.addEventListener("DOMContentLoaded", function() {
 				})
 				.addObj(background)
 				.addObj(hero)
-				//.addObj(villain)
-				//.addObj(villain2)
-				//.addObj(bird)
+				.addObj(villain)
+				.addObj(villain2)
+				.addObj(bird)
 				.addObj(bucket);
 
 			viewport.init();
@@ -192,15 +191,13 @@ document.addEventListener("DOMContentLoaded", function() {
 				debugTraect.init();
 			}
 
-/*
 			pathfinder.moveObjectByChain( {
 				id: 'bird',
-				path: '0.04654977540485561',
+				path: birdPath,
 				chain: 3,
 				animationName: 'bird',
 				speedValue: 4
 			})
-*/
 
 		}
 	})
