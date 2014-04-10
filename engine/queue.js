@@ -82,7 +82,9 @@ var queue = (function() {
 							if (!objects[obj].length) {
 								// Цепочка анимаций закончилась, нужно остановиться
 
-								//globals.objects[ obj ].image.state.setAnimationByName("stop", false); // STOP
+								if (obj == 'hero') {
+									globals.objects[ obj ].image.state.setAnimationByName("stop", false); // STOP
+								}
 
 								relay.drop({
 									obj: obj,

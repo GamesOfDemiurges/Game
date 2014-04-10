@@ -171,6 +171,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
 			//globals.hero.image.state.clearAnimation();
 
+			globals.objects['hero'].image.stateData.setMixByName("new", "stairCaseWalk", 0);
+			globals.objects['hero'].image.stateData.setMixByName("new", "stop", 0.3);
+
 			scene
 				.init({
 					canvasId: 'view'

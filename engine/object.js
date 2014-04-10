@@ -8,7 +8,6 @@ function obj() {
 		pz = 1,
 		step = null,
 		path = null;
-
 	/* Public */
 
 	return {
@@ -100,16 +99,6 @@ function obj() {
 					type: 'objectAdded'
 				});
 
-				/*if (_this.animated) {
-					var animations = _this.image.state.data.skeletonData.animations;
-					_this.image.state.setAnimationByName( animations[animations.length-1].name , true);
-				}*/
-
-				/*if (_this.image.state.data.skeletonData.skins.length > 1) {
-					_this.image.skeleton.setSkinByName("goblin");
-					_this.image.skeleton.setSlotsToSetupPose();
-				}*/
-
 			} else {
 				_this.type = 'image';
 				_this.src = p.src;
@@ -148,7 +137,7 @@ function obj() {
 				if ( dx < 0 ) {
 
 					// Автоматический разворот модели в зависимости от направления движения
-					if (_this.image.scale.x > 0 ) {
+					if ( (_this.image.state.current.name != 'stairCaseWalk') && (_this.image.scale.x > 0) ) {
 						_this.image.scale.x *= -1;
 					}
 				}
