@@ -24,7 +24,7 @@ var viewport = (function() {
 			y = (globals.objects['hero'].image.position.y + magicYHeroShift) * (1-k),
 			rx = globals.viewport.sceneX + x,
 			ry = globals.viewport.sceneY + y,
-			maxYShift = 800 * (1 - globals.scale * k);
+			maxYShift = (scene.height / globals.scale - (scene.height / globals.scale ) * (k) ) * globals.scale;
 
 		rx = (rx > 0)
 			? 0

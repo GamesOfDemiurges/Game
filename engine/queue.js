@@ -20,6 +20,12 @@ var queue = (function() {
 			// обрабатывается текущая первая из них
 			if (objectPathsLength) {
 
+				// Если текущая анимация объекта определна и отличается от заданной,
+				// сбросить её — новая анимация подхватится сама
+				if ((!!globals.objects[obj].image.state.current) && (objects[obj][0].animation !== globals.objects[obj].image.state.current.name) ) {
+					globals.objects[obj].image.state.clearAnimation();
+				}
+
 				// Если анимация происходит на месте,
 				// просто вызовем метод однократного проигрывания анимации.
 				// на время проигрывания анимации выставим временный флаг, предотвращающий исполнение
