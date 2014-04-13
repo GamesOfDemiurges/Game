@@ -1,5 +1,95 @@
+/*document.addEventListener('objectAdded', function(p){
+	if(p.detail.obj =='villain2') {
+		setTimeout(function(){
+			pathfinder.moveObjectByChain({
+				id: 'villain2',
+				path:'groundTreeToLeft',
+				chain: 0,
+				speedValue: 5
+			})
+		}, 1000)
+	}
+})
+
+
+document.addEventListener('stop', function(p){
+	if(p.detail.obj =='villain2' && p.detail.graphId =='5') {
+
+		pathfinder.moveObjectByChain({
+			id: 'villain',
+			path:'bucketToGround',
+			chain: 0
+		})
+
+	}
+})*/
+
+document.addEventListener('objectClick', function(p){
+	if(p.detail.obj =='bird' && globals.objects['hero'].step == 126 ){
+		pathfinder.moveObjectByChain( {
+			id: 'bird',
+			path: 'birdTreePath',
+			chain: 3,
+			animationName: 'bird',
+			speedValue: 4
+		})
+
+		setTimeout(function() {
+			globals.paths['treeToBucket'].breakpath = false;
+
+			var now = new Date().getTime();
+
+			graph.buildGraph({
+				callback: function() {
+					console.log(now - new Date().getTime(), 'ms');
+				}
+			});
+		}, 1000)
+	}
+})
+
+/*
+document.addEventListener('stop', function(p){
+	if(p.detail.obj =='villain' && p.detail.graphId =='3') {
+
+		pathfinder.moveObjectByChain({
+			id: 'villain2',
+			path:'groundTreeToLeft',
+			chain: 5
+		})
+
+	}
+})
+*/
+document.addEventListener('stop', function(p){
+	/*if(p.detail.obj =='villain2' && p.detail.graphId =='5') {
+		setTimeout(function(){
+			pathfinder.moveObjectByChain({
+				id: 'villain2',
+				path:'groundTreeToLeft',
+				chain: 5,
+				speedValue: 5
+			})
+		}, 1000)
+	}
+
+	if(p.detail.obj =='villain2' && p.detail.graphId =='6') {
+		setTimeout(function(){
+			pathfinder.moveObjectByChain({
+				id: 'villain2',
+				path:'groundTreeToLeft',
+				chain: 0,
+				speedValue: 5
+			})
+		}, 1000)
+	}*/
+})
+
+
+
+
 // Bird
-document.addEventListener('stop', function( p ) {
+/*document.addEventListener('stop', function( p ) {
 	if (p.detail.obj == 'bird' && p.detail.graphId == '9') {
 
 		setTimeout(function() {
@@ -28,7 +118,7 @@ document.addEventListener('stop', function( p ) {
 		}, 1000)
 
 	}
-})
+})*/
 
 /*
 document.addEventListener('stop', function( p ) {

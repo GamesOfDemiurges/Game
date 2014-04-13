@@ -193,7 +193,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				document.querySelector('.debug__wrap' ).style.display = "block";
 				debugTraect.init();
 			}
-
+/*
 			pathfinder.moveObjectByChain( {
 				id: 'bird',
 				path: birdPath,
@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				animationName: 'bird',
 				speedValue: 4
 			})
-
+*/
 		}
 	})
 
