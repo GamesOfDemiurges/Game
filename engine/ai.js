@@ -10,8 +10,31 @@
 		}, 1000)
 	}
 })
+document.addEventListener('stop', function(p){
+	if(p.detail.obj =='villain2' && p.detail.graphId =='5') {
+		setTimeout(function(){
+			pathfinder.moveObjectByChain({
+				id: 'villain2',
+				path:'groundTreeToLeft',
+				chain: 5,
+				speedValue: 5
+			})
+		}, 1000)
+	}
 
-
+	if(p.detail.obj =='villain2' && p.detail.graphId =='6') {
+		setTimeout(function(){
+			pathfinder.moveObjectByChain({
+				id: 'villain2',
+				path:'groundTreeToLeft',
+				chain: 0,
+				speedValue: 5
+			})
+		}, 1000)
+	}
+})
+*/
+/*
 document.addEventListener('stop', function(p){
 	if(p.detail.obj =='villain2' && p.detail.graphId =='5') {
 
@@ -22,8 +45,14 @@ document.addEventListener('stop', function(p){
 		})
 
 	}
+})
+*/
+/*
+document.addEventListener('stop', function (p){
+	if(p.detail.obj =='hero' && p.detail.graphId =='4'){}
+	
+	????? Как присвоить  точке 4 анимацию "ReachOut" главному герою??
 })*/
-
 document.addEventListener('objectClick', function(p){
 	if(p.detail.obj =='bird' && globals.objects['hero'].step == 126 ){
 		pathfinder.moveObjectByChain( {
@@ -61,29 +90,7 @@ document.addEventListener('stop', function(p){
 	}
 })
 */
-document.addEventListener('stop', function(p){
-	/*if(p.detail.obj =='villain2' && p.detail.graphId =='5') {
-		setTimeout(function(){
-			pathfinder.moveObjectByChain({
-				id: 'villain2',
-				path:'groundTreeToLeft',
-				chain: 5,
-				speedValue: 5
-			})
-		}, 1000)
-	}
 
-	if(p.detail.obj =='villain2' && p.detail.graphId =='6') {
-		setTimeout(function(){
-			pathfinder.moveObjectByChain({
-				id: 'villain2',
-				path:'groundTreeToLeft',
-				chain: 0,
-				speedValue: 5
-			})
-		}, 1000)
-	}*/
-})
 
 
 
