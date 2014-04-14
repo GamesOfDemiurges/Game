@@ -146,7 +146,7 @@ function obj() {
 				if ( dx > 0 ) {
 
 					// Автоматический разворот модели в зависимости от направления движения
-					if (_this.image.scale.x < 0)  {
+					if ( (_this.image.state.current.name != 'stairCaseWalk') && (_this.image.scale.x < 0) )  {
 						_this.image.scale.x *= -1;
 					}
 				}
@@ -158,7 +158,7 @@ function obj() {
 					var screenHalfWidth = scene.width / 2 / globals.viewport.scale,
 						screenHalfHeight = scene.height / 2 / globals.viewport.scale,
 						dx1 = (_this.image.position.x - screenHalfWidth ) * globals.viewport.scale,
-						dy1 = (_this.image.position.y - (150/globals.scale) - screenHalfHeight ) * globals.viewport.scale;
+						dy1 = (_this.image.position.y - (50/globals.scale) - screenHalfHeight ) * globals.viewport.scale;
 
 					scene.move({
 						dx: (0-dx1),

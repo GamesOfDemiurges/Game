@@ -160,8 +160,8 @@ document.addEventListener("DOMContentLoaded", function() {
 			var bucket = obj().create({
 				name: 'bucket',
 				src: 'assets/models/ready/bucket/bucket.anim',
-				x: 540,
-				y: 853,
+				x: 530,
+				y: 293,
 				z: 13,
 				pz: 5,
 				//step: 0,

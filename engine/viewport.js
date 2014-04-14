@@ -1,5 +1,5 @@
 var viewport = (function() {
-	var magicYHeroShift = -150;
+	var magicYHeroShift = 0;
 
 
 	function viewportInitScale( p ) {

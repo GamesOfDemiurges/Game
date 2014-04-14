@@ -50,11 +50,11 @@ document.addEventListener('stop', function(p){
 /*
 document.addEventListener('stop', function (p){
 	if(p.detail.obj =='hero' && p.detail.graphId =='4'){}
-	
+
 	????? Как присвоить  точке 4 анимацию "ReachOut" главному герою??
 })*/
-document.addEventListener('objectClick', function(p){
-	if(p.detail.obj =='bird' && globals.objects['hero'].step == 126 ){
+document.addEventListener('objectClick', function( p ) {
+	if( p.detail.obj =='bird' && globals.objects['hero'].step == 126 ){
 		pathfinder.moveObjectByChain( {
 			id: 'bird',
 			path: 'birdTreePath',
@@ -66,14 +66,50 @@ document.addEventListener('objectClick', function(p){
 		setTimeout(function() {
 			globals.paths['treeToBucket'].breakpath = false;
 
-			var now = new Date().getTime();
-
 			graph.buildGraph({
 				callback: function() {
-					console.log(now - new Date().getTime(), 'ms');
+
+					pathfinder.moveObjectByChain( {
+						id: 'hero',
+						path: 'treeToBucket',
+						chain: 0,
+						animationName: 'new',
+						speedValue: 3
+					})
+
+					setTimeout(function() {
+						globals.objects['hero'].image.scale.x *= -1;
+
+						globals.objects['bucket'].animate({
+							animation: 'bucket',
+							callback: function() {
+
+								pathfinder.moveObjectByChain( {
+									id: 'hero',
+									path: 'groundTreeToLeft',
+									chain: 1
+								})
+
+							}
+						})
+
+					}, 1000)
+
 				}
 			});
 		}, 1000)
+	}
+})
+
+document.addEventListener('breakpoint', function( p ) {
+	if (p.detail.obj == 'hero' && p.detail.graphId == '5' && (!globals.triggers.heroOnTheGround)) {
+		globals.paths['bucketToGround'].breakpath = true;
+
+		graph.buildGraph({
+			callback: function() {
+				globals.triggers.heroOnTheGround = true;
+			}
+		});
 	}
 })
 

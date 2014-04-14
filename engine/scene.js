@@ -42,6 +42,10 @@ var scene = function scene() {
 				_this.height = _this.scale * masterCanvas.clientHeight;
 
 				renderer.resize(_this.width, 800);
+
+				if (!!graph) {
+					graph.buildGraph({});
+				}
 			})
 
 			// Контейнер сцены
