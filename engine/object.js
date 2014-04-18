@@ -67,7 +67,7 @@ function obj() {
 				if (p.interactive) {
 					_this.image.setInteractive(true);
 
-					_this.image.click = function(data) {
+					_this.image.click = _this.image.tap = function(data) {
 						if (globals.viewport.resize) return false;
 
 						globals.objectClicked = true;
