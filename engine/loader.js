@@ -5,7 +5,7 @@ var loader = (function() {
 		var assetsLoader = new PIXI.AssetLoader(p.resources),
 			callback = p.callback || function() {};
 
-		assetsLoader.onComplete = function() {
+		assetsLoader.onComplete = function() { console.log('Ресурсы загружены');
 			callback();
 		}
 
@@ -20,7 +20,7 @@ var loader = (function() {
 		readTraect.open("GET", '/tools/traect.json?' + new Date().getTime());
 		readTraect.onreadystatechange = function() {
 
-			if (readTraect.readyState==4) {
+			if (readTraect.readyState==4) { console.log('Траектории загружены')
 				globals.paths = JSON.parse(readTraect.responseText);
 
 				// Построить траектории
@@ -29,7 +29,7 @@ var loader = (function() {
 
 						// Построить граф
 						graph.buildGraph({
-							callback: function() {
+							callback: function() { console.log('Граф построен');
 								callback();
 								pathfinder.start();
 							}
@@ -90,6 +90,9 @@ document.addEventListener("DOMContentLoaded", function() {
 			"assets/models/ready/bucket/bucket.json",
 			"assets/models/ready/bucket/bucket.anim",
 
+			"assets/models/ready/semaphore/semaphore.json",
+			"assets/models/ready/semaphore/semaphore.anim",
+
 			"assets/background/background.png"
 		],
 		callback: function() {
@@ -105,7 +108,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 			var currentPath = 'stair2',
 				birdPath = 'birdTreePath',
-				groundPath = 'groundTreeToLeft';
+				groundPath = 'groundTreeToLeft',
+				semaphoreVillainPath = 'semaphoreVillainPath';
 
 			var background = obj().create({
 				src: 'assets/background/background.png',
@@ -131,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				z: 15,
 				pz: 5,
 				scale: 0.4,
-				step: 0,
+				step: 440,
 				path: groundPath,
 				interactive: true
 			});
@@ -142,8 +146,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				z: 15,
 				pz: 5,
 				scale: 1,
-				step: 500,
-				path: groundPath,
+				step: 0,
+				path: semaphoreVillainPath,
 				interactive: true
 			});
 
@@ -166,7 +170,14 @@ document.addEventListener("DOMContentLoaded", function() {
 				pz: 5,
 				//step: 0,
 				//path: bucketPath.name,
-				interactive: false
+			});
+
+			var semaphore = obj().create({
+				name: 'semaphore',
+				src: 'assets/models/ready/semaphore/semaphore.anim',
+				x: 1500,
+				y: 730,
+				z: 10,
 			});
 
 			//globals.hero.image.state.clearAnimation();
@@ -183,11 +194,14 @@ document.addEventListener("DOMContentLoaded", function() {
 				.addObj(villain)
 				.addObj(villain2)
 				.addObj(bird)
-				.addObj(bucket);
+				.addObj(bucket)
+				.addObj(semaphore);
 
 			viewport.init();
 
 			queue.startQueue();
+
+			console.log('Загрузка завершена');
 
 			if (debug) {
 				document.querySelector('.debug__wrap' ).style.display = "block";

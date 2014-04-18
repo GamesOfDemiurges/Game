@@ -302,6 +302,10 @@ var pathfinder = (function() {
 					return false;
 				}
 
+				if (globals.preventClick) {
+					return false;
+				}
+
 				moveObjectByCoords({
 					id: 'hero',
 					x: (e.changedTouches[0].pageX - (scene.playGround.position.x / globals.scale)) / globals.viewport.scale ,
@@ -315,6 +319,10 @@ var pathfinder = (function() {
 				if (globals.objectClicked || globals.viewport.resize) {
 					globals.objectClicked = false;
 					globals.viewport.resize = false;
+					return false;
+				}
+
+				if (globals.preventClick) {
 					return false;
 				}
 
