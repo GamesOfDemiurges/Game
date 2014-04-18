@@ -304,7 +304,7 @@ var pathfinder = (function() {
 
 				moveObjectByCoords({
 					id: 'hero',
-					x: (e.changedTouches[0].pageX - scene.playGround.position.x) / globals.viewport.scale ,
+					x: (e.changedTouches[0].pageX - (scene.playGround.position.x / globals.scale)) / globals.viewport.scale ,
 					y: (e.changedTouches[0].pageY - (scene.playGround.position.y / globals.scale)) / globals.viewport.scale
 				})
 			})

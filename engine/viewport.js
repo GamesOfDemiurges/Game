@@ -20,6 +20,11 @@ var viewport = (function() {
 			return false;
 		}
 
+		if (k > 2.5) {
+			globals.viewport.scale = 2.5;
+			return false;
+		}
+
 		var x = (globals.objects['hero'].image.position.x) * (1-k),
 			y = (globals.objects['hero'].image.position.y + magicYHeroShift) * (1-k),
 			rx = globals.viewport.sceneX + x,
