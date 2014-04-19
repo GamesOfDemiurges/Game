@@ -169,7 +169,7 @@ var Z = function() {
 
 			// Оч. грубо — удалим все элементы и нарисуем из списка всё заново
 			while (scene.playGround.children.length) {
-				playGround.removeChild(playGround.children[0]);
+				scene.playGround.removeChild(scene.playGround.children[0]);
 			}
 
 			while (currentPlain !== null) {

@@ -127,7 +127,8 @@ var pathfinder = (function() {
 
 		queue.addToObjPaths({
 			objectId: p.currentObject.id,
-			paths: resultPath
+			paths: resultPath,
+			callback: p.callback
 		})
 	}
 
@@ -152,7 +153,8 @@ var pathfinder = (function() {
 			targetChain: p.resultPath.chain,
 			currentObject: p.currentObject,
 			animationName: p.animationName,
-			speedValue: p.speedValue
+			speedValue: p.speedValue,
+			callback: p.callback
 		} );
 	}
 
@@ -287,7 +289,8 @@ var pathfinder = (function() {
 			resultPath: resultPath,
 			currentObject: currentObject,
 			animationName: p.animationName,
-			speedValue: p.speedValue
+			speedValue: p.speedValue,
+			callback: p.callback
 		} )
 	}
 

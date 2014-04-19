@@ -93,29 +93,43 @@ document.addEventListener("DOMContentLoaded", function() {
 			"assets/models/ready/semaphore/semaphore.json",
 			"assets/models/ready/semaphore/semaphore.anim",
 
-			"assets/background/background.png"
+			"assets/models/ready/butterfly/butterfly.json",
+			"assets/models/ready/butterfly/butterfly.anim",
+
+			"assets/background/background.png",
+			"assets/background/backgroundVillainPatch.png"
 		],
 		callback: function() {
 
 			relay
-				.listen('breakpoint')
+				/*.listen('breakpoint')
 				.listen('start')
 				.listen('stop')
 				.listen('startAnimation')
-				.listen('endAnimation')
+				.listen('endAnimation')*/
 				.listen('objectClick')
 				.listen('objectAdded');
 
 			var currentPath = 'stair2',
 				birdPath = 'birdTreePath',
 				groundPath = 'groundTreeToLeft',
-				semaphoreVillainPath = 'semaphoreVillainPath';
+				semaphoreVillainPath = 'semaphoreVillainPath',
+				butterflyPath = 'butterflyPath';
 
 			var background = obj().create({
 				src: 'assets/background/background.png',
+				name: 'background',
 				x: 0,
 				y: 0,
 				z: 5
+			});
+
+			var backgroundVillainPatch = obj().create({
+				src: 'assets/background/backgroundVillainPatch.png',
+				name: 'backgroundVillainPatch',
+				x: 1582,
+				y: 600,
+				z: 10
 			});
 
 			var hero = obj().create({
@@ -125,8 +139,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				pz: 10,
 				scale: 0.4,
 				step: 0,
-				path: currentPath,
-				interactive: true
+				path: currentPath
 			});
 
 			var villain = obj().create({
@@ -143,7 +156,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			var villain2 = obj().create({
 				name: 'villain2',
 				src: 'assets/models/ready/villain2/villain2.anim',
-				z: 15,
+				z: 7,
 				pz: 5,
 				scale: 1,
 				step: 0,
@@ -178,24 +191,39 @@ document.addEventListener("DOMContentLoaded", function() {
 				x: 1500,
 				y: 730,
 				z: 10,
+				interactive: true
 			});
+
+			var butterfly = obj().create({
+				name: 'butterfly',
+				src: 'assets/models/ready/butterfly/butterfly.anim',
+				scale: 0.35,
+				z: 15,
+				pz: 5,
+				step: 0,
+				path: butterflyPath,
+				interactive: true
+			})
 
 			//globals.hero.image.state.clearAnimation();
 
-			globals.objects['hero'].image.stateData.setMixByName("new", "stairCaseWalk", 0);
-			globals.objects['hero'].image.stateData.setMixByName("new", "stop", 0.3);
+			globals.objects.hero.image.stateData.setMixByName("new", "stairCaseWalk", 0);
+			globals.objects.hero.image.stateData.setMixByName("new", "stop", 0.3);
+			globals.objects.semaphore.image.stateData.setMixByName("trafficLight", "trafficLight_stop", 0.5);
 
 			scene
 				.init({
 					canvasId: 'view'
 				})
 				.addObj(background)
+				.addObj(backgroundVillainPatch)
 				.addObj(hero)
 				.addObj(villain)
 				.addObj(villain2)
 				.addObj(bird)
 				.addObj(bucket)
-				.addObj(semaphore);
+				.addObj(semaphore)
+				.addObj(butterfly);
 
 			viewport.init();
 
@@ -207,15 +235,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				document.querySelector('.debug__wrap' ).style.display = "block";
 				debugTraect.init();
 			}
-/*
-			pathfinder.moveObjectByChain( {
-				id: 'bird',
-				path: birdPath,
-				chain: 3,
-				animationName: 'bird',
-				speedValue: 4
-			})
-*/
+
 		}
 	})
 

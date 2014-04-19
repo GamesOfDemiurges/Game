@@ -47,7 +47,7 @@ var queue = (function() {
 
 								// После завершения исполнения анимации выкинуть её из цепочки объекта
 								// а также те идущие непосредственно за ней, если их скорость == 0
-								while (!objects[obj][0].speed) {
+								while ( (objects[obj].length) && (!objects[obj][0].speed) ) {
 									var oldPath = objects[obj].shift();
 								}
 
@@ -83,7 +83,8 @@ var queue = (function() {
 								: globals.objects[obj].step;
 
 							// После завершения исполнения анимации выкинуть её из цепочки объекта
-							var oldPath = objects[obj].shift();
+							var objectCallback = objects[obj].callback || function() {},
+								oldPath = objects[obj].shift();
 
 							if (!objects[obj].length) {
 								// Цепочка анимаций закончилась, нужно остановиться
@@ -91,6 +92,8 @@ var queue = (function() {
 								if (obj == 'hero') {
 									globals.objects[ obj ].image.state.setAnimationByName("stop", false); // STOP
 								}
+
+								objectCallback();
 
 								relay.drop({
 									obj: obj,
@@ -148,6 +151,7 @@ var queue = (function() {
 		// p.paths
 		addToObjPaths: function( p ) {
 			objects[p.objectId] = p.paths;
+			objects[p.objectId].callback = p.callback;
 
 			relay.drop({
 				obj: p.objectId,

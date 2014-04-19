@@ -6,54 +6,62 @@ document.addEventListener('objectClick', function( p ) {
 			// Запретить пользователю ходить на время анимации
 			globals.preventClick = true;
 
-			pathfinder.moveObjectByChain( {
-				id: 'bird',
-				path: 'birdTreePath',
-				chain: 3,
-				animationName: 'bird',
-				speedValue: 4
-			})
+			globals.objects.hero.animate({
+				animation: 'slope',
+				callback: function() {
 
-			setTimeout(function() {
-				// Разрешить спуститься
-				globals.paths.treeToBucket.breakpath = false;
+					// Разрешить спуститься
+					globals.paths.treeToBucket.breakpath = false;
 
-				graph.buildGraph({
-					callback: function() {
+					graph.buildGraph({
+						callback: function() {
 
-						// Дойти до ведра
-						pathfinder.moveObjectByChain( {
-							id: 'hero',
-							path: 'treeToBucket',
-							chain: 0,
-							animationName: 'new',
-							speedValue: 3
-						})
-
-						setTimeout(function() {
-							// Развернуть героя для спуска по веревке
-							globals.objects.hero.image.scale.x *= -1;
-
-							// Бросить ведро вниз
-							globals.objects.bucket.animate({
-								animation: 'bucket',
+							// Дойти до ведра
+							pathfinder.moveObjectByChain( {
+								id: 'hero',
+								path: 'treeToBucket',
+								chain: 0,
+								animationName: 'new',
+								speedValue: 3,
 								callback: function() {
 
-									// Спустить героя на землю
-									pathfinder.moveObjectByChain( {
-										id: 'hero',
-										path: 'groundTreeToLeft',
-										chain: 1
-									})
+									// Бросить ведро вниз
+									globals.objects.bucket.animate({
+										animation: 'bucket',
+										callback: function() {
 
+											// Развернуть героя для спуска по веревке
+											globals.objects.hero.image.scale.x *= -1;
+
+											// Спустить героя на землю
+											pathfinder.moveObjectByChain( {
+												id: 'hero',
+												path: 'groundTreeToLeft',
+												chain: 1
+											})
+
+										}
+									})
 								}
 							})
 
-						}, 1300)
+						}
+					});
+				}
+			})
 
-					}
-				});
-			}, 1000)
+			// Запустить птицу через таймер, потому что улетает в середине анимации
+			setTimeout(function() {
+				pathfinder.moveObjectByChain( {
+					id: 'bird',
+					path: 'birdTreePath',
+					chain: 3,
+					animationName: 'bird',
+					speedValue: 4
+				})
+
+			}, 400)
+
 		}
 
 		// Если потянуться за птицей с земли
@@ -118,279 +126,260 @@ document.addEventListener('objectClick', function( p ) {
 	}
 });
 
-// Семафор качается
+// Светофор качается
 document.addEventListener('objectAdded', function( p ) {
 	if (p.detail.obj == 'semaphore') {
 
 		function startSemaphore() {
-			globals.objects.semaphore.animate({
-				animation: 'trafficLight',
-				callback: function() {
-					startSemaphore();
-				}
-			})
+			if (!globals.triggers.stopSemaphore) {
+				globals.objects.semaphore.animate({
+					animation: 'trafficLight',
+					callback: function() {
+						startSemaphore();
+					}
+				})
+			}
 		}
 
 		startSemaphore();
+
+	}
+});
+
+// Положить птицу в Светофор
+document.addEventListener('objectClick', function( p ) {
+	if ( (p.detail.obj == 'semaphore') && (globals.triggers.semaphoreIsClickable) ) {
+
+		if ( (globals.objects.hero.path == 'semaphoreTurnOnPath') && (globals.objects.hero.step < 10) ) {
+
+			globals.triggers.stopSemaphore = true;
+
+			// Остановить качание светофора
+			globals.objects.semaphore.animate({
+				animation: 'trafficLight_stop'
+			})
+
+			// Герой тянется к светофору
+			globals.objects.hero.animate({
+				animation: 'ReachOut'
+			})
+
+			// Таймер, потому что до завершения анимации
+			setTimeout(function() {
+				// Показать птицу в светофоре
+				if (globals.triggers.butterflyWasCatched) {
+
+					globals.objects.butterfly.move({
+						z: 15
+					})
+
+					// Разрешить ходить за шлагбаум
+					globals.paths.semaphoreToTV.breakpath = false;
+					graph.buildGraph({
+						callback: function() {
+							alert('Шлагбаум поднялся!');
+						}
+					});
+				}
+			}, 400);
+		}
 	}
 });
 
 
-/*document.addEventListener('objectAdded', function(p){
-	if(p.detail.obj =='villain2') {
-		setTimeout(function(){
-			pathfinder.moveObjectByChain({
-				id: 'villain2',
-				path:'groundTreeToLeft',
-				chain: 0,
-				speedValue: 5
-			})
-		}, 1000)
-	}
-})
-document.addEventListener('stop', function(p){
-	if(p.detail.obj =='villain2' && p.detail.graphId =='5') {
-		setTimeout(function(){
-			pathfinder.moveObjectByChain({
-				id: 'villain2',
-				path:'groundTreeToLeft',
-				chain: 5,
-				speedValue: 5
-			})
-		}, 1000)
-	}
+// Бабочка летает
+document.addEventListener('objectAdded', function( p ) {
+	if (p.detail.obj == 'butterfly') {
 
-	if(p.detail.obj =='villain2' && p.detail.graphId =='6') {
-		setTimeout(function(){
-			pathfinder.moveObjectByChain({
-				id: 'villain2',
-				path:'groundTreeToLeft',
-				chain: 0,
-				speedValue: 5
-			})
-		}, 1000)
-	}
-})
-*/
-/*
-document.addEventListener('stop', function(p){
-	if(p.detail.obj =='villain2' && p.detail.graphId =='5') {
-
-		pathfinder.moveObjectByChain({
-			id: 'villain',
-			path:'bucketToGround',
-			chain: 0
-		})
-
-	}
-})
-*/
-/*
-document.addEventListener('stop', function (p){
-	if(p.detail.obj =='hero' && p.detail.graphId =='4'){}
-
-	????? Как присвоить  точке 4 анимацию "ReachOut" главному герою??
-})*/
-
-
-
-
-
-/*
-document.addEventListener('stop', function(p){
-	if(p.detail.obj =='villain' && p.detail.graphId =='3') {
-
-		pathfinder.moveObjectByChain({
-			id: 'villain2',
-			path:'groundTreeToLeft',
-			chain: 5
-		})
-
-	}
-})
-*/
-
-
-
-
-
-// Bird
-/*document.addEventListener('stop', function( p ) {
-	if (p.detail.obj == 'bird' && p.detail.graphId == '9') {
-
+		// setTimeout, потому что может не успеть проинициализироваться
 		setTimeout(function() {
 			pathfinder.moveObjectByChain( {
-				id: 'bird',
-				path: 'birdTreePath',
+				id: 'butterfly',
+				path: 'butterflyPath2',
 				chain: 0,
-				animationName: 'bird',
+				animationName: 'butterfly',
+				speedValue: 4
+			})
+		}, 1000)
+	}
+})
+
+function catchButterfly() {
+	globals.objects.hero.animate({
+		animation: 'catch',
+		callback: function() {
+			globals.triggers.butterflyWasCatched = true;
+			globals.preventClick = false;
+		}
+	})
+
+	pathfinder.moveObjectByChain( {
+		id: 'butterfly',
+		path: 'butterflyStopPath',
+		chain: 2,
+		animationName: 'butterfly',
+		speedValue: 10
+	})
+
+	// Скрыть птицу
+	setTimeout(function() {
+		globals.objects.butterfly.move({
+			z: 0
+		})
+	}, 100)
+}
+
+document.addEventListener('stop', function( p ) {
+	if (p.detail.obj == 'butterfly') {
+		if ( p.detail.graphId == 17 ) {
+			pathfinder.moveObjectByChain( {
+				id: 'butterfly',
+				path: 'butterflyPath2',
+				chain: 0,
+				animationName: 'butterfly',
 				speedValue: 4
 			})
 
-		}, 1000)
-	}
+		}
 
-	if (p.detail.obj == 'bird' && p.detail.graphId == '8') {
-
-		setTimeout(function() {
+		if ( p.detail.graphId == 18 ) {
 			pathfinder.moveObjectByChain( {
-				id: 'bird',
-				path: 'birdTreePath',
-				chain: 3,
-				animationName: 'bird',
+				id: 'butterfly',
+				path: 'butterflyPath3',
+				chain: 0,
+				animationName: 'butterfly',
 				speedValue: 4
 			})
 
-		}, 1000)
+			if ( (globals.triggers.butterflyCanBeCatched) &&
+				( ((globals.objects.hero.path == 'semaphoreBreakPath') && (globals.objects.hero.step < 10)) ||
+				((globals.objects.hero.path == 'treeToSemaphore') && (globals.objects.hero.step > 890 && globals.objects.hero.step < 900))) ) {
 
-	}
-})*/
+				globals.preventClick = true;
 
-/*
-document.addEventListener('stop', function( p ) {
-	if (p.detail.obj == 'hero' && p.detail.graphId == '4') {
-		globals.paths['0.2527436772361398'].breakpath = false;
-
-		graph.buildGraph({
-			callback: function() {
-				alert('Ведро! Автоспуск');
-
-				pathfinder.moveObjectByChain( {
-					id: 'hero',
-					path: '0.35202742647379637',
-					chain: 0
-				})
+				// С таймером, потому что ловля бабочки не в самом начале её движения
+				setTimeout(function() {
+					catchButterfly();
+				}, 1000)
 			}
-		});
-	}
-})
-
-
-document.addEventListener('stop', function( p ) {
-	if (p.detail.obj == 'hero' && p.detail.graphId == '15') {
-		globals.paths['0.1525857609231025'].breakpath = false;
-
-		graph.buildGraph({
-			callback: function() {
-				alert('Камень!');
-			}
-		});
-	}
-})
-
-document.addEventListener('stop', function( p ) {
-	if (p.detail.obj == 'hero' && p.detail.graphId == '20') {
-		globals.paths['0.048842963529750705'].breakpath = false;
-
-		graph.buildGraph({
-			callback: function() {
-				alert('Телевизор!');
-			}
-		});
-	}
-})
-
-document.addEventListener('stop', function( p ) {
-	if (p.detail.obj == 'hero' && p.detail.graphId == '19') {
-		globals.paths['0.4269534260965884'].breakpath = false;
-
-		graph.buildGraph({
-			callback: function() {
-				alert('Телевизор2!');
-			}
-		});
-	}
-})
-
-document.addEventListener('stop', function( p ) {
-	if (p.detail.obj == 'hero' && p.detail.graphId == '28') {
-		globals.paths['0.9639693887438625'].breakpath = false;
-
-		graph.buildGraph({
-			callback: function() {
-				alert('Мусор!');
-			}
-		});
-	}
-})
-*/
-
-
-
-/*
-document.addEventListener('stop', function( p ) {
-	if (p.detail.obj == 'hero1') {
-		if (p.detail.graphId == '3') {
-			setTimeout(function() {
-				pathfinder.moveObjectByChain( {
-					id: 'hero1',
-					path: '0.06227287882938981',
-					chain: 3
-				})
-			}, 500)
 		}
 
-		if (p.detail.graphId == '5') {
-			setTimeout(function() {
-				pathfinder.moveObjectByChain( {
-					id: 'hero1',
-					path: '0.08568654861301184',
-					chain: 4
-				})
-			}, 500)
+		if ( p.detail.graphId == 19 ) {
+			pathfinder.moveObjectByChain( {
+				id: 'butterfly',
+				path: 'butterflyPath4',
+				chain: 0,
+				animationName: 'butterfly',
+				speedValue: 4
+			})
+
+			if ( (globals.triggers.butterflyCanBeCatched) && (globals.objects.hero.path == 'treeToSemaphore') && (globals.objects.hero.step > 630 && globals.objects.hero.step < 740) ) {
+
+				globals.preventClick = true;
+
+				if (globals.objects.hero.step > 730) {
+
+					// С таймером, потому что ловля бабочки не в самом начале её движения
+					setTimeout(function() {
+						catchButterfly();
+					}, 1000);
+
+
+				} else {
+
+					// С таймером, потому что ловля бабочки не в самом начале её движения
+					setTimeout(function() {
+						catchButterfly();
+					}, 1500);
+				}
+			}
+		}
+
+		if ( p.detail.graphId == 20 ) {
+			pathfinder.moveObjectByChain( {
+				id: 'butterfly',
+				path: 'butterflyPath',
+				chain: 0,
+				animationName: 'butterfly',
+				speedValue: 3
+			})
 		}
 	}
-})
+});
 
-document.addEventListener('stop', function( p ) {
-	if (p.detail.obj == 'hero2') {
-		if (p.detail.graphId == '1') {
-			setTimeout(function() {
-				pathfinder.moveObjectByChain( {
-					id: 'hero2',
-					path: '0.8360544058959931',
-					chain: 0
-				})
-			}, 500)
+document.addEventListener('objectClick', function( p ) {
+	if (p.detail.obj == 'butterfly') {
+		if (globals.triggers.butterflyInerval) {
+			clearInterval(globals.triggers.butterflyInerval);
 		}
 
-		if (p.detail.graphId == '0') {
+		globals.triggers.butterflyCanBeCatched = true;
+
+		globals.triggers.butterflyInerval = setTimeout(function() {
+			globals.triggers.butterflyCanBeCatched = false;
+		}, 3000);
+	}
+});
+
+// Кинуть камень в злодея
+
+function dropToVillain() {
+
+	globals.objects.hero.animate({
+		animation: 'slope',
+		callback: function() {
+
+			globals.preventClick = false;
+
+			// С таймером, потому что камень должен долететь
 			setTimeout(function() {
+
+				globals.paths.semaphoreBreakPath.breakpath = false;
+
+				graph.buildGraph({
+					callback: function() {
+						globals.triggers.semaphoreIsClickable = true;
+					}
+				});
+
 				pathfinder.moveObjectByChain( {
-					id: 'hero2',
-					path: '0.8360544058959931',
-					chain: 9
-				})
-			}, 500)
+					id: 'villain2',
+					path: 'semaphoreVillainPath',
+					chain: 1,
+					animationName: 'down',
+					speedValue: 15
+				});
+			}, 300)
+		}
+	})
+}
+
+document.addEventListener('objectClick', function( p ) {
+	if (p.detail.obj == 'villain2') {
+
+		if (globals.objects.hero.path == 'treeToSemaphore') {
+
+			if (globals.objects.hero.step > 730) {
+				globals.preventClick = true;
+
+				if (globals.objects.hero.step < 890) {
+
+					pathfinder.moveObjectByChain( {
+						id: 'hero',
+						path: 'treeToSemaphore',
+						chain: 8,
+						animationName: 'new',
+						speedValue: 3,
+						callback: function() {
+							dropToVillain();
+						}
+					});
+				} else {
+					dropToVillain();
+				}
+
+			}
+
 		}
 	}
-})
-
-
-
-document.addEventListener('stop', function( p ) {
-	if (p.detail.obj == 'hero' && p.detail.graphId == '6' && (!globals.triggers.thirdHeroAdded)) {
-		var currentPath = globals.paths['0.8360544058959931'];
-
-		var hero2 = obj().create({
-			name: 'hero2',
-			src: 'assets/models/hero/images/hero_final.anim',
-			x: currentPath.steps[0].x,
-			y: currentPath.steps[0].y,
-			z: 15,
-			scale: 0.5,
-			step: 900,
-			path: currentPath.name
-		});
-
-		scene
-			.addObj(hero2);
-
-		pathfinder.moveObjectByChain( {
-			id: 'hero2',
-			path: '0.8360544058959931',
-			chain: 9
-		})
-	}
-})
-*/
+});

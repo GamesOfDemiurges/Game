@@ -874,12 +874,14 @@ var debugTraect = function debugTraect() {
 
 		animationList.innerHTML = '';
 
-		for (var animation in globals.objects[heroId].image.spineData.animations) {
-			var newObject = document.createElement('option');
-			newObject.innerHTML = globals.objects[heroId].image.spineData.animations[animation].name;
-			newObject.setAttribute('value', globals.objects[heroId].image.spineData.animations[animation].name);
+		if (!!globals.objects[heroId].image.spineData) {
+			for (var animation in globals.objects[heroId].image.spineData.animations) {
+				var newObject = document.createElement('option');
+				newObject.innerHTML = globals.objects[heroId].image.spineData.animations[animation].name;
+				newObject.setAttribute('value', globals.objects[heroId].image.spineData.animations[animation].name);
 
-			animationList.appendChild(newObject);
+				animationList.appendChild(newObject);
+			}
 		}
 	}
 
