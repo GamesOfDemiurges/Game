@@ -49,7 +49,7 @@ document.addEventListener('objectClick', function( p ) {
 								}
 							})
 
-						}, 1000)
+						}, 1300)
 
 					}
 				});
