@@ -96,6 +96,9 @@ document.addEventListener("DOMContentLoaded", function() {
 			"assets/models/ready/butterfly/butterfly.json",
 			"assets/models/ready/butterfly/butterfly.anim",
 
+			"assets/models/ready/tv/tv.json",
+			"assets/models/ready/tv/tv.anim",
+
 			"assets/background/background.png",
 			"assets/background/backgroundVillainPatch.png"
 		],
@@ -180,9 +183,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				x: 530,
 				y: 293,
 				z: 13,
-				pz: 5,
-				//step: 0,
-				//path: bucketPath.name,
+				pz: 5
 			});
 
 			var semaphore = obj().create({
@@ -205,8 +206,18 @@ document.addEventListener("DOMContentLoaded", function() {
 				interactive: true
 			})
 
-			//globals.hero.image.state.clearAnimation();
+			var tv = obj().create({
+				name: 'tv',
+				src: 'assets/models/ready/tv/tv.anim',
+				z: 20,
+				pz: 5,
+				x: 2370,
+				y: 840,
+				interactive: true
+			})
 
+
+			// Переходы между анимациями
 			globals.objects.hero.image.stateData.setMixByName("new", "stairCaseWalk", 0);
 			globals.objects.hero.image.stateData.setMixByName("new", "stop", 0.3);
 			globals.objects.semaphore.image.stateData.setMixByName("trafficLight", "trafficLight_stop", 0.5);
@@ -223,7 +234,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				.addObj(bird)
 				.addObj(bucket)
 				.addObj(semaphore)
-				.addObj(butterfly);
+				.addObj(butterfly)
+				.addObj(tv);
 
 			viewport.init();
 

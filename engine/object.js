@@ -179,6 +179,21 @@ function obj() {
 			return _this;
 		},
 
+		moveTo: function( p ) {
+			var _this = this;
+
+			pathfinder.moveObjectByChain({
+				id: _this.id,
+				path: p.path,
+				chain: p.chain,
+				animationName: p.animationName,
+				speedValue: p.speedValue,
+				callback: p.callback
+			});
+
+			return _this;
+		},
+
 		//p.animation
 		animate: function( p ) {
 			var _this = this,

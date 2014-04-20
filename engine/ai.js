@@ -17,8 +17,7 @@ document.addEventListener('objectClick', function( p ) {
 						callback: function() {
 
 							// Дойти до ведра
-							pathfinder.moveObjectByChain( {
-								id: 'hero',
+							globals.objects.hero.moveTo( {
 								path: 'treeToBucket',
 								chain: 0,
 								animationName: 'new',
@@ -34,8 +33,7 @@ document.addEventListener('objectClick', function( p ) {
 											globals.objects.hero.image.scale.x *= -1;
 
 											// Спустить героя на землю
-											pathfinder.moveObjectByChain( {
-												id: 'hero',
+											globals.objects.hero.moveTo( {
 												path: 'groundTreeToLeft',
 												chain: 1
 											})
@@ -52,8 +50,7 @@ document.addEventListener('objectClick', function( p ) {
 
 			// Запустить птицу через таймер, потому что улетает в середине анимации
 			setTimeout(function() {
-				pathfinder.moveObjectByChain( {
-					id: 'bird',
+				globals.objects.bird.moveTo( {
 					path: 'birdTreePath',
 					chain: 3,
 					animationName: 'bird',
@@ -75,8 +72,7 @@ document.addEventListener('objectClick', function( p ) {
 			// Птица улетает до того, как герой дотянется
 			setTimeout(function() {
 
-				pathfinder.moveObjectByChain( {
-					id: 'bird',
+				globals.objects.bird.moveTo( {
 					path: 'birdTreePath2',
 					chain: 3,
 					animationName: 'bird',
@@ -193,8 +189,7 @@ document.addEventListener('objectAdded', function( p ) {
 
 		// setTimeout, потому что может не успеть проинициализироваться
 		setTimeout(function() {
-			pathfinder.moveObjectByChain( {
-				id: 'butterfly',
+			globals.objects.butterfly.moveTo( {
 				path: 'butterflyPath2',
 				chain: 0,
 				animationName: 'butterfly',
@@ -213,8 +208,7 @@ function catchButterfly() {
 		}
 	})
 
-	pathfinder.moveObjectByChain( {
-		id: 'butterfly',
+	globals.objects.butterfly.moveTo( {
 		path: 'butterflyStopPath',
 		chain: 2,
 		animationName: 'butterfly',
@@ -232,8 +226,7 @@ function catchButterfly() {
 document.addEventListener('stop', function( p ) {
 	if (p.detail.obj == 'butterfly') {
 		if ( p.detail.graphId == 17 ) {
-			pathfinder.moveObjectByChain( {
-				id: 'butterfly',
+			globals.objects.butterfly.moveTo( {
 				path: 'butterflyPath2',
 				chain: 0,
 				animationName: 'butterfly',
@@ -243,8 +236,7 @@ document.addEventListener('stop', function( p ) {
 		}
 
 		if ( p.detail.graphId == 18 ) {
-			pathfinder.moveObjectByChain( {
-				id: 'butterfly',
+			globals.objects.butterfly.moveTo( {
 				path: 'butterflyPath3',
 				chain: 0,
 				animationName: 'butterfly',
@@ -265,8 +257,7 @@ document.addEventListener('stop', function( p ) {
 		}
 
 		if ( p.detail.graphId == 19 ) {
-			pathfinder.moveObjectByChain( {
-				id: 'butterfly',
+			globals.objects.butterfly.moveTo( {
 				path: 'butterflyPath4',
 				chain: 0,
 				animationName: 'butterfly',
@@ -296,8 +287,7 @@ document.addEventListener('stop', function( p ) {
 		}
 
 		if ( p.detail.graphId == 20 ) {
-			pathfinder.moveObjectByChain( {
-				id: 'butterfly',
+			globals.objects.butterfly.moveTo( {
 				path: 'butterflyPath',
 				chain: 0,
 				animationName: 'butterfly',
@@ -342,8 +332,9 @@ function dropToVillain() {
 					}
 				});
 
-				pathfinder.moveObjectByChain( {
-					id: 'villain2',
+				globals.objects.villain2.image.setInteractive(false);
+
+				globals.objects.villain2.moveTo( {
 					path: 'semaphoreVillainPath',
 					chain: 1,
 					animationName: 'down',
@@ -364,8 +355,7 @@ document.addEventListener('objectClick', function( p ) {
 
 				if (globals.objects.hero.step < 890) {
 
-					pathfinder.moveObjectByChain( {
-						id: 'hero',
+					globals.objects.hero.moveTo( {
 						path: 'treeToSemaphore',
 						chain: 8,
 						animationName: 'new',
@@ -380,6 +370,44 @@ document.addEventListener('objectClick', function( p ) {
 
 			}
 
+		}
+	}
+});
+
+// Телевизор
+
+function TVPictures() {
+	globals.objects.tv.animate({
+		animation: 'TV stop',
+		callback: function() {
+			TVPictures();
+		}
+	})
+}
+
+document.addEventListener('objectClick', function( p ) {
+
+	if ( p.detail.obj == 'tv' ) {
+
+		if ( globals.objects.hero.path == 'TVPath' ) {
+
+			globals.objects.hero.moveTo( {
+				path: 'TVPath',
+				chain: 2,
+				callback: function() {
+
+					globals.objects.tv.animate({
+						animation: 'TV run',
+						callback: function() {
+
+							globals.paths.TVBreakPath.breakpath = false;
+							graph.buildGraph();
+
+							TVPictures();
+						}
+					})
+				}
+			});
 		}
 	}
 });

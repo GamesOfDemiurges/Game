@@ -89,7 +89,7 @@ var graph = (function() {
 	// Построение матрицы достижимости
 	function buildAdjacencyMatrix( p ) {
 		var reference = [],
-			callback = p.callback || function() {};
+			callback = (p && p.callback) || function() {};
 
 		// Пересобираем объект в массив, потому что нам важен порядок их следования для построения матрицы достижимости
 		for (var point in serviceGraph) {
