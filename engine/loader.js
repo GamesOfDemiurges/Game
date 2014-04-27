@@ -98,6 +98,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
 			"assets/models/ready/tv/tv.json",
 			"assets/models/ready/tv/tv.anim",
+			
+			"assets/models/ready/additionalHero2/additionalHero2.json",
+			"assets/models/ready/additionalHero2/additionalHero2.anim",
 
 			"assets/background/background.png",
 			"assets/background/backgroundVillainPatch.png"
@@ -215,6 +218,15 @@ document.addEventListener("DOMContentLoaded", function() {
 				y: 840,
 				interactive: true
 			})
+			
+			var addHero2 = obj().create({
+				name: 'addHero2',
+				src: 'assets/models/ready/additionalHero2/additionalHero2.anim',
+				z:15,
+				x: 2800,
+				y: 840,
+				interactive: true
+			})
 
 
 			// Переходы между анимациями
@@ -235,7 +247,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				.addObj(bucket)
 				.addObj(semaphore)
 				.addObj(butterfly)
-				.addObj(tv);
+				.addObj(tv)
+				.addObj(addHero2);
 
 			viewport.init();
 
