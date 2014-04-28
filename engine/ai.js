@@ -411,3 +411,29 @@ document.addEventListener('objectClick', function( p ) {
 		}
 	}
 });
+document.addEventListener('stop', function(p){
+
+	if(p.detail.obj =='addHero2' && p.detail.graphId =='27') {
+	// Развернуть героя
+	globals.objects.addhero2.image.scale.x *= -1;
+		setTimeout(function(){
+			pathfinder.moveObjectByChain({
+				id: 'addHero2',
+				path:'addHero2Path',
+				chain: 7,
+				speedValue: 5
+			})
+		}, 1000)
+	}
+
+	if(p.detail.obj =='addHero2Path' && p.detail.graphId =='28') {
+		setTimeout(function(){
+			pathfinder.moveObjectByChain({
+				id: 'addHero2',
+				path:'addHero2Path',
+				chain: 0,
+				speedValue: 5
+			})
+		}, 1000)
+	}
+});

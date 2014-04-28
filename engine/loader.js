@@ -120,7 +120,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				birdPath = 'birdTreePath',
 				groundPath = 'groundTreeToLeft',
 				semaphoreVillainPath = 'semaphoreVillainPath',
-				butterflyPath = 'butterflyPath';
+				butterflyPath = 'butterflyPath',
+				addHero2Path = 'addHero2Path';
 
 			var background = obj().create({
 				src: 'assets/background/background.png',
@@ -223,8 +224,9 @@ document.addEventListener("DOMContentLoaded", function() {
 				name: 'addHero2',
 				src: 'assets/models/ready/additionalHero2/additionalHero2.anim',
 				z:15,
-				x: 2800,
-				y: 840,
+				pz: 10,
+				step:0,
+				path: addHero2Path,
 				interactive: true
 			})
 
