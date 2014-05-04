@@ -186,7 +186,10 @@ document.addEventListener('objectClick', function( p ) {
 // Бабочка летает
 document.addEventListener('objectAdded', function( p ) {
 	if (p.detail.obj == 'butterfly') {
-
+	/*!!!!*/
+	/*globals.paths.semaphoreToTV.breakpath = false;*/
+	
+	
 		// setTimeout, потому что может не успеть проинициализироваться
 		setTimeout(function() {
 			globals.objects.butterfly.moveTo( {
@@ -411,12 +414,12 @@ document.addEventListener('objectClick', function( p ) {
 		}
 	}
 });
-
+/*
 document.addEventListener('stop', function(p){
 
 	if(p.detail.obj =='addHero2' && p.detail.graphId =='27') {
 	// Развернуть героя
-	globals.objects.addhero2.image.scale.x *= -1;
+	globals.objects.addHero2.image.scale.x *= -1;
 		setTimeout(function(){
 			pathfinder.moveObjectByChain({
 				id: 'addHero2',
@@ -427,7 +430,7 @@ document.addEventListener('stop', function(p){
 		}, 1000)
 	}
 
-	if(p.detail.obj =='addHero2Path' && p.detail.graphId =='28') {
+	if(p.detail.obj =='addHero2' && p.detail.graphId =='28') {
 		setTimeout(function(){
 			pathfinder.moveObjectByChain({
 				id: 'addHero2',
@@ -437,4 +440,82 @@ document.addEventListener('stop', function(p){
 			})
 		}, 1000)
 	}
+});
+
+document.addEventListener('objectAdded', function(p){
+
+ if(p.detail.obj =='addHero2') {
+ console.log('!!');
+
+ // Развернуть героя
+ //globals.objects.addhero2.image.scale.x *= -1;
+  setTimeout(function(){
+   pathfinder.moveObjectByChain({
+    id: 'addHero2',
+    path:'addHero2Path',
+    chain: 3,
+    speedValue: 5
+   })
+  }, 1000)
+ }
+});
+
+document.addEventListener('objectAdded', function( p ) {
+ if (p.detail.obj == 'hero') {
+
+  // setTimeout, потому что может не успеть проинициализироваться
+  setTimeout(function() {
+
+     globals.paths.semaphoreToTV.breakpath = false;
+     graph.buildGraph({
+      callback: function() {
+
+      }
+     });
+
+  
+  }, 3000)
+ }
+});
+*/
+document.addEventListener('objectAdded', function(p){
+
+ if(p.detail.obj =='addHero2') {
+
+  setTimeout(function(){
+   pathfinder.moveObjectByChain({
+    id: 'addHero2',
+    path:'addHero2Path',
+    chain: 6,
+    speedValue: 5
+   })
+  }, 1000)
+ }
+});
+
+
+document.addEventListener('stop', function(p){
+
+ if(p.detail.obj =='addHero2' && p.detail.graphId =='27') {
+
+  setTimeout(function(){
+   pathfinder.moveObjectByChain({
+    id: 'addHero2',
+    path:'addHero2Path',
+    chain: 6,
+    speedValue: 5
+   })
+  }, 1000)
+ }
+
+ if(p.detail.obj =='addHero2' && p.detail.graphId =='28') {
+  setTimeout(function(){
+   pathfinder.moveObjectByChain({
+    id: 'addHero2',
+    path:'addHero2Path',
+    chain: 0,
+    speedValue: 5
+   })
+  }, 1000)
+ }
 });
