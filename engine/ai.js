@@ -411,6 +411,7 @@ document.addEventListener('objectClick', function( p ) {
 		}
 	}
 });
+
 document.addEventListener('stop', function(p){
 
 	if(p.detail.obj =='addHero2' && p.detail.graphId =='27') {
