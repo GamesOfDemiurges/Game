@@ -101,6 +101,9 @@ document.addEventListener("DOMContentLoaded", function() {
 			
 			"assets/models/ready/additionalHero2/additionalHero2.json",
 			"assets/models/ready/additionalHero2/additionalHero2.anim",
+			
+			"assets/models/ready/elephant/elephant.json",
+			"assets/models/ready/elephant/elephant.anim",
 
 			"assets/background/background.png",
 			"assets/background/backgroundVillainPatch.png"
@@ -229,6 +232,15 @@ document.addEventListener("DOMContentLoaded", function() {
 				path: addHero2Path,
 				interactive: true
 			})
+			var elephant = obj().create({
+				name: 'elephant',
+				src: 'assets/models/ready/elephant/elephant.anim',
+				z:15,
+				pz: 10,
+				step:0,
+				path: elephantPath,
+				interactive: true
+			})
 
 
 			// Переходы между анимациями
@@ -250,7 +262,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				.addObj(semaphore)
 				.addObj(butterfly)
 				.addObj(tv)
-				.addObj(addHero2);
+				.addObj(addHero2)
+				.addObj(elephant);
 
 			viewport.init();
 

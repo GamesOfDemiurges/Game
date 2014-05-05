@@ -459,7 +459,7 @@ document.addEventListener('objectAdded', function(p){
   }, 1000)
  }
 });
-
+*/
 document.addEventListener('objectAdded', function( p ) {
  if (p.detail.obj == 'hero') {
 
@@ -477,7 +477,7 @@ document.addEventListener('objectAdded', function( p ) {
   }, 3000)
  }
 });
-*/
+
 document.addEventListener('objectAdded', function(p){
 
  if(p.detail.obj =='addHero2') {
@@ -487,7 +487,7 @@ document.addEventListener('objectAdded', function(p){
     id: 'addHero2',
     path:'addHero2Path',
     chain: 6,
-    speedValue: 5
+    speedValue: 2
    })
   }, 1000)
  }
@@ -503,7 +503,7 @@ document.addEventListener('stop', function(p){
     id: 'addHero2',
     path:'addHero2Path',
     chain: 6,
-    speedValue: 5
+    speedValue: 2
    })
   }, 1000)
  }
@@ -514,7 +514,7 @@ document.addEventListener('stop', function(p){
     id: 'addHero2',
     path:'addHero2Path',
     chain: 0,
-    speedValue: 5
+    speedValue: 2
    })
   }, 1000)
  }
