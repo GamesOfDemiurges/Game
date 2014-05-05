@@ -1,0 +1,54 @@
+doctype html
+html
+	head
+		title= pageTitle
+		meta(http-equiv='Content-Type', content='text/html; charset=utf-8')
+		meta(name='viewport', content='width=device-width, user-scalable=no')
+		link(rel='stylesheet', type='text/css', href='css/style.css')
+		script(type='text/javascript', src='js/index.js')
+
+		if debug
+			script(type='text/javascript', src='js/debug.js')
+			script(type='text/javascript').
+				var debug = true;
+		else
+			script(type='text/javascript').
+				var debug = false;
+	body
+		canvas#view
+
+		if debug
+			.debug__wrap
+				.debug
+					.debug__control
+
+						.debug__control-data
+							.debug__control-traects
+								select.debug__control-traects-list(size='10')
+								label.debug__control-traects-label
+									input.debug__control-traects-break(type='checkbox', disabled='disabled')
+									= breakpath
+
+								div
+									button.debug__button.debug__button_add= appendPath
+									button.debug__button_remove= removePath
+
+							.debug__control-objects
+								select.debug__control-objects-list(size='4')
+								button.debug__button.debug__button_remove-object(disabled='disabled')= detachObject
+								hr
+								select.debug__control-objects-anim(size='3')
+
+								label.debug__control-traects-label
+									input.debug__control-traects-speed(type='number', value='0', min='0')
+									= speed
+
+								button.debug__button.debug__button_remember-animation= setAnimation
+
+						.debug__control-buttons
+							hr
+							button.debug__button.debug__button_toggle-overlay= switchOverlay
+							hr
+							button.debug__button.debug__button_save= saveToFile
+
+					canvas.debug__view.debug__view_hidden

@@ -1,0 +1,19 @@
+{
+    "author": "fromanywhere",
+    "name": "GamesOfDemiurges",
+    "version": "0.1.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/GamesOfDemiurges/Game.git"
+    },
+    "dependencies": {
+        "gulp": "~3.6.2",
+        "gulp-clean": "~0.2.4",
+        "gulp-if": "~1.1.0",
+        "gulp-jade": "~0.5.0",
+        "gulp-concat": "~2.2.0",
+        "gulp-csso": "~0.2.8",
+        "gulp-imagemin": "~0.5.0",
+        "gulp-uglify": "~0.2.1"
+    }
+}

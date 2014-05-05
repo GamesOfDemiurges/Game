@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Игры Демиургов</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" src="js/debug.js"></script>
+    <script type="text/javascript">var debug = true;</script>
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+    <div class="debug__wrap">
+      <div class="debug">
+        <div class="debug__control">
+          <div class="debug__control-data">
+            <div class="debug__control-traects">
+              <select size="10" class="debug__control-traects-list"></select>
+              <label class="debug__control-traects-label">
+                <input type="checkbox" disabled="disabled" class="debug__control-traects-break">breakpath
+              </label>
+              <div>
+                <button class="debug__button debug__button_add">Добавить траекторию</button>
+                <button class="debug__button_remove">Удалить траекторию</button>
+              </div>
+            </div>
+            <div class="debug__control-objects">
+              <select size="4" class="debug__control-objects-list"></select>
+              <button disabled="disabled" class="debug__button debug__button_remove-object">Отвязать объект</button>
+              <hr>
+              <select size="3" class="debug__control-objects-anim"></select>
+              <label class="debug__control-traects-label">
+                <input type="number" value="0" min="0" class="debug__control-traects-speed">Скорость
+              </label>
+              <button class="debug__button debug__button_remember-animation">Задать анимацию</button>
+            </div>
+          </div>
+          <div class="debug__control-buttons">
+            <hr>
+            <button class="debug__button debug__button_toggle-overlay">Переключить оверлей</button>
+            <hr>
+            <button class="debug__button debug__button_save">Записать в файл</button>
+          </div>
+        </div>
+        <canvas class="debug__view debug__view_hidden"></canvas>
+      </div>
+    </div>
+  </body>
+</html>

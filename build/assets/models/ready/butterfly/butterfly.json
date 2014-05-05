@@ -1,0 +1,20 @@
+{"frames": {
+
+"butterfly.png":
+{
+	"frame": {"x":2,"y":2,"w":119,"h":107},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":119,"h":107},
+	"sourceSize": {"w":119,"h":107}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker ",
+	"version": "1.0",
+	"image": "butterfly.png",
+	"format": "RGBA8888",
+	"size": {"w":123,"h":111},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:ea16d5cf8e7060943572546c22a2beb5:d93172e31cb70715d9aca17d70937c03:3fef989ed967e7bd86acc14ba95312c2$"
+}
+}

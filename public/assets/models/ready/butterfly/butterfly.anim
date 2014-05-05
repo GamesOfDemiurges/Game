@@ -1,0 +1,1 @@
+{"bones":[{"name":"root","rotation":0.16},{"name":"background","parent":"root","x":9.28,"y":655.68},{"name":"butterfly","parent":"root"}],"slots":[{"name":"background","bone":"background"},{"name":"butterfly","bone":"butterfly","attachment":"butterfly"}],"skins":{"default":{"butterfly":{"butterfly":{"scaleX":-1,"width":119,"height":107}}}},"animations":{"butterfly":{}}}
