@@ -126,7 +126,7 @@ document.addEventListener('objectClick', function( p ) {
 document.addEventListener('objectAdded', function( p ) {
 	if (p.detail.obj == 'semaphore') {
 
-		function startSemaphore() {
+		(function startSemaphore() {
 			if (!globals.triggers.stopSemaphore) {
 				globals.objects.semaphore.animate({
 					animation: 'trafficLight',
@@ -135,9 +135,7 @@ document.addEventListener('objectAdded', function( p ) {
 					}
 				})
 			}
-		}
-
-		startSemaphore();
+		})();
 
 	}
 });
