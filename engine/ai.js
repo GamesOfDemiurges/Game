@@ -491,7 +491,6 @@ document.addEventListener('objectAdded', function(p){
  }
 });
 
-
 document.addEventListener('stop', function(p){
 
  if(p.detail.obj =='addHero2' && p.detail.graphId =='27') {
@@ -513,6 +512,44 @@ document.addEventListener('stop', function(p){
     path:'addHero2Path',
     chain: 0,
     speedValue: 2
+   })
+  }, 1000)
+ }
+});
+
+document.addEventListener('objectAdded', function(p){
+	if(p.detail.obj = 'elephant'){
+		setTimeout(function(){
+			pathfinder.moveObjectByChain({
+				id:'elephant',
+				path: 'elephantPath',
+				chain: 7,
+				speedValue: 5
+			})
+		}, 1000)
+	}
+});
+document.addEventListener('stop', function(p){
+
+ if(p.detail.obj =='elephant' && p.detail.graphId =='29') {
+
+  setTimeout(function(){
+   pathfinder.moveObjectByChain({
+    id: 'elephant',
+    path:'elephantPath',
+    chain: 7,
+    speedValue: 5
+   })
+  }, 1000)
+ }
+
+ if(p.detail.obj =='elephant' && p.detail.graphId =='30') {
+  setTimeout(function(){
+   pathfinder.moveObjectByChain({
+    id: 'elephant',
+    path:'elephantPath',
+    chain: 0,
+    speedValue: 5
    })
   }, 1000)
  }
