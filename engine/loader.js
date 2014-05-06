@@ -238,6 +238,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				src: 'assets/models/ready/elephant/elephant.anim',
 				z:15,
 				pz: 10,
+				scale: 0.8,
 				step:0,
 				path: elephantPath,
 				interactive: true
