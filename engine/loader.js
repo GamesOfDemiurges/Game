@@ -125,6 +125,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				semaphoreVillainPath = 'semaphoreVillainPath',
 				butterflyPath = 'butterflyPath',
 				addHero2Path = 'addHero2Path';
+				/*elephantPath = 'elephantPath';*/
 
 			var background = obj().create({
 				src: 'assets/background/background.png',
