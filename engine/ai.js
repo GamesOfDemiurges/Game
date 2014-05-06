@@ -524,7 +524,7 @@ document.addEventListener('objectAdded', function(p){
 				id:'elephant',
 				path: 'elephantPath',
 				chain: 7,
-				speedValue: 5
+				speedValue: 2
 			})
 		}, 1000)
 	}
@@ -538,7 +538,7 @@ document.addEventListener('stop', function(p){
     id: 'elephant',
     path:'elephantPath',
     chain: 7,
-    speedValue: 5
+    speedValue: 2
    })
   }, 1000)
  }
@@ -549,7 +549,7 @@ document.addEventListener('stop', function(p){
     id: 'elephant',
     path:'elephantPath',
     chain: 0,
-    speedValue: 5
+    speedValue: 2
    })
   }, 1000)
  }
