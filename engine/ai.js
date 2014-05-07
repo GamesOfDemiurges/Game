@@ -523,7 +523,7 @@ document.addEventListener('objectAdded', function(p){
 			pathfinder.moveObjectByChain({
 				id:'elephant',
 				path: 'elephantPath',
-				chain: 7,
+				chain: 10,
 				speedValue: 2
 			})
 		}, 1000)
@@ -537,7 +537,7 @@ document.addEventListener('stop', function(p){
    pathfinder.moveObjectByChain({
     id: 'elephant',
     path:'elephantPath',
-    chain: 7,
+    chain: 10,
     speedValue: 2
    })
   }, 1000)
