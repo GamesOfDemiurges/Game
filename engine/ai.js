@@ -527,7 +527,7 @@ if(p.detail.obj =='addHero2' && p.detail.graphId =='25') {
 	}, 1000)
 	}
 });
-/*!!!!!!!!!!*/
+
 
 /*elephant*/
 document.addEventListener('objectAdded', function(p){
@@ -566,7 +566,7 @@ document.addEventListener('stop', function(p){
 		}
 	}
 })
-/*!!!!!!!!*/
+
 /*
 document.addEventListener('stop', function(p){
 
@@ -620,3 +620,30 @@ document.addEventListener('stop', function (p){
 		})
 })
 */
+
+
+/*doorToTheNextLavel*/
+document.addEventListener('objectAdded', function(p){
+	if(p.detail.obj =='doorToTheNextLavel'){
+		globals.objects.doorToTheNextLavel.animate({
+			animation: 'door',
+			speedValue: 2
+		})
+	}
+});
+
+/*Финал*/
+/*
+document.addEventListener('objectClick', function(p){
+	if((globals.objects.hero.path =='endPath')&&(globals.objects.hero.step == ???)){
+		globals.objects.hero.animate({
+			animation:'ReachOut'
+		})
+		/*теперь анимация двери*/
+		/*
+		globals.objects.doorToTheNextLavel.animate({
+			animation: 'door',
+			speedValue: 2
+		})
+	}
+})*/
