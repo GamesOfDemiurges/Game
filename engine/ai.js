@@ -476,60 +476,46 @@ document.addEventListener('objectAdded', function( p ) {
  }
 });
 
+/*AddHero2*/
 document.addEventListener('objectAdded', function(p){
-
- if(p.detail.obj =='addHero2') {
-
-  setTimeout(function(){
-   pathfinder.moveObjectByChain({
-    id: 'addHero2',
-    path:'addHero2Path',
-    chain: 6,
-    speedValue: 2
-   })
-  }, 1000)
- }
-});
-
-document.addEventListener('stop', function(p){
-
- if(p.detail.obj =='addHero2' && p.detail.graphId =='27') {
-
-  setTimeout(function(){
-   pathfinder.moveObjectByChain({
-    id: 'addHero2',
-    path:'addHero2Path',
-    chain: 6,
-    speedValue: 2
-   })
-  }, 1000)
- }
-
- if(p.detail.obj =='addHero2' && p.detail.graphId =='28') {
-  setTimeout(function(){
-   pathfinder.moveObjectByChain({
-    id: 'addHero2',
-    path:'addHero2Path',
-    chain: 0,
-    speedValue: 2
-   })
-  }, 1000)
- }
-});
-
-document.addEventListener('objectAdded', function(p){
-	if(p.detail.obj = 'elephant'){
+	if(p.detail.obj = 'addHero2'){
 		setTimeout(function(){
 			pathfinder.moveObjectByChain({
-				id:'elephant',
-				path: 'elephantPath',
-				chain: 10,
-				speedValue: 2
+				id:'addHero2',
+				path: 'addHero2Path',
+				chain: 7,
+				speedValue: 1
 			})
 		}, 1000)
 	}
 });
+document.addEventListener('stop', function(p){
 
+if(p.detail.obj =='addHero2' && p.detail.graphId =='24') {
+	setTimeout(function(){
+		pathfinder.moveObjectByChain({
+			id: 'addHero2',
+			path:'addHero2Path',
+			chain: 7,
+			speedValue: 1
+		})
+	}, 1000)
+}
+
+if(p.detail.obj =='addHero2' && p.detail.graphId =='25') {
+	setTimeout(function(){
+		pathfinder.moveObjectByChain({
+			id: 'addHero2',
+			path:'addHero2Path',
+			chain: 0,
+			speedValue: 1
+		})
+	}, 1000)
+	}
+});
+/*!!!!!!!!!!*/
+
+/*elephant*/
 document.addEventListener('objectAdded', function(p){
 	if(p.detail.obj = 'elephant'){
 		setTimeout(function(){
@@ -542,6 +528,32 @@ document.addEventListener('objectAdded', function(p){
 		}, 1000)
 	}
 });
+document.addEventListener('stop', function(p){
+	if(p.detail.obj =='elephant'){
+		if(p.detail.graphId =='23'){
+			setTimeout(function(){
+				globals.objects.elephant.moveTo({
+					path:'endPath',
+					chain: 2,
+					speedValue: 4,
+					animationName:'Elefant'
+				})
+			}, 1000)	
+		}
+		if(p.detail.graphId =='30'){
+			setTimeout(function(){
+				globals.objects.elephant.moveTo({
+					path:'elephantPath',
+					chain: 10,
+					speedValue: 4,
+					animationName:'Elefant'
+				})
+			}, 1000)	
+		}
+	}
+})
+/*!!!!!!!!*/
+/*
 document.addEventListener('stop', function(p){
 
  if(p.detail.obj =='elephant' && p.detail.graphId =='29') {
@@ -567,6 +579,7 @@ document.addEventListener('stop', function(p){
   }, 1000)
  }
 });
+*/
 /*
 // Клик на слона 
 document.addEventListener('objectClick', function( p ) {

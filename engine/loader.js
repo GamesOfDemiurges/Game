@@ -126,6 +126,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				butterflyPath = 'butterflyPath',
 				addHero2Path = 'addHero2Path',
 				elephantPath = 'elephantPath';
+				endPath = 'endPath'
 
 			var background = obj().create({
 				src: 'assets/background/background.png',
@@ -240,7 +241,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				pz: 10,
 				scale: 0.8,
 				step:0,
-				path: elephantPath,
+				path: endPath,
 				interactive: true
 			})
 
