@@ -530,7 +530,7 @@ document.addEventListener('objectAdded', function(p){
 	}
 });*/
 document.addEventListener('objectAdded', function(p){
-	if(p.detail.obj = 'elephant' && p.detail.graphId =='23'){
+	if(p.detail.obj = 'elephant'){
 		setTimeout(function(){
 			pathfinder.moveObjectByChain({
 				id:'elephant',
@@ -551,32 +551,18 @@ document.addEventListener('objectClick', function( p ) {
 				animationName: 'Elefant',
 				chain:2,
 				speedValue: 2
-			}
+			})
 		}, 1000)
 	}
 });	
-function moveElephant(){
-	globals.objects.elephant.moveTo({
-		animationName: 'Elefant',
-		path:'elephantPath',
-		chain: 10,
-		speedValue: 2
-	})
-};
+
 document.addEventListener('stop', function (p){
-	if(p.detail.graphId == '30'){
 		globals.objects.elephant.moveTo({
 			animationName: 'Elefant',
 			path:'elephantPath',
 			chain: 10,
 			speedValue: 2
 		})
-	}
-	else {
-		setTimeout(function() {
-			moveElephant();
-		}, 1000);
-		}
 })
 /*
 document.addEventListener('stop', function(p){
