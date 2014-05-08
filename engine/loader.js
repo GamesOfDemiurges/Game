@@ -89,6 +89,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
 			"assets/models/ready/bucket/bucket.json",
 			"assets/models/ready/bucket/bucket.anim",
+			
+			"assets/models/ready/stone/stone.json",
+			"assets/models/ready/stone/stone.anim",
 
 			"assets/models/ready/semaphore/semaphore.json",
 			"assets/models/ready/semaphore/semaphore.anim",
@@ -125,8 +128,9 @@ document.addEventListener("DOMContentLoaded", function() {
 				semaphoreVillainPath = 'semaphoreVillainPath',
 				butterflyPath = 'butterflyPath',
 				addHero2Path = 'addHero2Path',
-				elephantPath = 'elephantPath';
-				endPath = 'endPath'
+				elephantPath = 'elephantPath',
+				endPath = 'endPath',
+				stoneToHand = 'stoneToHand';
 
 			var background = obj().create({
 				src: 'assets/background/background.png',
@@ -203,7 +207,17 @@ document.addEventListener("DOMContentLoaded", function() {
 				z: 10,
 				interactive: true
 			});
-
+			
+			var stone = obj().create({
+				name:'stone',
+				src: 'assets/models/ready/stone/stone.anim',
+				path: stoneToHand,
+				step: 0,
+				z: 15,
+				pz: 5,
+				interactive: true
+			})
+			
 			var butterfly = obj().create({
 				name: 'butterfly',
 				src: 'assets/models/ready/butterfly/butterfly.anim',
@@ -266,7 +280,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				.addObj(butterfly)
 				.addObj(tv)
 				.addObj(addHero2)
-				.addObj(elephant);
+				.addObj(elephant)
+				.addObj(stone);
 
 			viewport.init();
 

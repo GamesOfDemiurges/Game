@@ -334,7 +334,7 @@ function dropToVillain() {
 				});
 
 				globals.objects.villain2.image.setInteractive(false);
-
+				/*теперь куда-то сюда вставляется перемещние камня по траектории*/
 				globals.objects.villain2.moveTo( {
 					path: 'semaphoreVillainPath',
 					chain: 1,
@@ -345,7 +345,21 @@ function dropToVillain() {
 		}
 	})
 }
-
+/*Камень*/
+document.addEventListener('objectClick', function(p){
+	if (p.detail.obj =='stone'){
+		if ((globals.objects.stone.path == 'stoneToHand') && (globals.objects.hero.step ==890)){
+			setTimeout(function(){
+				pathfinder.moveObjectByChain({
+					id:'stone',
+					path: 'stoneToHnad',
+					chain: 1,
+					speedValue: 2
+				})
+			}, 1000)
+		}
+	}
+});
 document.addEventListener('objectClick', function( p ) {
 	if (p.detail.obj == 'villain2') {
 
