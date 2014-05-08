@@ -8,10 +8,6 @@ var scene = function scene() {
 		x = 0, y = 0; // точки отсчета для сцены
 
 	function repaintCanvas() {
-		if (Z.zchange) {
-			Z.drawZindex(playGround);
-		}
-
 		requestAnimFrame(repaintCanvas);
 		renderer.render(stage);
 	}

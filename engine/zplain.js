@@ -9,7 +9,6 @@ var Z = function() {
 		}
 
 	return {
-		zchange: false,
 		getZindex: function () {
 			return zindex;
 		},
@@ -141,7 +140,7 @@ var Z = function() {
 			}
 			p.stackZindex = stackIndex; // отражает позицию в стеке на отрисовку
 
-			Z.zchange = true;
+			Z.drawZindex(scene.playGround);
 		},
 		changeZindex: function ( p ) {
 			// Оч. грубо — удалим приоритет из списка
@@ -182,7 +181,6 @@ var Z = function() {
 
 				currentPlain = currentPlain.next;
 			}
-			Z.zchange = false;
 		}
 	}
 
