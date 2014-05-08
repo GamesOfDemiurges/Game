@@ -107,6 +107,9 @@ document.addEventListener("DOMContentLoaded", function() {
 			
 			"assets/models/ready/elephant/elephant.json",
 			"assets/models/ready/elephant/elephant.anim",
+			
+			"assets/models/ready/doorToTheNextLavel/doorToTheNextLavel.json",
+			"assets/models/ready/doorToTheNextLavel/doorToTheNextLavel.anim",
 
 			"assets/background/background.png",
 			"assets/background/backgroundVillainPatch.png"
@@ -258,7 +261,14 @@ document.addEventListener("DOMContentLoaded", function() {
 				path: endPath,
 				interactive: true
 			})
-
+			var doorToTheNextLavel = obj().create({
+				name:'doorToTheNextLavel',
+				src: 'assets/models/ready/doorToTheNextLavel/doorToTheNextLavel.anim',
+				x: 3700,
+				y: 550,
+				z: 10,
+				interactive: true
+			})
 
 			// Переходы между анимациями
 			globals.objects.hero.image.stateData.setMixByName("new", "stairCaseWalk", 0);
@@ -281,7 +291,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				.addObj(tv)
 				.addObj(addHero2)
 				.addObj(elephant)
-				.addObj(stone);
+				.addObj(stone)
+				.addObj(doorToTheNextLavel);
 
 			viewport.init();
 
