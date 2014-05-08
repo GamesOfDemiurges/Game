@@ -5,14 +5,14 @@ var relay = (function() {
 		drop: function( p ) {
 			var _this = this;
 
-			if (window.CustomEvent) {
-				var event = new CustomEvent( p.type , {detail: p });
+			if (typeof window.CustomEvent === 'function') {
+				var evt = new CustomEvent( p.type , {detail: p });
 			} else {
-				var event = document.createEvent( p.type );
-				event.initCustomEvent(p.type, true, true, p );
+				var evt = document.createEvent( 'CustomEvent' );
+				evt.initCustomEvent(p.type, true, true, p );
 			}
 
-			document.dispatchEvent(event);
+			document.dispatchEvent(evt);
 
 			return _this;
 
