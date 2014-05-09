@@ -166,7 +166,14 @@ document.addEventListener('objectClick', function( p ) {
 					globals.objects.butterfly.move({
 						z: 15
 					})
-
+					//шлагбаум поднимается
+					if(p.detail.obj =='barrier'){
+						globals.objects.barrier.animate({
+							animation: 'barrier',
+							speedValue: 2
+						})
+					}
+					
 					// Разрешить ходить за шлагбаум
 					globals.paths.semaphoreToTV.breakpath = false;
 					graph.buildGraph({

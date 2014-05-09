@@ -136,10 +136,12 @@ document.addEventListener("DOMContentLoaded", function() {
 				groundPath = 'groundTreeToLeft',
 				semaphoreVillainPath = 'semaphoreVillainPath',
 				butterflyPath = 'butterflyPath',
+				stoneToHand = 'stoneToHand',
 				addHero2Path = 'addHero2Path',
 				elephantPath = 'elephantPath',
-				endPath = 'endPath',
-				stoneToHand = 'stoneToHand';
+				pathToMonitors = 'pathToMonitors',
+				pathToRoadSing = 'pathToRoadSing',
+				endPath = 'endPath';
 
 			var background = obj().create({
 				src: 'assets/background/background.png',
