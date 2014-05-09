@@ -113,6 +113,9 @@ document.addEventListener("DOMContentLoaded", function() {
 			
 			"assets/models/ready/barrier/barrier.json",
 			"assets/models/ready/barrier/barrier.anim",
+			
+			"assets/models/ready/roadSing/roadSing.json",
+			"assets/models/ready/roadSing/roadSing.anim",
 
 			"assets/background/background.png",
 			"assets/background/backgroundVillainPatch.png"
@@ -281,6 +284,14 @@ document.addEventListener("DOMContentLoaded", function() {
 				z: 10,
 				interactive: true
 			});
+			var roadSing = obj().create({
+				name:'roadSing',
+				src: 'assets/models/ready/roadSing/roadSing.anim',
+				x: 3485,
+				y: 285,
+				z: 10,
+				interactive: true
+			});
 
 			// Переходы между анимациями
 			globals.objects.hero.image.stateData.setMixByName("new", "stairCaseWalk", 0);
@@ -305,7 +316,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				.addObj(elephant)
 				.addObj(stone)
 				.addObj(doorToTheNextLavel)
-				.addObj(barrier);
+				.addObj(barrier)
+				.addObj(roadSing);
 
 			viewport.init();
 
