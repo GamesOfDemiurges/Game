@@ -497,7 +497,7 @@ document.addEventListener('objectAdded', function(p){
 			pathfinder.moveObjectByChain({
 				id:'addHero2',
 				path: 'addHero2Path',
-				chain: 7,
+				chain: 8,
 				speedValue: 1
 			})
 		}, 1000)
@@ -510,7 +510,7 @@ if(p.detail.obj =='addHero2' && p.detail.graphId =='24') {
 		pathfinder.moveObjectByChain({
 			id: 'addHero2',
 			path:'addHero2Path',
-			chain: 7,
+			chain: 8,
 			speedValue: 1
 		})
 	}, 1000)
