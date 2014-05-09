@@ -110,6 +110,9 @@ document.addEventListener("DOMContentLoaded", function() {
 			
 			"assets/models/ready/doorToTheNextLavel/doorToTheNextLavel.json",
 			"assets/models/ready/doorToTheNextLavel/doorToTheNextLavel.anim",
+			
+			"assets/models/ready/barrier/barrier.json",
+			"assets/models/ready/barrier/barrier.anim",
 
 			"assets/background/background.png",
 			"assets/background/backgroundVillainPatch.png"
@@ -219,7 +222,16 @@ document.addEventListener("DOMContentLoaded", function() {
 				z: 15,
 				pz: 5,
 				interactive: true
-			})
+			});
+			
+			var barrier = obj().create({
+				name: 'barrier',
+				src: 'assets/models/ready/barrier/barrier.anim',
+				x:1750,
+				y: 610,
+				z: 10,
+				interactive: true
+			});
 			
 			var butterfly = obj().create({
 				name: 'butterfly',
@@ -230,7 +242,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				step: 0,
 				path: butterflyPath,
 				interactive: true
-			})
+			});
 
 			var tv = obj().create({
 				name: 'tv',
@@ -240,7 +252,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				x: 2370,
 				y: 840,
 				interactive: true
-			})
+			});
 			
 			var addHero2 = obj().create({
 				name: 'addHero2',
@@ -250,7 +262,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				step:0,
 				path: addHero2Path,
 				interactive: true
-			})
+			});
 			var elephant = obj().create({
 				name: 'elephant',
 				src: 'assets/models/ready/elephant/elephant.anim',
@@ -260,7 +272,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				step:0,
 				path: endPath,
 				interactive: true
-			})
+			});
 			var doorToTheNextLavel = obj().create({
 				name:'doorToTheNextLavel',
 				src: 'assets/models/ready/doorToTheNextLavel/doorToTheNextLavel.anim',
@@ -268,7 +280,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				y: 550,
 				z: 10,
 				interactive: true
-			})
+			});
 
 			// Переходы между анимациями
 			globals.objects.hero.image.stateData.setMixByName("new", "stairCaseWalk", 0);
@@ -292,7 +304,8 @@ document.addEventListener("DOMContentLoaded", function() {
 				.addObj(addHero2)
 				.addObj(elephant)
 				.addObj(stone)
-				.addObj(doorToTheNextLavel);
+				.addObj(doorToTheNextLavel)
+				.addObj(barrier);
 
 			viewport.init();
 
