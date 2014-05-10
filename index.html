@@ -24,18 +24,26 @@
 		<script type="text/javascript" src="engine/queue.js"></script>
 		<script type="text/javascript" src="engine/relay.js"></script>
 		<script type="text/javascript" src="engine/ai.js"></script>
+		<script type="text/javascript" src="engine/audio.js"></script>
 		<script type="text/javascript" src="engine/loader.js"></script>
 
 		<script type="text/javascript" src="engine/classlist.js"></script>
 		<script type="text/javascript" src="tools/debugTraect.js"></script>
 
 		<script type="text/javascript">
-			var debug = true;
+			var debug = false;
 		</script>
 
 	</head>
 	<body>
 		<canvas id="view"></canvas>
+
+		<div class="start">
+			<div class="start__splash">
+				<img src="assets/background/SignatureTune.png" class="start__img" alt="" />
+				<button class="start__run">Начать</button>
+			</div>
+		</div>
 
 		<div class="debug__wrap">
 			<div class="debug">

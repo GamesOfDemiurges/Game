@@ -25,7 +25,7 @@ var scene = function scene() {
 
 			// Обертка над оператором рендера PIXI
 			masterCanvas = document.getElementById(p.canvasId); // указатель на DOM
-			stage = new PIXI.Stage(0xFFFFFF, true); // Корневая сцена
+			stage = new PIXI.Stage(0x000000, true); // Корневая сцена
 
 			_this.scale = 800/masterCanvas.clientHeight;
 			_this.width = _this.scale * masterCanvas.clientWidth;

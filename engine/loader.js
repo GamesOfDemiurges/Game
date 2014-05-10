@@ -55,9 +55,9 @@ var loader = (function() {
 				resources: p.resources,
 				callback: function() {
 
-					if (!debug) {
+					/*if (!debug) {
 						document.body.classList.add('_noscroll');
-					}
+					}*/
 
 					globals.scale = 800 / document.body.clientHeight;
 
@@ -72,7 +72,7 @@ var loader = (function() {
 
 })();
 
-document.addEventListener("DOMContentLoaded", function() {
+function init() {
 	loader.init({
 		resources: [
 			"assets/models/ready/hero/hero.json",
@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 			"assets/models/ready/bucket/bucket.json",
 			"assets/models/ready/bucket/bucket.anim",
-			
+
 			"assets/models/ready/stone/stone.json",
 			"assets/models/ready/stone/stone.anim",
 
@@ -101,19 +101,19 @@ document.addEventListener("DOMContentLoaded", function() {
 
 			"assets/models/ready/tv/tv.json",
 			"assets/models/ready/tv/tv.anim",
-			
+
 			"assets/models/ready/additionalHero2/additionalHero2.json",
 			"assets/models/ready/additionalHero2/additionalHero2.anim",
-			
+
 			"assets/models/ready/elephant/elephant.json",
 			"assets/models/ready/elephant/elephant.anim",
-			
+
 			"assets/models/ready/doorToTheNextLavel/doorToTheNextLavel.json",
 			"assets/models/ready/doorToTheNextLavel/doorToTheNextLavel.anim",
-			
+
 			"assets/models/ready/barrier/barrier.json",
 			"assets/models/ready/barrier/barrier.anim",
-			
+
 			"assets/models/ready/roadSing/roadSing.json",
 			"assets/models/ready/roadSing/roadSing.anim",
 
@@ -216,9 +216,14 @@ document.addEventListener("DOMContentLoaded", function() {
 				x: 1500,
 				y: 730,
 				z: 10,
-				interactive: true
+				interactive: true,
+				animation: {
+					trafficLight: {
+						soundSrc: 'assets/models/ready/doorToTheNextLavel/door_sound.wav'
+					}
+				}
 			});
-			
+
 			var stone = obj().create({
 				name:'stone',
 				src: 'assets/models/ready/stone/stone.anim',
@@ -228,7 +233,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				pz: 5,
 				interactive: true
 			});
-			
+
 			var barrier = obj().create({
 				name: 'barrier',
 				src: 'assets/models/ready/barrier/barrier.anim',
@@ -237,7 +242,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				z: 10,
 				interactive: true
 			});
-			
+
 			var butterfly = obj().create({
 				name: 'butterfly',
 				src: 'assets/models/ready/butterfly/butterfly.anim',
@@ -258,7 +263,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				y: 840,
 				interactive: true
 			});
-			
+
 			var addHero2 = obj().create({
 				name: 'addHero2',
 				src: 'assets/models/ready/additionalHero2/additionalHero2.anim',
@@ -284,7 +289,12 @@ document.addEventListener("DOMContentLoaded", function() {
 				x: 3700,
 				y: 550,
 				z: 10,
-				interactive: true
+				interactive: true,
+				animation: {
+					door: {
+						soundSrc: 'assets/models/ready/doorToTheNextLavel/door_sound.wav'
+					}
+				}
 			});
 			var roadSing = obj().create({
 				name:'roadSing',
@@ -299,6 +309,8 @@ document.addEventListener("DOMContentLoaded", function() {
 			globals.objects.hero.image.stateData.setMixByName("new", "stairCaseWalk", 0);
 			globals.objects.hero.image.stateData.setMixByName("new", "stop", 0.3);
 			globals.objects.semaphore.image.stateData.setMixByName("trafficLight", "trafficLight_stop", 0.5);
+
+			audio.initBackgroundSound();
 
 			scene
 				.init({
@@ -334,5 +346,24 @@ document.addEventListener("DOMContentLoaded", function() {
 
 		}
 	})
+}
 
+document.addEventListener("DOMContentLoaded", function() {
+
+	audio
+		.init()
+		.initSplashSound();
+
+	if (!debug) {
+		document.body.classList.add('_noscroll');
+		document.querySelector('.start__run').onclick = function() {
+			document.body.removeChild( document.querySelector('.start') );
+
+			audio.finishSplashSound();
+
+			init();
+		}
+	} else {
+		init();
+	}
 })

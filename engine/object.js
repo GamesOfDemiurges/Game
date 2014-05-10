@@ -63,6 +63,24 @@ function obj() {
 				}
 			}
 
+			function setAnimation() {
+				if (p.animation) {
+					_this.animation = {};
+
+					for (var animationName in p.animation) {
+						_this.animation[animationName] = {};
+
+						if (p.animation[animationName].soundSrc) {
+
+							_this.animation[animationName].track = track().load({
+								obj: _this,
+								url: p.animation[animationName].soundSrc
+							})
+						}
+					}
+				}
+			}
+
 			function setInteractive() {
 				if (p.interactive) {
 					_this.image.setInteractive(true);
@@ -108,6 +126,7 @@ function obj() {
 			setObjectPosition();
 			setObjectScale();
 			setReverse();
+			setAnimation();
 			setInteractive();
 
 			return _this;
@@ -200,6 +219,11 @@ function obj() {
 				callback = p.callback || function() {};
 
 			_this.image.state.setAnimationByName( p.animation , false);
+
+			if (_this.animation && _this.animation[p.animation]) {
+				_this.animation[p.animation].track.play();
+			}
+
 			var duration = _this.image.state.current.duration * 1000,
 				animationId = Math.random();
 
