@@ -228,8 +228,8 @@ function init() {
 				name:'stone',
 				src: 'assets/models/ready/stone/stone.anim',
 				path: stoneToHand,
-				step: 64,
-				z: 15,
+				step: 20,
+				z: 10,
 				pz:  15,
 				interactive: true
 			});
@@ -351,8 +351,8 @@ function init() {
 document.addEventListener("DOMContentLoaded", function() {
 
 	audio
-		.init()
-		.initSplashSound();
+		.init();
+		/*.initSplashSound();*/
 
 	/*if (!debug) {
 		document.body.classList.add('_noscroll');

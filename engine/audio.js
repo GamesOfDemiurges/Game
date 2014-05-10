@@ -117,7 +117,7 @@ var audio = (function() {
 			soundObj.panner.setPosition(soundObj.image.position.x, soundObj.image.position.y, 0);
 		}
 
-		if (p.id == 'hero') {
+		if ( (context) && (p.id == 'hero') ) {
 			context.listener.setPosition(soundObj.image.position.x, soundObj.image.position.y, 0);
 		}
 	}
@@ -157,7 +157,7 @@ var audio = (function() {
 	return {
 
 		init: function () {
-			initContext();
+			//initContext();
 
 			return this;
 		},

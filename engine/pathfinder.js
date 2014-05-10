@@ -20,8 +20,8 @@ var pathfinder = (function() {
 			// 3. Первая анимация из всех доступных для этого объекта
 			if (!resultAnimation.animation || !resultAnimation.speed) {
 				if (!!globals.paths[ p.pathId ].objects && !!globals.paths[ p.pathId ].objects[ p.obj ] ) {
-					resultAnimation.animation = globals.paths[ p.pathId ].objects[ p.obj ].animation;
-					resultAnimation.speed = globals.paths[ p.pathId ].objects[ p.obj ].speed;
+					resultAnimation.animation = resultAnimation.animation || globals.paths[ p.pathId ].objects[ p.obj ].animation;
+					resultAnimation.speed = resultAnimation.speed || globals.paths[ p.pathId ].objects[ p.obj ].speed;
 				} else {
 					resultAnimation.animation = globals.objects[ p.obj ].image.spineData.animations[0].name
 					resultAnimation.speed = 0;
@@ -107,8 +107,6 @@ var pathfinder = (function() {
 			}
 		}
 
-
-
 		var pathId = p.pathArray[ p.pathArray.length-1 ],
 			objectAnimation = getAnimation({
 				obj: p.currentObject.id,
@@ -159,7 +157,7 @@ var pathfinder = (function() {
 	}
 
 	function findPathToChain( p ) {
-		if (!p.currentObject) return false;
+		if (!p.currentObject || !globals.paths[p.path]) return false;
 
 		var path = p.path,
 			chain = p.chain,

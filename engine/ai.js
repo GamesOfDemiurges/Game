@@ -173,7 +173,7 @@ document.addEventListener('objectClick', function( p ) {
 							speedValue: 2
 						})
 					}
-					
+
 					// Разрешить ходить за шлагбаум
 					globals.paths.semaphoreToTV.breakpath = false;
 					graph.buildGraph({
@@ -193,8 +193,8 @@ document.addEventListener('objectAdded', function( p ) {
 	if (p.detail.obj == 'butterfly') {
 	/*!!!!*/
 	/*globals.paths.semaphoreToTV.breakpath = false;*/
-	
-	
+
+
 		// setTimeout, потому что может не успеть проинициализироваться
 		setTimeout(function() {
 			globals.objects.butterfly.moveTo( {
@@ -315,22 +315,68 @@ document.addEventListener('objectClick', function( p ) {
 
 		globals.triggers.butterflyInerval = setTimeout(function() {
 			globals.triggers.butterflyCanBeCatched = false;
-		}, 3000);
+		}, 5000);
 	}
 });
+
+function getTheStone(cb) {
+	var callback = cb || function() {};
+
+	if (!globals.triggers.ihavestone) {
+		globals.objects.hero.animate({
+			animation: 'slope',
+			callback: function() {
+				globals.triggers.ihavestone	 = true;
+				callback();
+			}
+		})
+
+		setTimeout(function() {
+			globals.objects.stone.move({
+				z: 0
+			})
+
+			globals.objects.stone.moveTo({
+				path: 'stoneToHand',
+				chain: 1,
+				speedValue: 20,
+			})
+		}, 700)
+
+	} else {
+		callback();
+	}
+
+}
 
 // Кинуть камень в злодея
 
 function dropToVillain() {
 
-	globals.objects.hero.animate({
-		animation: 'slope',
-		callback: function() {
+	getTheStone(function() {
 
-			globals.preventClick = false;
+		globals.preventClick = false;
 
-			// С таймером, потому что камень должен долететь
-			setTimeout(function() {
+		globals.objects.stone.move({
+			z: 10
+		})
+
+		globals.objects.stone.moveTo({
+			path: 'stoneToHand',
+			chain: 3,
+			speedValue: 12,
+			callback: function() {
+
+				globals.objects.stone.move({
+					z: 0
+				})
+
+				globals.objects.villain2.moveTo( {
+					path: 'semaphoreVillainPath',
+					chain: 1,
+					animationName: 'down',
+					speedValue: 15
+				});
 
 				globals.paths.semaphoreBreakPath.breakpath = false;
 
@@ -342,28 +388,21 @@ function dropToVillain() {
 
 				globals.objects.villain2.image.setInteractive(false);
 
-			}, 300)
-		}
+			}
+		})
 	})
-
-    setTimeout(function() {
-        pathfinder.moveObjectByChain({
-            id:'stone',
-            path: 'stoneToVillain',
-            chain: 3,
-            speedValue: 2,
-            callback: function() {
-
-                pathfinder.moveObjectByChain({
-                    id: 'stone',
-                    path: 'stoneToVillain',
-                    chain: 0
-                })
-            }
-        })
-    }, 700)
 }
-/*Камень*/
+
+document.addEventListener('objectClick', function( p ) {
+
+	if (p.detail.obj == 'stone') {
+
+		if ( ((globals.objects.hero.path == 'treeToSemaphore') && (globals.objects.hero.step > 880)) ||
+			((globals.objects.hero.path == 'semaphoreBreakPath') && (globals.objects.hero.step < 10)) ) {
+			getTheStone();
+		}
+	}
+})
 
 document.addEventListener('objectClick', function( p ) {
 	if (p.detail.obj == 'villain2') {
@@ -444,7 +483,7 @@ document.addEventListener('objectAdded', function( p ) {
       }
      });
 
-  
+
   }, 3000)
  }
 });
@@ -520,7 +559,7 @@ document.addEventListener('stop', function(p){
 
                     }
 				})
-			}, 1000)	
+			}, 1000)
 		}
 	}
 })
@@ -553,7 +592,7 @@ document.addEventListener('stop', function(p){
 });
 */
 /*
-// Клик на слона 
+// Клик на слона
 document.addEventListener('objectClick', function( p ) {
 	if (p.detail.obj == 'elephant') {
 		// Если герой рядом со слоном
@@ -566,7 +605,7 @@ document.addEventListener('objectClick', function( p ) {
 			})
 		}, 1000)
 	}
-});	
+});
 */
 /*
 document.addEventListener('stop', function (p){
