@@ -228,9 +228,9 @@ function init() {
 				name:'stone',
 				src: 'assets/models/ready/stone/stone.anim',
 				path: stoneToHand,
-				step: 0,
+				step: 64,
 				z: 15,
-				pz: 5,
+				pz:  15,
 				interactive: true
 			});
 
@@ -354,7 +354,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		.init()
 		.initSplashSound();
 
-	if (!debug) {
+	/*if (!debug) {
 		document.body.classList.add('_noscroll');
 		document.querySelector('.start__run').onclick = function() {
 			document.body.removeChild( document.querySelector('.start') );
@@ -363,7 +363,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 			init();
 		}
-	} else {
+	} else {  */
 		init();
-	}
+	//}
 })

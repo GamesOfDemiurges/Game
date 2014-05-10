@@ -341,32 +341,30 @@ function dropToVillain() {
 				});
 
 				globals.objects.villain2.image.setInteractive(false);
-				/*теперь куда-то сюда вставляется перемещние камня по траектории*/
-				globals.objects.villain2.moveTo( {
-					path: 'semaphoreVillainPath',
-					chain: 1,
-					animationName: 'down',
-					speedValue: 15
-				});
+
 			}, 300)
 		}
 	})
+
+    setTimeout(function() {
+        pathfinder.moveObjectByChain({
+            id:'stone',
+            path: 'stoneToVillain',
+            chain: 3,
+            speedValue: 2,
+            callback: function() {
+
+                pathfinder.moveObjectByChain({
+                    id: 'stone',
+                    path: 'stoneToVillain',
+                    chain: 0
+                })
+            }
+        })
+    }, 700)
 }
 /*Камень*/
-document.addEventListener('objectClick', function(p){
-	if (p.detail.obj =='stone'){
-		if ((globals.objects.stone.path == 'stoneToHand') && (globals.objects.hero.step ==890)){
-			setTimeout(function(){
-				pathfinder.moveObjectByChain({
-					id:'stone',
-					path: 'stoneToHnad',
-					chain: 1,
-					speedValue: 2
-				})
-			}, 1000)
-		}
-	}
-});
+
 document.addEventListener('objectClick', function( p ) {
 	if (p.detail.obj == 'villain2') {
 
@@ -422,7 +420,7 @@ document.addEventListener('objectClick', function( p ) {
 						animation: 'TV run',
 						callback: function() {
 
-							globals.paths.TVBreakPath.breakpath = false;
+							//globals.paths.TVBreakPath.breakpath = false;
 							graph.buildGraph();
 
 							TVPictures();
@@ -511,17 +509,16 @@ document.addEventListener('stop', function(p){
 					path:'endPath',
 					chain: 2,
 					speedValue: 4,
-					animationName:'Elefant'
-				})
-			}, 1000)	
-		}
-		if(p.detail.graphId =='30'){
-			setTimeout(function(){
-				globals.objects.elephant.moveTo({
-					path:'elephantPath',
-					chain: 10,
-					speedValue: 4,
-					animationName:'Elefant'
+					animationName:'Elefant',
+                    callback: function() {
+                        globals.objects.elephant.moveTo({
+                            path:'elephantPath',
+                            chain: 0,
+                            speedValue: 4,
+                            animationName:'Elefant'
+                        })
+
+                    }
 				})
 			}, 1000)	
 		}

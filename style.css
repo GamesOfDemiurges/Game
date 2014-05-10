@@ -141,7 +141,7 @@ body._noscroll {
 	position: fixed;
 	z-index: 10;
 	top: 100px;
-	right: 1000px;
+	right: 20px;
 	background-color: rgba(255, 255, 255, 0.5);
 	border: 1px black solid;
 	text-align: center;
