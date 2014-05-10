@@ -239,8 +239,7 @@ function init() {
 				src: 'assets/models/ready/barrier/barrier.anim',
 				x:1750,
 				y: 610,
-				z: 10,
-				interactive: true
+				z: 10
 			});
 
 			var butterfly = obj().create({

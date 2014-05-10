@@ -166,19 +166,16 @@ document.addEventListener('objectClick', function( p ) {
 					globals.objects.butterfly.move({
 						z: 15
 					})
-					//шлагбаум поднимается
-					if(p.detail.obj =='barrier'){
-						globals.objects.barrier.animate({
-							animation: 'barrier',
-							speedValue: 2
-						})
-					}
 
 					// Разрешить ходить за шлагбаум
 					globals.paths.semaphoreToTV.breakpath = false;
 					graph.buildGraph({
 						callback: function() {
-							alert('Шлагбаум поднялся!');
+
+							//шлагбаум поднимается
+							globals.objects.barrier.animate({
+								animation: 'barrier'
+							})
 						}
 					});
 				}
@@ -315,7 +312,7 @@ document.addEventListener('objectClick', function( p ) {
 
 		globals.triggers.butterflyInerval = setTimeout(function() {
 			globals.triggers.butterflyCanBeCatched = false;
-		}, 5000);
+		}, 20000);
 	}
 });
 
@@ -471,22 +468,6 @@ document.addEventListener('objectClick', function( p ) {
 	}
 });
 
-document.addEventListener('objectAdded', function( p ) {
- if (p.detail.obj == 'hero') {
-  // setTimeout, потому что может не успеть проинициализироваться
-  setTimeout(function() {
-
-     globals.paths.semaphoreToTV.breakpath = false;
-     graph.buildGraph({
-      callback: function() {
-
-      }
-     });
-
-
-  }, 3000)
- }
-});
 
 /*AddHero2*/
 document.addEventListener('objectAdded', function(p){
