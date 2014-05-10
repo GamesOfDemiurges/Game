@@ -123,7 +123,7 @@ var pathfinder = (function() {
 			animation: objectAnimation.animation,
 			speed: objectAnimation.speed,
 			step: step
-		})
+		});
 
 		queue.addToObjPaths({
 			objectId: p.currentObject.id,

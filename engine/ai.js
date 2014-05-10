@@ -433,55 +433,9 @@ document.addEventListener('objectClick', function( p ) {
 		}
 	}
 });
-/*
-document.addEventListener('stop', function(p){
 
-	if(p.detail.obj =='addHero2' && p.detail.graphId =='27') {
-	// Развернуть героя
-	globals.objects.addHero2.image.scale.x *= -1;
-		setTimeout(function(){
-			pathfinder.moveObjectByChain({
-				id: 'addHero2',
-				path:'addHero2Path',
-				chain: 7,
-				speedValue: 5
-			})
-		}, 1000)
-	}
-
-	if(p.detail.obj =='addHero2' && p.detail.graphId =='28') {
-		setTimeout(function(){
-			pathfinder.moveObjectByChain({
-				id: 'addHero2',
-				path:'addHero2Path',
-				chain: 0,
-				speedValue: 5
-			})
-		}, 1000)
-	}
-});
-
-document.addEventListener('objectAdded', function(p){
-
- if(p.detail.obj =='addHero2') {
- console.log('!!');
-
- // Развернуть героя
- //globals.objects.addhero2.image.scale.x *= -1;
-  setTimeout(function(){
-   pathfinder.moveObjectByChain({
-    id: 'addHero2',
-    path:'addHero2Path',
-    chain: 3,
-    speedValue: 5
-   })
-  }, 1000)
- }
-});
-*/
 document.addEventListener('objectAdded', function( p ) {
  if (p.detail.obj == 'hero') {
-
   // setTimeout, потому что может не успеть проинициализироваться
   setTimeout(function() {
 
