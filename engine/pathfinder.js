@@ -18,15 +18,8 @@ var pathfinder = (function() {
 			// 1. Задана явно
 			// 2. Взята из параметров траектории для этого объкта
 			// 3. Первая анимация из всех доступных для этого объекта
-			if (!resultAnimation.animation || !resultAnimation.speed) {
-				if (!!globals.paths[ p.pathId ].objects && !!globals.paths[ p.pathId ].objects[ p.obj ] ) {
-					resultAnimation.animation = resultAnimation.animation || globals.paths[ p.pathId ].objects[ p.obj ].animation;
-					resultAnimation.speed = resultAnimation.speed || globals.paths[ p.pathId ].objects[ p.obj ].speed;
-				} else {
-					resultAnimation.animation = globals.objects[ p.obj ].image.spineData.animations[0].name
-					resultAnimation.speed = 0;
-				}
-			}
+			resultAnimation.animation = resultAnimation.animation || (globals.paths[ p.pathId ].objects && globals.paths[ p.pathId ].objects[ p.obj ].animation) || globals.objects[ p.obj ].image.spineData.animations[0].name;
+			resultAnimation.speed = resultAnimation.speed || (globals.paths[ p.pathId ].objects && globals.paths[ p.pathId ].objects[ p.obj ].speed) || 0;
 
 			return resultAnimation;
 		}
@@ -157,7 +150,7 @@ var pathfinder = (function() {
 	}
 
 	function findPathToChain( p ) {
-		if (!p.currentObject || !globals.paths[p.path]) return false;
+		if (!p.currentObject || !globals.paths[p.path] || !globals.paths[ p.currentObject.path ]) return false;
 
 		var path = p.path,
 			chain = p.chain,

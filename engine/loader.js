@@ -272,6 +272,7 @@ function init() {
 				path: addHero2Path,
 				interactive: true
 			});
+
 			var elephant = obj().create({
 				name: 'elephant',
 				src: 'assets/models/ready/elephant/elephant.anim',
@@ -282,6 +283,7 @@ function init() {
 				path: endPath,
 				interactive: true
 			});
+
 			var doorToTheNextLavel = obj().create({
 				name:'doorToTheNextLavel',
 				src: 'assets/models/ready/doorToTheNextLavel/doorToTheNextLavel.anim',
@@ -295,6 +297,7 @@ function init() {
 					}
 				}
 			});
+
 			var roadSing = obj().create({
 				name:'roadSing',
 				src: 'assets/models/ready/roadSing/roadSing.anim',
