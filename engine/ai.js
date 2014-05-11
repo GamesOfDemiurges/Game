@@ -546,7 +546,7 @@ document.addEventListener('objectAdded', function(p){
 
 document.addEventListener('stop', function(p){
 	if ( (p.detail.obj == 'elephant') && (p.detail.graphId == '29') ) {
-		pathfinder.moveObjectByChain({
+		pathfinder.moveObdjectByChain({
 			id: 'elephant',
 			path:'elephantPath',
 			chain: 0,
@@ -575,7 +575,7 @@ function animateElephant(){
 
 document.addEventListener('objectClick', function(p){
     if(p.detail.obj =='elephant'){
-        if ( globals.objects.hero.getPosition().graphId == 29 ){
+        if ( globals.objects.hero.getPosition().graphId == 23 ){
             //запускаем слона
             animateElephant();
         }
