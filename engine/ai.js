@@ -527,7 +527,7 @@ if(p.detail.obj =='addHero2' && p.detail.graphId =='25') {
 	}
 });
 
-
+/*
 // elephant
 document.addEventListener('objectAdded', function(p){
 	if(p.detail.obj == 'elephant'){
@@ -553,61 +553,35 @@ document.addEventListener('stop', function(p){
 			speedValue: 4
 		})
 	}
+})*/
+
+//запуск слона по траекториям
+function animateElephant(){
+    pathfinder.moveObjectByChain({
+        id: 'elephant',
+        path: 'endPath',
+        chain: 2,
+        speedValue: 2,
+        callback: function() {
+            pathfinder.moveObjectByChain({
+                id: 'elephant',
+                path:'elephantPath',
+                chain: 0,
+                speedValue: 4
+            })
+        }
+    })
+}
+
+document.addEventListener('objectClick', function(p){
+    if(p.detail.obj =='elephant'){
+        if((globals.objects.hero.path == 'endPath' || globals.objects.hero.path == 'pathToMonitors' )&&(p.detail.graphId==23)){
+            //запускаем слона
+            animateElephant();
+        }
+    }
 })
 
-/*
-document.addEventListener('stop', function(p){
-
- if(p.detail.obj =='elephant' && p.detail.graphId =='29') {
-
-  setTimeout(function(){
-   pathfinder.moveObjectByChain({
-    id: 'elephant',
-    path:'elephantPath',
-    chain: 10,
-    speedValue: 2
-   })
-  }, 1000)
- }
-
- if(p.detail.obj =='elephant' && p.detail.graphId =='30') {
-  setTimeout(function(){
-   pathfinder.moveObjectByChain({
-    id: 'elephant',
-    path:'elephantPath',
-    chain: 0,
-    speedValue: 2
-   })
-  }, 1000)
- }
-});
-*/
-/*
-// Клик на слона
-document.addEventListener('objectClick', function( p ) {
-	if (p.detail.obj == 'elephant') {
-		// Если герой рядом со слоном
-		if ( p.detail.graphId == '23' ) {
-			globals.objects.elephant.moveTo({
-				path:'endPath',
-				animationName: 'elephant',
-				chain:2,
-				speedValue: 2
-			})
-		}, 1000)
-	}
-});
-*/
-/*
-document.addEventListener('stop', function (p){
-		globals.objects.elephant.moveTo({
-			animationName: 'elephant',
-			path:'elephantPath',
-			chain: 10,
-			speedValue: 2
-		})
-})
-*/
 
 
 /*doorToTheNextLavel*/
