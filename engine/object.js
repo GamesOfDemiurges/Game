@@ -98,6 +98,22 @@ function obj() {
 				}
 			}
 
+			function setAI() {
+				if (p.ai) {
+
+					_this.ai = ai().init({
+
+						probMatrix: p.ai.probMatrix,
+						moveAnimation: p.ai.moveAnimation,
+						stayAnimation: p.ai.stayAnimation,
+						availablesPaths: p.ai.availablesPaths,
+						lookDistance: p.ai.lookDistance,
+						obj: _this
+					});
+				}
+
+			}
+
 			if (p.src.indexOf('.anim') !== -1) {
 
 				var id = p.name
@@ -247,6 +263,39 @@ function obj() {
 			});
 
 			return _this;
+		},
+
+		getPosition: function() {
+
+			var _this = this,
+				path = _this.path,
+				chain,
+				graphId;
+
+			for (var i = 0; i < globals.paths[ _this.path ].controlPath.length; i++) {
+
+				if ( Math.abs(globals.paths[ _this.path ].controlPath[i].step - _this.step) < 5 ) {
+
+					chain = i;
+					break;
+				}
+
+			}
+
+			if ( _this.step < 5 ) {
+				graphId = globals.paths[ path ].dots[0].graphId;
+			}
+
+			if ( Math.abs(globals.paths[ path ].steps.length - _this.step) < 5 ) {
+				graphId = globals.paths[ path ].dots[ globals.paths[ path ].dots.length-1 ].graphId;
+			}
+
+			return {
+				path: path,
+				chain: chain,
+				graphId: graphId
+			}
+
 		}
 	}
 }
