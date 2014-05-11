@@ -581,7 +581,18 @@ document.addEventListener('objectClick', function(p){
         }
     }
 })
-
+//Финальный этап
+//Герой дотягивется до дорожного знака
+document.addEventListener('objectClick', function(p){
+    if(p.detail.obj=='roadSing'){
+        if(globals.objects.hero.getPosition().graphId == 28){
+            //герой тянется
+            globals.object.hero.animate({
+                animation:'ReachOut'
+            })
+        }
+    }
+})
 
 
 /*doorToTheNextLavel*/
