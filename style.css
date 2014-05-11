@@ -121,6 +121,10 @@ body._noscroll {
 	background-color: red;
 }
 
+.debug__point_super {
+	z-index: 10;
+}
+
 .debug__point_dragged {
 	z-index: 3;
 }

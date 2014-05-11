@@ -148,6 +148,7 @@ var debugTraect = function debugTraect() {
 
 				tempPoint = document.createElement('div');
 				tempPoint.className = 'debug__point';
+				tempPoint.setAttribute('data-path', path);
 				tempPoint.style.top = globals.paths[path].dots[dot].mainHandle.y / globals.scale+ 'px';
 				tempPoint.style.left = globals.paths[path].dots[dot].mainHandle.x / globals.scale + 'px';
 				globals.paths[path].dots[dot].mainHandle.dom = tempPoint;
@@ -189,6 +190,10 @@ var debugTraect = function debugTraect() {
 		// Ощищаем холст
 		ctx.clearRect(0,0,canvas.width,canvas.height);
 
+		[].forEach.call(document.querySelectorAll('.debug__point'), function (node) {
+			node.classList.remove('debug__point_super');
+		});
+
 		// Выводим линии
 		// Перебираем текущие узлы и получаем их координаты.
 		// Узлы образуют траектории, отдельных траекторий может быть много
@@ -196,6 +201,11 @@ var debugTraect = function debugTraect() {
 			// IE и FF умирает от setStrokeColor
 			if ( (document.querySelector('.debug__view_hidden') === null) && (document.querySelector('.debug__control-traects option[value="' + path + '"]').selected) ) {
 				ctx.setStrokeColor('#383');
+
+				[].forEach.call(document.querySelectorAll('.debug__point[data-path="' + path + '"]'), function (node) {
+					node.classList.add('debug__point_super');
+				});
+
 			} else {
 				ctx.setStrokeColor('#000');
 			}
@@ -277,10 +287,15 @@ var debugTraect = function debugTraect() {
 							// Визуализация
 						ctx.rect( globals.paths[path].controlPath[ j ].rect.x, globals.paths[path].controlPath[ j ].rect.y, globals.paths[path].controlPath[ j ].rect.width, globals.paths[path].controlPath[ j ].rect.height );
 						ctx.rect( globals.paths[path].steps[ globals.paths[path].controlPath[ j ].step ].x, globals.paths[path].steps[ globals.paths[path].controlPath[ j ].step ].y,  6, 6 );
+
+						ctx.font="14px Arial";
+						ctx.strokeText( j, globals.paths[path].steps[ globals.paths[path].controlPath[ j ].step ].x-15, globals.paths[path].steps[ globals.paths[path].controlPath[ j ].step ].y-10 );
+
 					}
 
 					// Вершины графа
 					if (globals.paths[path].dots[i].graphId !== undefined) {
+						ctx.font="30px Arial";
 						ctx.strokeText( globals.paths[path].dots[i].graphId, globals.paths[path].dots[i].mainHandle.x, globals.paths[path].dots[i].mainHandle.y-10 );
 					}
 

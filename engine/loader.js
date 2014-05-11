@@ -198,7 +198,10 @@ function init() {
 				pz: 5,
 				step: 0,
 				path: birdPath,
-				interactive: true
+				interactive: true,
+				ai: {
+					stayAnimation: 'bird'
+				}
 			});
 
 			var bucket = obj().create({
