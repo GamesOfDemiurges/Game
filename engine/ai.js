@@ -575,7 +575,7 @@ function animateElephant(){
 
 document.addEventListener('objectClick', function(p){
     if(p.detail.obj =='elephant'){
-        if((globals.objects.hero.path == 'endPath' || globals.objects.hero.path == 'pathToMonitors' )&&(p.detail.graphId==23)){
+        if ( globals.objects.hero.getPosition().graphId == 29 ){
             //запускаем слона
             animateElephant();
         }
