@@ -590,8 +590,32 @@ document.addEventListener('objectClick', function(p){
             globals.object.hero.animate({
                 animation:'ReachOut'
             })
+            //знак меняется на противоположный
+            globals.object.roadSing.animate({
+                animation:'roadSing'
+            })
+            //дверь открывается
+            globals.object.doorToTheNextLavel.animate({
+                animation:'door'
+            })
         }
     }
+})
+//второй вариант
+document.addEventListener('objectClick', function(p){
+   if(p.detail.obj=='roadSing'){
+       if((globals.objects.hero.path=='ElephantPath')&&(globals.objects.hero.step==1551)){
+           globals.objects.hero.animate({
+               animation:'ReachOut',
+               callback: function(){
+                   //дверь открывается
+                   globals.object.doorToTheNextLavel.animate({
+                       animation:'door'
+                   })
+               }
+           })
+       }
+   }
 })
 
 
