@@ -312,7 +312,7 @@ document.addEventListener('objectClick', function( p ) {
 
 		globals.triggers.butterflyInerval = setTimeout(function() {
 			globals.triggers.butterflyCanBeCatched = false;
-		}, 20000);
+		}, 25000);
 	}
 });
 
@@ -336,7 +336,7 @@ function getTheStone(cb) {
 			globals.objects.stone.moveTo({
 				path: 'stoneToHand',
 				chain: 1,
-				speedValue: 20,
+				speedValue: 20
 			})
 		}, 700)
 
@@ -345,7 +345,23 @@ function getTheStone(cb) {
 	}
 
 }
+// Злодей
+document.addEventListener('objectAdded', function( p ) {
+    if (p.detail.obj == 'villain2') {
 
+        (function animateVillain2() {
+            if (!globals.triggers.stopVillain2) {
+                globals.objects.villain2.animate({
+                    animation: 'animation',
+                    callback: function() {
+                        animateVillain2();
+                    }
+                })
+            }
+        })();
+
+    }
+});
 // Кинуть камень в злодея
 
 function dropToVillain() {
