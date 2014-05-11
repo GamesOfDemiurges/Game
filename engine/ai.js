@@ -315,7 +315,23 @@ document.addEventListener('objectClick', function( p ) {
 		}, 25000);
 	}
 });
+// Злодей
+document.addEventListener('objectAdded', function( p ) {
+    if (p.detail.obj == 'villain2') {
 
+        (function animateVillain2() {
+            if (!globals.triggers.stopVillain2) {
+                globals.objects.villain2.animate({
+                    animation: 'animation',
+                    callback: function() {
+                        animateVillain2();
+                    }
+                })
+            }
+        })();
+
+    }
+});
 function getTheStone(cb) {
 	var callback = cb || function() {};
 
@@ -345,23 +361,7 @@ function getTheStone(cb) {
 	}
 
 }
-// Злодей
-document.addEventListener('objectAdded', function( p ) {
-    if (p.detail.obj == 'villain2') {
 
-        (function animateVillain2() {
-            if (!globals.triggers.stopVillain2) {
-                globals.objects.villain2.animate({
-                    animation: 'animation',
-                    callback: function() {
-                        animateVillain2();
-                    }
-                })
-            }
-        })();
-
-    }
-});
 // Кинуть камень в злодея
 
 function dropToVillain() {
