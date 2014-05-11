@@ -18,8 +18,8 @@ var pathfinder = (function() {
 			// 1. Задана явно
 			// 2. Взята из параметров траектории для этого объкта
 			// 3. Первая анимация из всех доступных для этого объекта
-			resultAnimation.animation = resultAnimation.animation || (globals.paths[ p.pathId ].objects && globals.paths[ p.pathId ].objects[ p.obj ].animation) || globals.objects[ p.obj ].image.spineData.animations[0].name;
-			resultAnimation.speed = resultAnimation.speed || (globals.paths[ p.pathId ].objects && globals.paths[ p.pathId ].objects[ p.obj ].speed) || 0;
+			resultAnimation.animation = resultAnimation.animation || (globals.paths[ p.pathId ].objects && globals.paths[ p.pathId ].objects[ p.obj ] && globals.paths[ p.pathId ].objects[ p.obj ].animation) || globals.objects[ p.obj ].image.spineData.animations[0].name;
+			resultAnimation.speed = resultAnimation.speed || (globals.paths[ p.pathId ].objects && globals.paths[ p.pathId ].objects[ p.obj ] && globals.paths[ p.pathId ].objects[ p.obj ].speed) || 0;
 
 			return resultAnimation;
 		}
