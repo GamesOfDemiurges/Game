@@ -177,7 +177,15 @@ function init() {
 				scale: 0.4,
 				step: 440,
 				path: groundPath,
-				interactive: true
+				interactive: true,
+				ai: {
+					stayAnimation: 'animation'
+				},
+				animation: {
+					animation: {
+						soundSrc: 'assets/models/ready/villain/villain_sound.wav'
+					}
+				}
 			});
 
 			var villain2 = obj().create({
@@ -188,7 +196,15 @@ function init() {
 				scale: 1,
 				step: 0,
 				path: semaphoreVillainPath,
-				interactive: true
+				interactive: true,
+				ai: {
+					stayAnimation: 'animation'
+				},
+				animation: {
+					animation: {
+						soundSrc: 'assets/models/ready/villain2/villain2_sound.wav'
+					}
+				}
 			});
 
 			var bird = obj().create({
@@ -201,6 +217,11 @@ function init() {
 				interactive: true,
 				ai: {
 					stayAnimation: 'bird'
+				},
+				animation: {
+					bird: {
+						soundSrc: 'assets/models/ready/bird/bird_sound.mp3'
+					}
 				}
 			});
 
@@ -222,7 +243,7 @@ function init() {
 				interactive: true,
 				animation: {
 					trafficLight: {
-						soundSrc: 'assets/models/ready/doorToTheNextLavel/door_sound.wav'
+						soundSrc: 'assets/models/ready/semaphore/semaphore_sound.wav'
 					}
 				}
 			});
@@ -263,17 +284,34 @@ function init() {
 				pz: 5,
 				x: 2370,
 				y: 840,
-				interactive: true
+				interactive: true,
+				animation: {
+					'TV run': {
+						soundSrc: 'assets/models/ready/tv/tv_sound.wav'
+					},
+					'TV stop': {
+						soundSrc: 'assets/models/ready/tv/tv_sound.wav'
+					}
+				}
 			});
 
 			var addHero2 = obj().create({
 				name: 'addHero2',
 				src: 'assets/models/ready/additionalHero2/additionalHero2.anim',
-				z:15,
+				z:10,
 				pz: 10,
 				step:0,
 				path: addHero2Path,
-				interactive: true
+				ai: {
+					stayAnimation: 'animation',
+					moveAnimation: 'animation',
+					availablesPaths: addHero2Path
+				},
+				animation: {
+					animation: {
+						soundSrc: 'assets/models/ready/additionalHero2/additionalHero2_sound.wav'
+					}
+				}
 			});
 
 			var elephant = obj().create({

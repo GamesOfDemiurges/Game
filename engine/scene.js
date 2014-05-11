@@ -70,6 +70,10 @@ var scene = function scene() {
 
 			Z.addZindex( p );
 
+			if (p.ai) {
+				p.ai.start();
+			}
+
 			return _this;
 		},
 

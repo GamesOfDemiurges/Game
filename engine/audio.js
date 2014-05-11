@@ -149,7 +149,7 @@ var audio = (function() {
 					backgroundMusic.play({
 						loop: true
 					})
-				}, 5000)
+				}, 7000)
 			}
 		})
 	}
@@ -157,7 +157,7 @@ var audio = (function() {
 	return {
 
 		init: function () {
-			//initContext();
+			initContext();
 
 			return this;
 		},

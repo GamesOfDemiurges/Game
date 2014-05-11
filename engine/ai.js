@@ -315,23 +315,7 @@ document.addEventListener('objectClick', function( p ) {
 		}, 25000);
 	}
 });
-// Злодей
-document.addEventListener('objectAdded', function( p ) {
-    if (p.detail.obj == 'villain2') {
 
-        (function animateVillain2() {
-            if (!globals.triggers.stopVillain2) {
-                globals.objects.villain2.animate({
-                    animation: 'animation',
-                    callback: function() {
-                        animateVillain2();
-                    }
-                })
-            }
-        })();
-
-    }
-});
 function getTheStone(cb) {
 	var callback = cb || function() {};
 
@@ -384,6 +368,7 @@ function dropToVillain() {
 					z: 0
 				})
 
+				globals.objects.villain2.ai.stop();
 				globals.objects.villain2.moveTo( {
 					path: 'semaphoreVillainPath',
 					chain: 1,
@@ -487,45 +472,6 @@ document.addEventListener('objectClick', function( p ) {
 	}
 });
 
-// AddHero2
-document.addEventListener('objectAdded', function(p){
-	if (p.detail.obj == 'addHero2' ){
-		setTimeout(function(){
-			pathfinder.moveObjectByChain({
-				id:'addHero2',
-				path: 'addHero2Path',
-				chain: 8,
-				speedValue: 1
-			})
-		}, 1000)
-	}
-});
-
-
-document.addEventListener('stop', function(p){
-
-if(p.detail.obj =='addHero2' && p.detail.graphId =='24') {
-	setTimeout(function(){
-		pathfinder.moveObjectByChain({
-			id: 'addHero2',
-			path:'addHero2Path',
-			chain: 8,
-			speedValue: 1
-		})
-	}, 1000)
-}
-
-if(p.detail.obj =='addHero2' && p.detail.graphId =='25') {
-	setTimeout(function(){
-		pathfinder.moveObjectByChain({
-			id: 'addHero2',
-			path:'addHero2Path',
-			chain: 0,
-			speedValue: 1
-		})
-	}, 1000)
-	}
-});
 
 /*
 // elephant
@@ -555,6 +501,10 @@ document.addEventListener('stop', function(p){
 	}
 })*/
 
+
+// =========================
+
+/*
 //запуск слона по траекториям
 function animateElephant(){
     pathfinder.moveObjectByChain({
@@ -582,6 +532,37 @@ function animateElephant(){
 document.addEventListener('objectClick', function(p){
     if(p.detail.obj =='elephant'){
         if ( globals.objects.hero.getPosition().graphId == 23 ){
+            //запускаем слона
+            animateElephant();
+        }
+    }
+})*/
+
+
+
+// ======
+
+//запуск слона по траекториям
+function animateElephant(){
+    pathfinder.moveObjectByChain({
+        id: 'elephant',
+        path: 'endPath',
+        chain: 2,
+        speedValue: 2,
+        callback: function() {
+            pathfinder.moveObjectByChain({
+                id: 'elephant',
+                path:'elephantPath',
+                chain: 0,
+                speedValue: 4
+            })
+        }
+    })
+}
+
+document.addEventListener('objectClick', function(p){
+    if(p.detail.obj =='elephant'){
+        if ( globals.objects.hero.getPosition().graphId == 29 ){
             //запускаем слона
             animateElephant();
         }

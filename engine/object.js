@@ -128,6 +128,7 @@ function obj() {
 			setReverse();
 			setAnimation();
 			setInteractive();
+			setAI();
 
 			return _this;
 		},
