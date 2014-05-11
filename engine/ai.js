@@ -393,6 +393,9 @@ function dropToVillain() {
 
 				globals.paths.semaphoreBreakPath.breakpath = false;
 
+/* === */
+				globals.paths.semaphoreToTV.breakpath = false;
+/* === */
 				graph.buildGraph({
 					callback: function() {
 						globals.triggers.semaphoreIsClickable = true;
