@@ -568,6 +568,12 @@ function animateElephant(){
                 path:'elephantPath',
                 chain: 0,
                 speedValue: 4
+            });
+            pathfinder.moveObjectByChain({
+                id: 'elephant',
+                path:'elephantPathEnd',
+                chain: 0,
+                speedValue: 4
             })
         }
     })
@@ -608,6 +614,10 @@ document.addEventListener('objectClick', function(p){
            globals.objects.hero.animate({
                animation:'ReachOut',
                callback: function(){
+                   //знак меняется на противоположный
+                   globals.object.roadSing.animate({
+                       animation:'roadSing'
+                   });
                    //дверь открывается
                    globals.object.doorToTheNextLavel.animate({
                        animation:'door'
