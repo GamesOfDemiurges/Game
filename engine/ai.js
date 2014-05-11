@@ -578,7 +578,7 @@ function animateElephant(){
         }
     })
 }
-
+//когда герой находится рядом, слон должен указать путь
 document.addEventListener('objectClick', function(p){
     if(p.detail.obj =='elephant'){
         if ( globals.objects.hero.getPosition().graphId == 23 ){
