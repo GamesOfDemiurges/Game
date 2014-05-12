@@ -139,6 +139,7 @@ function init() {
 				stoneToHand = 'stoneToHand',
 				addHero2Path = 'addHero2Path',
 				elephantPath = 'elephantPath',
+				elephantPathEnd = 'elephantPathEnd',
 				pathToMonitors = 'pathToMonitors',
 				pathToRoadSing = 'pathToRoadSing',
 				endPath = 'endPath';
@@ -301,11 +302,12 @@ function init() {
 				z:10,
 				pz: 10,
 				step:0,
-				path: addHero2Path,
+				path: elephantPathEnd,
 				ai: {
 					stayAnimation: 'animation',
 					moveAnimation: 'animation',
-					availablesPaths: addHero2Path
+					availablesPaths: elephantPathEnd,
+					stayTime: 5000
 				},
 				animation: {
 					animation: {
@@ -321,8 +323,13 @@ function init() {
 				pz: 10,
 				scale: 0.8,
 				step:0,
-				path: endPath,
-				interactive: true
+				path: addHero2Path,
+				interactive: false,
+				ai: {
+					moveAnimation: 'Elefant',
+					availablesPaths: addHero2Path,
+					stayTime: 6000
+				}
 			});
 
 			var doorToTheNextLavel = obj().create({

@@ -190,7 +190,7 @@ var debugTraect = function debugTraect() {
 		// Ощищаем холст
 		ctx.clearRect(0,0,canvas.width,canvas.height);
 
-		[].forEach.call(document.querySelectorAll('.debug__point'), function (node) {
+		Array.prototype.forEach.call(document.querySelectorAll('.debug__point'), function (node) {
 			node.classList.remove('debug__point_super');
 		});
 
@@ -202,7 +202,7 @@ var debugTraect = function debugTraect() {
 			if ( (document.querySelector('.debug__view_hidden') === null) && (document.querySelector('.debug__control-traects option[value="' + path + '"]').selected) ) {
 				ctx.setStrokeColor('#383');
 
-				[].forEach.call(document.querySelectorAll('.debug__point[data-path="' + path + '"]'), function (node) {
+				Array.prototype.forEach.call(document.querySelectorAll('.debug__point[data-path="' + path + '"]'), function (node) {
 					node.classList.add('debug__point_super');
 				});
 
