@@ -570,7 +570,7 @@ document.addEventListener('objectClick', function(p){
 })
 //Финальный этап
 //Герой дотягивется до дорожного знака
-document.addEventListener('objectClick', function(p){
+/*document.addEventListener('objectClick', function(p){
     if(p.detail.obj=='roadSing'){
         if(globals.objects.hero.getPosition().graphId == 28){
             //герой тянется
@@ -587,20 +587,20 @@ document.addEventListener('objectClick', function(p){
             })
         }
     }
-})
+})*/
 //второй вариант
 document.addEventListener('objectClick', function(p){
    if(p.detail.obj=='roadSing'){
-       if((globals.objects.hero.path=='ElephantPath')&&(globals.objects.hero.step==1551)){
+       if(globals.objects.hero.getPosition().graphId == 28){
            globals.objects.hero.animate({
                animation:'ReachOut',
                callback: function(){
                    //знак меняется на противоположный
-                   globals.object.roadSing.animate({
+                   globals.objects.roadSing.animate({
                        animation:'roadSing'
                    });
                    //дверь открывается
-                   globals.object.doorToTheNextLavel.animate({
+                   globals.objects.doorToTheNextLavel.animate({
                        animation:'door'
                    })
                }
