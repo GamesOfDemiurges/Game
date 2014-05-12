@@ -568,26 +568,6 @@ document.addEventListener('objectClick', function(p){
         }
     }
 })
-//Финальный этап
-//Герой дотягивется до дорожного знака
-/*document.addEventListener('objectClick', function(p){
-    if(p.detail.obj=='roadSing'){
-        if(globals.objects.hero.getPosition().graphId == 28){
-            //герой тянется
-            globals.object.hero.animate({
-                animation:'ReachOut'
-            })
-            //знак меняется на противоположный
-            globals.object.roadSing.animate({
-                animation:'roadSing'
-            })
-            //дверь открывается
-            globals.object.doorToTheNextLavel.animate({
-                animation:'door'
-            })
-        }
-    }
-})*/
 //второй вариант
 document.addEventListener('objectClick', function(p){
    if(p.detail.obj=='roadSing'){
@@ -609,29 +589,3 @@ document.addEventListener('objectClick', function(p){
    }
 })
 
-
-/*doorToTheNextLavel*/
-document.addEventListener('objectAdded', function(p){
-	if(p.detail.obj =='doorToTheNextLavel'){
-		globals.objects.doorToTheNextLavel.animate({
-			animation: 'door',
-			speedValue: 2
-		})
-	}
-});
-
-/*Финал*/
-/*
-document.addEventListener('objectClick', function(p){
-	if((globals.objects.hero.path =='endPath')&&(globals.objects.hero.step == ???)){
-		globals.objects.hero.animate({
-			animation:'ReachOut'
-		})
-		/*теперь анимация двери*/
-		/*
-		globals.objects.doorToTheNextLavel.animate({
-			animation: 'door',
-			speedValue: 2
-		})
-	}
-})*/
