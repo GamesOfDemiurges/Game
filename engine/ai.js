@@ -194,13 +194,14 @@ document.addEventListener('objectAdded', function( p ) {
 
 		// setTimeout, потому что может не успеть проинициализироваться
 		setTimeout(function() {
+
 			globals.objects.butterfly.moveTo( {
 				path: 'butterflyPath2',
 				chain: 0,
 				animationName: 'butterfly',
 				speedValue: 4
 			})
-		}, 1000)
+		}, 3000)
 	}
 })
 
@@ -230,7 +231,7 @@ function catchButterfly() {
 
 document.addEventListener('stop', function( p ) {
 	if (p.detail.obj == 'butterfly') {
-		if ( p.detail.graphId == 17 ) {
+		if ( p.detail.graphId == 18 ) {
 			globals.objects.butterfly.moveTo( {
 				path: 'butterflyPath2',
 				chain: 0,
@@ -240,7 +241,7 @@ document.addEventListener('stop', function( p ) {
 
 		}
 
-		if ( p.detail.graphId == 18 ) {
+		if ( p.detail.graphId == 19 ) {
 			globals.objects.butterfly.moveTo( {
 				path: 'butterflyPath3',
 				chain: 0,
@@ -261,7 +262,7 @@ document.addEventListener('stop', function( p ) {
 			}
 		}
 
-		if ( p.detail.graphId == 19 ) {
+		if ( p.detail.graphId == 20 ) {
 			globals.objects.butterfly.moveTo( {
 				path: 'butterflyPath4',
 				chain: 0,
@@ -291,7 +292,7 @@ document.addEventListener('stop', function( p ) {
 			}
 		}
 
-		if ( p.detail.graphId == 20 ) {
+		if ( p.detail.graphId == 21 ) {
 			globals.objects.butterfly.moveTo( {
 				path: 'butterflyPath',
 				chain: 0,
@@ -361,7 +362,7 @@ function dropToVillain() {
 		globals.objects.stone.moveTo({
 			path: 'stoneToHand',
 			chain: 3,
-			speedValue: 12,
+			speedValue: 18,
 			callback: function() {
 
 				globals.objects.stone.move({
@@ -379,7 +380,7 @@ function dropToVillain() {
 				globals.paths.semaphoreBreakPath.breakpath = false;
 
 /* === */
-				globals.paths.semaphoreToTV.breakpath = false;
+//				globals.paths.semaphoreToTV.breakpath = false;
 /* === */
 				graph.buildGraph({
 					callback: function() {
@@ -460,7 +461,7 @@ document.addEventListener('objectClick', function( p ) {
 						animation: 'TV run',
 						callback: function() {
 
-							//globals.paths.TVBreakPath.breakpath = false;
+							globals.paths.pathToMonitors.breakpath = false;
 							graph.buildGraph();
 
 							TVPictures();
@@ -473,119 +474,43 @@ document.addEventListener('objectClick', function( p ) {
 });
 
 
-/*
-// elephant
-document.addEventListener('objectAdded', function(p){
-	if(p.detail.obj == 'elephant'){
 
-		setTimeout(function() {
-			pathfinder.moveObjectByChain({
-				id: 'elephant',
-				path: 'endPath',
-				chain: 2,
-				speedValue: 2
-			})
-
-		}, 1000)
-	}
-});
-
-document.addEventListener('stop', function(p){
-	if ( (p.detail.obj == 'elephant') && (p.detail.graphId == '29') ) {
-		pathfinder.moveObdjectByChain({
-			id: 'elephant',
-			path:'elephantPath',
-			chain: 0,
-			speedValue: 4
-		})
-	}
-})*/
-
-
-// =========================
-
-/*
-//запуск слона по траекториям
-function animateElephant(){
-    pathfinder.moveObjectByChain({
-        id: 'elephant',
-        path: 'endPath',
-        chain: 2,
-        speedValue: 2,
-        callback: function() {
-            pathfinder.moveObjectByChain({
-                id: 'elephant',
-                path:'elephantPath',
-                chain: 0,
-                speedValue: 4
-            });
-            pathfinder.moveObjectByChain({
-                id: 'elephant',
-                path:'elephantPathEnd',
-                chain: 0,
-                speedValue: 4
-            })
-        }
-    })
-}
-//когда герой находится рядом, слон должен указать путь
-document.addEventListener('objectClick', function(p){
-    if(p.detail.obj =='elephant'){
-        if ( globals.objects.hero.getPosition().graphId == 23 ){
-            //запускаем слона
-            animateElephant();
-        }
-    }
-})*/
-
-
-
-// ======
-
-//запуск слона по траекториям
-function animateElephant(){
-    pathfinder.moveObjectByChain({
-        id: 'elephant',
-        path: 'endPath',
-        chain: 2,
-        speedValue: 2,
-        callback: function() {
-            pathfinder.moveObjectByChain({
-                id: 'elephant',
-                path:'elephantPath',
-                chain: 0,
-                speedValue: 4
-            })
-        }
-    })
-}
-
-document.addEventListener('objectClick', function(p){
-    if(p.detail.obj =='elephant'){
-        if ( globals.objects.hero.getPosition().graphId == 29 ){
-            //запускаем слона
-            animateElephant();
-        }
-    }
-})
 //второй вариант
-document.addEventListener('objectClick', function(p){
+document.addEventListener('objectClick', function( p ){
+
    if(p.detail.obj=='roadSing'){
-       if(globals.objects.hero.getPosition().graphId == 28){
+
+       if( (globals.objects.hero.getPosition().path == 'elephantPath') && (globals.objects.hero.getPosition().chain == 1) ){
+
            globals.objects.hero.animate({
                animation:'ReachOut',
                callback: function(){
+
                    //знак меняется на противоположный
                    globals.objects.roadSing.animate({
-                       animation:'roadSing'
+                       animation:'roadSing',
+                       callback: function () {
+
+						   //дверь открывается
+						   globals.objects.doorToTheNextLavel.animate({
+							   animation:'door',
+							   callback: function () {
+							   		globals.triggers.exit = true;
+							   }
+						   })
+
+                       }
                    });
-                   //дверь открывается
-                   globals.objects.doorToTheNextLavel.animate({
-                       animation:'door'
-                   })
                }
            })
        }
    }
 })
 
+// Конец уровня
+document.addEventListener('stop', function( p ) {
+
+	if (p.detail.obj == 'hero' && p.detail.graphId == 32 && globals.triggers.exit) {
+		alert('Уровень пройден!');
+	}
+})

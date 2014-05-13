@@ -157,7 +157,7 @@ var audio = (function() {
 	return {
 
 		init: function () {
-			//initContext();
+			initContext();
 
 			return this;
 		},

@@ -319,7 +319,7 @@ function init() {
 			var elephant = obj().create({
 				name: 'elephant',
 				src: 'assets/models/ready/elephant/elephant.anim',
-				z:15,
+				z:10,
 				pz: 10,
 				scale: 0.8,
 				step:0,
@@ -401,10 +401,10 @@ function init() {
 document.addEventListener("DOMContentLoaded", function() {
 
 	audio
-		.init();
-		/*.initSplashSound();*/
+		.init()
+		.initSplashSound();
 
-	/*if (!debug) {
+	if (!debug) {
 		document.body.classList.add('_noscroll');
 		document.querySelector('.start__run').onclick = function() {
 			document.body.removeChild( document.querySelector('.start') );
@@ -413,7 +413,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 			init();
 		}
-	} else {  */
+	} else {
 		init();
-	//}
+	}
 })
