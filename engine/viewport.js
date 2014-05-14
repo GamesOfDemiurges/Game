@@ -6,8 +6,8 @@ var viewport = (function() {
 		globals.viewport.resize = true;
 		globals.viewport.distance = Math.sqrt( ( p.x1 - p.x2 )*( p.x1 - p.x2 ) + ( p.y1 - p.y2 )*( p.y1 - p.y2 ) );
 
-		globals.viewport.sceneX = scene.playGround.position.x - globals.objects['hero'].image.position.x * (1 - globals.viewport.scale);
-		globals.viewport.sceneY = scene.playGround.position.y - (globals.objects['hero'].image.position.y + magicYHeroShift) * (1 - globals.viewport.scale);
+		globals.viewport.sceneX = scene.playGround.position.x - globals.objects.hero.image.position.x * (1 - globals.viewport.scale);
+		globals.viewport.sceneY = scene.playGround.position.y - (globals.objects.hero.image.position.y + magicYHeroShift) * (1 - globals.viewport.scale);
 	}
 
 	function viewportProcessScale( p ) {
@@ -25,11 +25,16 @@ var viewport = (function() {
 			return false;
 		}
 
-		var x = (globals.objects['hero'].image.position.x) * (1-k),
-			y = (globals.objects['hero'].image.position.y + magicYHeroShift) * (1-k),
+		var x = (globals.objects.hero.image.position.x) * (1-k),
+			y = (globals.objects.hero.image.position.y + magicYHeroShift) * (1-k),
 			rx = globals.viewport.sceneX + x,
 			ry = globals.viewport.sceneY + y,
-			maxYShift = (scene.height / globals.scale - (scene.height / globals.scale ) * (k) ) * globals.scale;
+			maxYShift = (scene.height / globals.scale - (scene.height / globals.scale ) * (k) ) * globals.scale,
+			maxXShift = (scene.width / globals.scale - (globals.sceneWidth / globals.scale ) * (k) ) * globals.scale;
+
+		rx = rx < maxXShift
+			? maxXShift
+			: rx;
 
 		rx = (rx > 0)
 			? 0

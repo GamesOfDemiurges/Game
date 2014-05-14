@@ -127,7 +127,7 @@ var audio = (function() {
 		splashMusic.load({
 
 			obj: {},
-			url: 'assets/music/splash.wav',
+			url: 'assets/music/splash.ogg',
 			callback: function() {
 				setTimeout(function() {
 					splashMusic.play({
@@ -143,7 +143,7 @@ var audio = (function() {
 		backgroundMusic.load({
 
 			obj: globals.objects.hero,
-			url: 'assets/music/background.mp3',
+			url: 'assets/music/background.ogg',
 			callback: function() {
 				setTimeout(function() {
 					backgroundMusic.play({
@@ -176,17 +176,20 @@ var audio = (function() {
 
 		finishSplashSound: function () {
 
-			var duration = 1,
-				currTime  = audio.getContext().currentTime;
+			if (audio.getContext()) {
 
-			audio.getGainNode().gain.linearRampToValueAtTime(1, currTime);
-			audio.getGainNode().gain.linearRampToValueAtTime(0, currTime + duration);
+				var duration = 1,
+					currTime  = audio.getContext().currentTime;
 
-			setTimeout(function() {
-				splashMusic.stop();
-				splashMusic.play = function() {};
-				audio.getGainNode().gain.linearRampToValueAtTime(1, currTime + duration);
-			}, 1000)
+				audio.getGainNode().gain.linearRampToValueAtTime(1, currTime);
+				audio.getGainNode().gain.linearRampToValueAtTime(0, currTime + duration);
+
+				setTimeout(function() {
+					splashMusic.stop();
+					splashMusic.play = function() {};
+					audio.getGainNode().gain.linearRampToValueAtTime(1, currTime + duration);
+				}, 1000)
+			}
 
 			return this;
 

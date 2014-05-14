@@ -1,11 +1,11 @@
 var loader = (function() {
 
 	// Предзагрузка ресурсов
-	function init( p ) {
+	function initResources( p ) {
 		var assetsLoader = new PIXI.AssetLoader(p.resources),
 			callback = p.callback || function() {};
 
-		assetsLoader.onComplete = function() { console.log('Ресурсы загружены');
+		assetsLoader.onComplete = function () { console.log('Ресурсы загружены');
 			callback();
 		}
 
@@ -15,10 +15,10 @@ var loader = (function() {
 	// Извлечение сохраненных путей из файла
 	function readTraectFromFile ( p ) {
 		var readTraect = new XMLHttpRequest,
-			callback = p.callback || function() {};
+			callback = p.callback || function () {};
 
-		readTraect.open("GET", '/tools/traect.json?' + new Date().getTime());
-		readTraect.onreadystatechange = function() {
+		readTraect.open("GET", 'tools/traect.json?' + new Date().getTime());
+		readTraect.onreadystatechange = function () {
 
 			if (readTraect.readyState==4) { console.log('Траектории загружены')
 				globals.paths = JSON.parse(readTraect.responseText);
@@ -29,7 +29,7 @@ var loader = (function() {
 
 						// Построить граф
 						graph.buildGraph({
-							callback: function() { console.log('Граф построен');
+							callback: function () { console.log('Граф построен');
 								callback();
 								pathfinder.start();
 							}
@@ -45,26 +45,44 @@ var loader = (function() {
 		readTraect.send(null);
 	}
 
+	function resizeWatcher() {
+		globals.scale = globals.sceneHeight / document.body.clientHeight;
+		if (globals.objects.hero) {
+			globals.objects.hero.move({
+				x: globals.objects.hero.image.position.x,
+				y: globals.objects.hero.image.position.y
+			})
+		}
+
+	}
+
 	return {
 
 		init: function( p ) {
-			var callback = p.callback || function() {};
+			var callback = p.callback || function () {};
 
 			// предзагрузить ресурсы
-			init({
+			initResources({
 				resources: p.resources,
-				callback: function() {
+				callback: function () {
 
 					/*if (!debug) {
 						document.body.classList.add('_noscroll');
 					}*/
 
-					globals.scale = 800 / document.body.clientHeight;
+					globals.sceneWidth = 3828;
+					globals.sceneHeight = 800;
+
+					globals.scale = globals.sceneHeight / document.body.clientHeight;
+
+					window.addEventListener('resize', function () {
+						resizeWatcher();
+					});
 
 					// загрузить траектории
 					readTraectFromFile({
 						callback: callback
-					})
+					});
 				}
 			})
 		}
@@ -120,7 +138,7 @@ function init() {
 			"assets/background/background.png",
 			"assets/background/backgroundVillainPatch.png"
 		],
-		callback: function() {
+		callback: function () {
 
 			relay
 				/*.listen('breakpoint')
@@ -184,7 +202,7 @@ function init() {
 				},
 				animation: {
 					animation: {
-						soundSrc: 'assets/models/ready/villain/villain_sound.wav'
+						soundSrc: 'assets/models/ready/villain/villain_sound.ogg'
 					}
 				}
 			});
@@ -203,7 +221,7 @@ function init() {
 				},
 				animation: {
 					animation: {
-						soundSrc: 'assets/models/ready/villain2/villain2_sound.wav'
+						soundSrc: 'assets/models/ready/villain2/villain2_sound.ogg'
 					}
 				}
 			});
@@ -221,7 +239,7 @@ function init() {
 				},
 				animation: {
 					bird: {
-						soundSrc: 'assets/models/ready/bird/bird_sound.mp3'
+						soundSrc: 'assets/models/ready/bird/bird_sound.ogg'
 					}
 				}
 			});
@@ -244,7 +262,7 @@ function init() {
 				interactive: true,
 				animation: {
 					trafficLight: {
-						soundSrc: 'assets/models/ready/semaphore/semaphore_sound.wav'
+						soundSrc: 'assets/models/ready/semaphore/semaphore_sound.ogg'
 					}
 				}
 			});
@@ -288,10 +306,10 @@ function init() {
 				interactive: true,
 				animation: {
 					'TV run': {
-						soundSrc: 'assets/models/ready/tv/tv_sound.wav'
+						soundSrc: 'assets/models/ready/tv/tv_sound.ogg'
 					},
 					'TV stop': {
-						soundSrc: 'assets/models/ready/tv/tv_sound.wav'
+						soundSrc: 'assets/models/ready/tv/tv_sound.ogg'
 					}
 				}
 			});
@@ -311,7 +329,7 @@ function init() {
 				},
 				animation: {
 					animation: {
-						soundSrc: 'assets/models/ready/additionalHero2/additionalHero2_sound.wav'
+						soundSrc: 'assets/models/ready/additionalHero2/additionalHero2_sound.ogg'
 					}
 				}
 			});
@@ -341,7 +359,7 @@ function init() {
 				interactive: true,
 				animation: {
 					door: {
-						soundSrc: 'assets/models/ready/doorToTheNextLavel/door_sound.wav'
+						soundSrc: 'assets/models/ready/doorToTheNextLavel/door_sound.ogg'
 					}
 				}
 			});
@@ -398,7 +416,20 @@ function init() {
 	})
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
+
+	function fullScreen() {
+		var html = document.body;
+
+		if (html.requestFullScreen) {
+			html.requestFullScreen();
+		} else if (html.mozRequestFullScreen) {
+			html.mozRequestFullScreen();
+		} else {
+			html.webkitRequestFullScreen();
+		}
+
+	}
 
 	audio
 		.init()
@@ -406,8 +437,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	if (!debug) {
 		document.body.classList.add('_noscroll');
-		document.querySelector('.start__run').onclick = function() {
+		document.querySelector('.start__run').onclick = function () {
 			document.body.removeChild( document.querySelector('.start') );
+			fullScreen();
 
 			audio.finishSplashSound();
 

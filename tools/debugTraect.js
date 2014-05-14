@@ -469,7 +469,7 @@ var debugTraect = function debugTraect() {
 		dots = document.querySelectorAll('.debug__point');
 		ctx = canvas.getContext('2d');
 
-		canvas.setAttribute('width', debugPanel.clientWidth / document.getElementById('view').clientHeight * 800 );
+		canvas.setAttribute('width', debugPanel.clientWidth / document.getElementById('view').clientHeight * globals.sceneHeight );
 		canvas.setAttribute('height', document.getElementById('view').getAttribute('height'));
 
 		document.body.classList.add('_noscroll');
