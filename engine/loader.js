@@ -425,7 +425,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			html.requestFullScreen();
 		} else if (html.mozRequestFullScreen) {
 			html.mozRequestFullScreen();
-		} else {
+		} else if (html.webkitRequestFullScreen) {
 			html.webkitRequestFullScreen();
 		}
 
