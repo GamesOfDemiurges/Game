@@ -417,20 +417,20 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	audio
-		.init()
-		.initSplashSound();
+		.init();
+		//.initSplashSound();
 
-	if (!debug) {
+	/*if (!debug) {
 		document.body.classList.add('_noscroll');
 		document.querySelector('.start__run').onclick = function () {
 			document.body.removeChild( document.querySelector('.start') );
-			fullScreen();
+			//fullScreen();
 
 			audio.finishSplashSound();
 
 			init();
 		}
-	} else {
+	} else {*/
 		init();
-	}
+	//}
 })

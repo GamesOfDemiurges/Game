@@ -181,6 +181,7 @@ var audio = (function() {
 	return {
 
 		init: function () {
+		/*
 			initContext();
 
 			document.addEventListener("visibilitychange", function() {
@@ -190,7 +191,7 @@ var audio = (function() {
 			document.addEventListener("webkitvisibilitychange", function() {
 				handleVisibilityChange();
 			});
-
+		*/
 			return this;
 		},
 
