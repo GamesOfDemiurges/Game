@@ -88,6 +88,7 @@ var audio = (function() {
 
 	var context,
 		gainNode,
+		fadeDuration = 1,
 		splashMusic = track(),
 		backgroundMusic = track();
 
@@ -154,10 +155,41 @@ var audio = (function() {
 		})
 	}
 
+	function fadeIn() {
+		var currTime  = audio.getContext().currentTime;
+
+		audio.getGainNode().gain.linearRampToValueAtTime(0, currTime);
+		audio.getGainNode().gain.linearRampToValueAtTime(1, currTime + fadeDuration);
+	}
+
+	function fadeOut() {
+		var currTime  = audio.getContext().currentTime;
+
+		audio.getGainNode().gain.linearRampToValueAtTime(1, currTime);
+		audio.getGainNode().gain.linearRampToValueAtTime(0, currTime + fadeDuration);
+	}
+
+	function handleVisibilityChange() {
+
+		if (document.webkitHidden || document.hidden) {
+			fadeOut();
+		} else {
+			fadeIn();
+		}
+	}
+
 	return {
 
 		init: function () {
 			initContext();
+
+			document.addEventListener("visibilitychange", function() {
+				handleVisibilityChange();
+			});
+
+			document.addEventListener("webkitvisibilitychange", function() {
+				handleVisibilityChange();
+			});
 
 			return this;
 		},
@@ -179,15 +211,14 @@ var audio = (function() {
 			if (audio.getContext()) {
 
 				var duration = 1,
-					currTime  = audio.getContext().currentTime;
+					currTime = audio.getContext().currentTime;
 
-				audio.getGainNode().gain.linearRampToValueAtTime(1, currTime);
-				audio.getGainNode().gain.linearRampToValueAtTime(0, currTime + duration);
+				fadeOut();
 
 				setTimeout(function() {
 					splashMusic.stop();
 					splashMusic.play = function() {};
-					audio.getGainNode().gain.linearRampToValueAtTime(1, currTime + duration);
+					fadeIn();
 				}, 1000)
 			}
 

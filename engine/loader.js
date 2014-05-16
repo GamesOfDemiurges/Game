@@ -45,17 +45,6 @@ var loader = (function() {
 		readTraect.send(null);
 	}
 
-	function resizeWatcher() {
-		globals.scale = globals.sceneHeight / document.body.clientHeight;
-		if (globals.objects.hero) {
-			globals.objects.hero.move({
-				x: globals.objects.hero.image.position.x,
-				y: globals.objects.hero.image.position.y
-			})
-		}
-
-	}
-
 	return {
 
 		init: function( p ) {
@@ -74,10 +63,6 @@ var loader = (function() {
 					globals.sceneHeight = 800;
 
 					globals.scale = globals.sceneHeight / document.body.clientHeight;
-
-					window.addEventListener('resize', function () {
-						resizeWatcher();
-					});
 
 					// загрузить траектории
 					readTraectFromFile({

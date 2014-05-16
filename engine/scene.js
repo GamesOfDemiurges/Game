@@ -31,13 +31,23 @@ var scene = function scene() {
 			_this.width = _this.scale * masterCanvas.clientWidth;
 			_this.height = _this.scale * masterCanvas.clientHeight;
 
-			renderer = new PIXI.autoDetectRenderer(_this.width, globals.sceneHeight, masterCanvas, false);
+			renderer = new PIXI.autoDetectRecommendedRenderer(_this.width, globals.sceneHeight, masterCanvas, false);
+
 			window.addEventListener('resize', function() {
 				_this.scale = globals.sceneHeight/masterCanvas.clientHeight;
 				_this.width = _this.scale * masterCanvas.clientWidth;
 				_this.height = _this.scale * masterCanvas.clientHeight;
 
 				renderer.resize(_this.width, globals.sceneHeight);
+
+				globals.scale = globals.sceneHeight / document.body.clientHeight;
+
+				if (globals.objects.hero) {
+					globals.objects.hero.move({
+						x: globals.objects.hero.image.position.x,
+						y: globals.objects.hero.image.position.y
+					})
+				}
 
 				if (!!graph) {
 					graph.buildGraph({});
