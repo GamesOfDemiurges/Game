@@ -35,9 +35,10 @@ function track() {
 								audio.updateWorldSound({
 									id: p.obj.id
 								})
-							} else {
-
 							}
+
+							callback();
+							return _this;
 
 						}, function (e) {
 							// fail
@@ -130,11 +131,11 @@ var audio = (function() {
 			obj: {},
 			url: 'assets/music/splash.ogg',
 			callback: function() {
-				setTimeout(function() {
-					splashMusic.play({
-						loop: true
-					})
-				}, 1000)
+
+				splashMusic.play({
+					loop: true
+				})
+
 			}
 		})
 	}
@@ -146,11 +147,10 @@ var audio = (function() {
 			obj: globals.objects.hero,
 			url: 'assets/music/background.ogg',
 			callback: function() {
-				setTimeout(function() {
-					backgroundMusic.play({
-						loop: true
-					})
-				}, 7000)
+
+				backgroundMusic.play({
+					loop: true
+				})
 			}
 		})
 	}

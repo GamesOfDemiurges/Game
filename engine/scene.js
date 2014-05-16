@@ -31,7 +31,7 @@ var scene = function scene() {
 			_this.width = _this.scale * masterCanvas.clientWidth;
 			_this.height = _this.scale * masterCanvas.clientHeight;
 
-			renderer = new PIXI.autoDetectRecommendedRenderer(_this.width, globals.sceneHeight, masterCanvas, false);
+			renderer = new PIXI.CanvasRenderer(_this.width, globals.sceneHeight, masterCanvas, false);
 
 			window.addEventListener('resize', function() {
 				_this.scale = globals.sceneHeight/masterCanvas.clientHeight;
