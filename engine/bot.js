@@ -52,7 +52,7 @@ function ai() {
 
 		setTimeout(function() {
 			processAction();
-		}, Math.round(Math.random() * stayTime) );
+		}, utils.getRandomValue(stayTime) );
 	}
 
 	function rotateObject() {
@@ -68,7 +68,7 @@ function ai() {
 
 		if (moveAnimation && availablesPaths) {
 
-			var targetChain = Math.round( Math.random() * (globals.paths[availablesPaths].controlPath.length-1) );
+			var targetChain =  utils.getRandomValue(globals.paths[availablesPaths].controlPath.length-1);
 
 			obj.moveTo({
 				path: availablesPaths,
@@ -120,7 +120,7 @@ function ai() {
 	function processAction() {
 		if (stop) return;
 
-		var prob = Math.random() * 10,
+		var prob = utils.getRandomValue(10),
 			sum = 0,
 			isVisible = heroIsVisible
 				? 'yes'

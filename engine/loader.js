@@ -126,11 +126,11 @@ function init() {
 		callback: function () {
 
 			relay
-				/*.listen('breakpoint')
-				.listen('start')
-				.listen('stop')
-				.listen('startAnimation')
-				.listen('endAnimation')*/
+				.listen('hero.breakpoint')
+				.listen('hero.start')
+				.listen('hero.stop')
+				.listen('hero.startAnimation')
+				.listen('hero.endAnimation')
 				.listen('objectClick')
 				.listen('objectAdded');
 
@@ -387,6 +387,7 @@ function init() {
 				.addObj(roadSing);
 
 			viewport.init();
+			hint.init();
 
 			queue.startQueue();
 

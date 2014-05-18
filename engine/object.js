@@ -85,7 +85,7 @@ function obj() {
 				if (p.interactive) {
 					_this.image.setInteractive(true);
 
-					_this.image.click = _this.image.tap = function(data) {
+					_this.image.click = _this.image.tap = function (data) {
 						if (globals.viewport.resize) return false;
 
 						globals.objectClicked = true;
@@ -94,6 +94,15 @@ function obj() {
 							obj: _this.id,
 							type: 'objectClick'
 						});
+					}
+
+					_this.image.mouseover = function () {
+
+						document.body.className += ' _cursor';
+					}
+
+					_this.image.mouseout = function () {
+						document.body.className = document.body.className.replace(/\s_cursor/ig, '');
 					}
 				}
 			}
@@ -270,11 +279,12 @@ function obj() {
 			var _this = this,
 				path = _this.path,
 				chain,
-				graphId;
+				graphId,
+				orientation = Math.abs(_this.image.scale.x)/_this.image.scale.x;
 
 			for (var i = 0; i < globals.paths[ _this.path ].controlPath.length; i++) {
 
-				if ( Math.abs(globals.paths[ _this.path ].controlPath[i].step - _this.step) < 5 ) {
+				if ( Math.abs(globals.paths[ _this.path ].controlPath[i].step - _this.step) < 10 ) {
 
 					chain = i;
 					break;
@@ -282,18 +292,19 @@ function obj() {
 
 			}
 
-			if ( _this.step < 5 ) {
+			if ( _this.step < 10 ) {
 				graphId = globals.paths[ path ].dots[0].graphId;
 			}
 
-			if ( Math.abs(globals.paths[ path ].steps.length - _this.step) < 5 ) {
+			if ( Math.abs(globals.paths[ path ].steps.length - _this.step) < 10 ) {
 				graphId = globals.paths[ path ].dots[ globals.paths[ path ].dots.length-1 ].graphId;
 			}
 
 			return {
 				path: path,
 				chain: chain,
-				graphId: graphId
+				graphId: graphId,
+				orientation: orientation
 			}
 
 		}

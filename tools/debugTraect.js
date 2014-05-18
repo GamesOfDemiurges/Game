@@ -477,6 +477,9 @@ var debugTraect = function debugTraect() {
 
 	function attachEvents() {
 		var currentTarget,
+			panelDragged,
+			originalPanel = {},
+			tempPointPanel = {},
 			debugWrap = document.querySelector('.debug__wrap');
 
 		var pathList = document.querySelector('.debug__control-traects .debug__control-traects-list'),
@@ -505,6 +508,22 @@ var debugTraect = function debugTraect() {
 				e.target.isDragged = true;
 				currentTarget = e.target;
 			}
+
+			// Панель
+			if ( e.target.classList.contains('debug__control' )) {
+				originalPanel.x = e.target.offsetLeft;
+				originalPanel.y = e.target.offsetTop;
+
+				e.target.style.right = 'auto';
+				e.target.style.left = originalPanel.x + 'px';
+				e.target.style.top = originalPanel.y + 'px';
+
+				tempPointPanel.x = e.pageX;
+				tempPointPanel.y = e.pageY;
+
+				panelDragged = true;
+			}
+
 		})
 
 		debugPanel.addEventListener("mouseup", function(e) {
@@ -516,6 +535,11 @@ var debugTraect = function debugTraect() {
 				e.target.isDragged = undefined;
 				currentTarget = undefined;
 				e.target.classList.remove('debug__point_dragged');
+			}
+
+			// Панель
+			if ( e.target.classList.contains('debug__control' )) {
+				panelDragged = false;
 			}
 		})
 
@@ -568,6 +592,12 @@ var debugTraect = function debugTraect() {
 						});
 					}
 				});
+			}
+
+			// Панель
+			if ( (panelDragged) && (e.target.className == 'debug__control') ) {
+				e.target.style.left = originalPanel.x + (e.pageX - tempPointPanel.x) + 'px';
+				e.target.style.top = originalPanel.y + (e.pageY - tempPointPanel.y) + 'px';
 			}
 		})
 

@@ -2,6 +2,15 @@ var utils = (function() {
 
 	return {
 
+		getRandomValue: function ( low, high ) {
+			var innerLow = 0,
+				innerHigh = high
+					? high
+					: low;
+
+			return innerLow + Math.round( Math.random()*(innerHigh-innerLow) );
+		},
+
 		// Возвращает Эвклидово расстояния
 		//p.x1
 		//p.y1
