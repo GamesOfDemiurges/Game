@@ -184,11 +184,12 @@ document.addEventListener('semaphore.objectClick', function( p ) {
 });
 
 
+/*
 // Бабочка летает
 document.addEventListener('butterfly.objectAdded', function( p ) {
 
-	/*!!!!*/
-	/*globals.paths.semaphoreToTV.breakpath = false;*/
+
+	//globals.paths.semaphoreToTV.breakpath = false;
 
 
 	// setTimeout, потому что может не успеть проинициализироваться
@@ -314,6 +315,8 @@ document.addEventListener('butterfly.objectClick', function( p ) {
 	}, 25000);
 
 });
+*/
+
 
 function getTheStone(cb) {
 	var callback = cb || function() {};
@@ -503,11 +506,62 @@ document.addEventListener('hero.stop.inGraphId.32', function( p ) {
 })
 
 
+function checkGarbageBucket() {
+
+	if (globals.triggers.garbageBucketIsOpen) return;
+
+	var currentChain = globals.objects.hero.getPosition().chain;
+
+	if (currentChain > 1 && currentChain < 9) {
+
+		globals.objects.garbageBucket.animate({
+			animation: 'live'
+		})
+	}
+
+	setTimeout(function() {
+		if ( globals.objects.hero.getPosition().path !== 'treeToSemaphore' ) return;
+		checkGarbageBucket();
+	}, 1200);
+}
+
+document.addEventListener('hero.stop.inGraphId.5', function( p ) { checkGarbageBucket() })
+document.addEventListener('hero.breakpoint.inGraphId.5', function( p ) { checkGarbageBucket() })
+document.addEventListener('hero.stop.inGraphId.11', function( p ) { checkGarbageBucket() })
+document.addEventListener('hero.breakpoint.inGraphId.11', function( p ) { checkGarbageBucket() })
+
+document.addEventListener('garbageBucket.objectClick', function( p ) {
+	if ( globals.triggers.garbageBucketIsOpen ) return;
+
+	var currentChain = globals.objects.hero.getPosition().chain;
+	if ( !((globals.objects.hero.getPosition().path == 'treeToSemaphore') && (currentChain == 6 || currentChain == 7)) ) return;
+
+ 	globals.triggers.garbageBucketIsOpen = true;
+	globals.objects.garbageBucket.animate({
+		animation: 'open',
+		callback: function() {
+
+			globals.objects.butterfly.move({
+				z: 15
+			})
+
+			globals.objects.butterfly.moveTo( {
+				path: 'butterflyPath4',
+				chain: 0,
+				animationName: 'butterfly',
+				speedValue: 4
+			})
+
+		}
+	})
+})
+
 /* === Подсказки */
 
 
 
 // Лестница
+/*
 document.addEventListener('hero.objectAdded', function( p ) {
 
 	globals.triggers.stairHint = setInterval(function() {
@@ -543,3 +597,4 @@ function bucketHint() {
 document.addEventListener('hero.bucketToGround.inGraphId.3', function( p ) {
 	clearInterval( globals.triggers.bucketHint );
 })
+*/

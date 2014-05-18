@@ -104,6 +104,9 @@ function init() {
 			"assets/models/ready/tv/tv.json",
 			"assets/models/ready/tv/tv.anim",
 
+			"assets/models/ready/additionalHero1/addHero1.json",
+			"assets/models/ready/additionalHero1/addHero1.anim",
+
 			"assets/models/ready/additionalHero2/additionalHero2.json",
 			"assets/models/ready/additionalHero2/additionalHero2.anim",
 
@@ -256,6 +259,7 @@ function init() {
 				x: 1193,
 				y: 647,
 				z: 10,
+				interactive: true
 			});
 
 			var semaphore = obj().create({
@@ -294,7 +298,7 @@ function init() {
 				name: 'butterfly',
 				src: 'assets/models/ready/butterfly/butterfly.anim',
 				scale: 0.35,
-				z: 15,
+				z: 0,
 				pz: 5,
 				step: 0,
 				path: butterflyPath,
@@ -316,6 +320,20 @@ function init() {
 					'TV stop': {
 						soundSrc: 'assets/models/ready/tv/tv_sound.ogg'
 					}
+				}
+			});
+
+			var addHero1 = obj().create({
+				name: 'addHero1',
+				src: 'assets/models/ready/additionalHero1/addHero1.anim',
+				z:15,
+				pz: 10,
+				step:110,
+				path: groundPath,
+				ai: {
+					stayAnimation: 'addHero1',
+					moveAnimation: 'addHero1',
+					availablesPaths: groundPath
 				}
 			});
 
@@ -401,6 +419,7 @@ function init() {
 				.addObj(semaphore)
 				.addObj(butterfly)
 				.addObj(tv)
+				.addObj(addHero1)
 				.addObj(addHero2)
 				.addObj(elephant)
 				.addObj(stone)

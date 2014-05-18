@@ -24,8 +24,8 @@ body._noscroll {
 	overflow: hidden;
 }
 
-body._cursor {
-	cursor: pointer;
+body._cursor #view {
+	cursor: pointer !important;
 }
 
 /* Scene */
