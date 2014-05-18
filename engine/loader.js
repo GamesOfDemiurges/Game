@@ -131,11 +131,11 @@ function init() {
 		callback: function () {
 
 			relay
-				.listen('hero.breakpoint')
-				.listen('hero.start')
-				.listen('hero.stop')
+				/*.listen('breakpoint')
+				.listen('start')
+				.listen('stop')
 				.listen('hero.startAnimation')
-				.listen('hero.endAnimation')
+				.listen('hero.endAnimation')*/
 				.listen('objectClick')
 				.listen('objectAdded');
 
@@ -150,7 +150,8 @@ function init() {
 				elephantPathEnd = 'elephantPathEnd',
 				pathToMonitors = 'pathToMonitors',
 				pathToRoadSing = 'pathToRoadSing',
-				endPath = 'endPath';
+				endPath = 'endPath',
+				endPath1 = 'endPath1';
 
 			var background = obj().create({
 				src: 'assets/background/background.jpg',
@@ -169,7 +170,7 @@ function init() {
 			});
 
 			var tree = obj().create({
-				name: 'hero',
+				name: 'tree',
 				src: 'assets/models/ready/tree/tree.anim',
 				z: 10,
 				pz: 10,
@@ -329,11 +330,10 @@ function init() {
 				z:15,
 				pz: 10,
 				step:110,
-				path: groundPath,
+				path: endPath1,
 				ai: {
-					stayAnimation: 'addHero1',
 					moveAnimation: 'addHero1',
-					availablesPaths: groundPath
+					availablesPaths: endPath1
 				}
 			});
 
@@ -342,12 +342,12 @@ function init() {
 				src: 'assets/models/ready/additionalHero2/additionalHero2.anim',
 				z:10,
 				pz: 10,
-				step:0,
+				step:240,
 				path: elephantPathEnd,
 				ai: {
 					stayAnimation: 'animation',
-					moveAnimation: 'animation',
-					availablesPaths: elephantPathEnd,
+					/*moveAnimation: 'animation',
+					availablesPaths: elephantPathEnd*/
 					stayTime: 5000
 				},
 				animation: {

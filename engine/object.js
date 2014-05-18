@@ -182,7 +182,7 @@ function obj() {
 				if ( dx < 0 ) {
 
 					// Автоматический разворот модели в зависимости от направления движения
-					if ( (_this.image.state.current.name != 'stairCaseWalk') && (_this.image.scale.x > 0) ) {
+					if ( (_this.image.state.current.name !== 'stairCaseWalk' && _this.id !== 'tree') && (_this.image.scale.x > 0) ) {
 						_this.image.scale.x *= -1;
 					}
 				}
