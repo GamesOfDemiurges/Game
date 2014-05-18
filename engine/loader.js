@@ -55,10 +55,6 @@ var loader = (function() {
 				resources: p.resources,
 				callback: function () {
 
-					/*if (!debug) {
-						document.body.classList.add('_noscroll');
-					}*/
-
 					globals.sceneWidth = 3828;
 					globals.sceneHeight = 800;
 
@@ -93,6 +89,9 @@ function init() {
 			"assets/models/ready/bucket/bucket.json",
 			"assets/models/ready/bucket/bucket.anim",
 
+			"assets/models/ready/garbageBucket/garbageBucket.json",
+			"assets/models/ready/garbageBucket/garbageBucket.anim",
+
 			"assets/models/ready/stone/stone.json",
 			"assets/models/ready/stone/stone.anim",
 
@@ -120,8 +119,11 @@ function init() {
 			"assets/models/ready/roadSing/roadSing.json",
 			"assets/models/ready/roadSing/roadSing.anim",
 
-			"assets/background/background.png",
-			"assets/background/backgroundVillainPatch.png"
+			"assets/background/background.jpg",
+			"assets/background/backgroundVillainPatch.png",
+
+			"assets/models/ready/tree/tree.json",
+			"assets/models/ready/tree/tree.anim"
 		],
 		callback: function () {
 
@@ -148,7 +150,7 @@ function init() {
 				endPath = 'endPath';
 
 			var background = obj().create({
-				src: 'assets/background/background.png',
+				src: 'assets/background/background.jpg',
 				name: 'background',
 				x: 0,
 				y: 0,
@@ -161,6 +163,16 @@ function init() {
 				x: 1582,
 				y: 600,
 				z: 10
+			});
+
+			var tree = obj().create({
+				name: 'hero',
+				src: 'assets/models/ready/tree/tree.anim',
+				z: 10,
+				pz: 10,
+				scale: 1.15,
+				step: 275,
+				path: groundPath
 			});
 
 			var hero = obj().create({
@@ -236,6 +248,14 @@ function init() {
 				y: 293,
 				z: 13,
 				pz: 5
+			});
+
+			var garbageBucket = obj().create({
+				name: 'garbageBucket',
+				src: 'assets/models/ready/garbageBucket/garbageBucket.anim',
+				x: 1193,
+				y: 647,
+				z: 10,
 			});
 
 			var semaphore = obj().create({
@@ -371,11 +391,13 @@ function init() {
 				})
 				.addObj(background)
 				.addObj(backgroundVillainPatch)
+				.addObj(tree)
 				.addObj(hero)
 				.addObj(villain)
 				.addObj(villain2)
 				.addObj(bird)
 				.addObj(bucket)
+				.addObj(garbageBucket)
 				.addObj(semaphore)
 				.addObj(butterfly)
 				.addObj(tv)
@@ -421,17 +443,23 @@ document.addEventListener("DOMContentLoaded", function () {
 		.init();
 		//.initSplashSound();
 
-	/*if (!debug) {
-		document.body.classList.add('_noscroll');
+	video
+		.init();
+
+	if (!debug) {
+		document.body.className += ' _noscroll';
 		document.querySelector('.start__run').onclick = function () {
 			document.body.removeChild( document.querySelector('.start') );
-			//fullScreen();
+			fullScreen();
 
 			audio.finishSplashSound();
 
-			init();
+			video.play(function() {
+				init();
+			});
+
 		}
-	} else {*/
+	} else {
 		init();
-	//}
+	}
 })

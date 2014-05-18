@@ -3,7 +3,9 @@ var utils = (function() {
 	return {
 
 		getRandomValue: function ( low, high ) {
-			var innerLow = 0,
+			var innerLow = high
+					? low
+					: 0,
 				innerHigh = high
 					? high
 					: low;

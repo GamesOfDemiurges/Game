@@ -104,6 +104,18 @@ body._cursor {
 	transition: opacity 0.3s;
 }
 
+/* Video */
+video {
+	display: none;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	height: 100%;
+	background: #000;
+}
+
 /* Debug zone */
 .debug__wrap {
 	display: none;

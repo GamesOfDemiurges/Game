@@ -514,7 +514,7 @@ document.addEventListener('hero.objectAdded', function( p ) {
 
 		hint.message('Высоко тут...');
 
-	}, utils.getRandomValue(30000, 40000) );
+	}, utils.getRandomValue(60000, 90000) );
 })
 
 document.addEventListener('hero.stop.inGraphId.2', function( p ) {
@@ -537,7 +537,7 @@ function bucketHint() {
 			hint.message('Додумался же кто-то повесить ведро на дерево!');
 		}
 
-	}, utils.getRandomValue(30000, 40000) );
+	}, utils.getRandomValue(60000, 90000) );
 }
 
 document.addEventListener('hero.bucketToGround.inGraphId.3', function( p ) {
