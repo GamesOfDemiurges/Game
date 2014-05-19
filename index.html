@@ -39,60 +39,62 @@
 
 	</head>
 	<body>
-		<canvas id="view"></canvas>
+        <div class="snow">
+            <canvas id="view"></canvas>
 
-		<div class="start" style="display: none">
-			<div class="start__splash">
-				<img src="assets/background/SignatureTune.png" class="start__img" alt="" />
-				<button class="start__run">Начать</button>
-			</div>
-		</div>
+            <div class="start" style="display: none">
+                <div class="start__splash">
+                    <img src="assets/background/SignatureTune.png" class="start__img" alt="" />
+                    <button class="start__run">Начать</button>
+                </div>
+            </div>
 
-		<video src="assets/video/intro2.mp4"></video>
-		<div class="hint"></div>
+            <video src="assets/video/intro2.mp4"></video>
+            <div class="hint"></div>
 
-		<div class="debug__wrap">
-			<div class="debug">
-				<div class="debug__control">
+            <div class="debug__wrap">
+                <div class="debug">
+                    <div class="debug__control">
 
-					<div class="debug__control-data">
-						<div class="debug__control-traects">
-							<select size="10" class="debug__control-traects-list"></select>
-							<label class="debug__control-traects-label"><input type="checkbox" class="debug__control-traects-break" disabled/>breakpath</label>
+                        <div class="debug__control-data">
+                            <div class="debug__control-traects">
+                                <select size="10" class="debug__control-traects-list"></select>
+                                <label class="debug__control-traects-label"><input type="checkbox" class="debug__control-traects-break" disabled/>breakpath</label>
 
-							<div>
-								<button class="debug__button debug__button_add">Добавить траекторию</button>
-								<button class="debug__button debug__button_remove">Удалить траекторию</button>
-							</div>
-						</div>
+                                <div>
+                                    <button class="debug__button debug__button_add">Добавить траекторию</button>
+                                    <button class="debug__button debug__button_remove">Удалить траекторию</button>
+                                </div>
+                            </div>
 
-						<div class="debug__control-objects">
-							<select class="debug__control-objects-list" size="4" ></select>
-							<button class="debug__button debug__button_remove-object" disabled="disabled">Отвязать объект</button>
-							<hr />
-							<select class="debug__control-objects-anim" size="3" ></select>
+                            <div class="debug__control-objects">
+                                <select class="debug__control-objects-list" size="4" ></select>
+                                <button class="debug__button debug__button_remove-object" disabled="disabled">Отвязать объект</button>
+                                <hr />
+                                <select class="debug__control-objects-anim" size="3" ></select>
 
-							<label class="debug__control-traects-label">
-								<input type="number" value="0" class="debug__control-traects-speed" min="0" />Скорость
-							</label>
+                                <label class="debug__control-traects-label">
+                                    <input type="number" value="0" class="debug__control-traects-speed" min="0" />Скорость
+                                </label>
 
-							<button class="debug__button debug__button_remember-animation">Задать анимацию</button>
-						</div>
-					</div>
+                                <button class="debug__button debug__button_remember-animation">Задать анимацию</button>
+                            </div>
+                        </div>
 
-					<div class="debug__control-buttons">
+                        <div class="debug__control-buttons">
 
 
-						<hr />
-						<button class="debug__button debug__button_toggle-overlay">Переключить оверлей</button>
-						<hr />
-						<button class="debug__button debug__button_save">Записать в файл</button>
-					</div>
-				</div>
+                            <hr />
+                            <button class="debug__button debug__button_toggle-overlay">Переключить оверлей</button>
+                            <hr />
+                            <button class="debug__button debug__button_save">Записать в файл</button>
+                        </div>
+                    </div>
 
-				<canvas class="debug__view debug__view_hidden"></canvas>
-			</div>
+                    <canvas class="debug__view debug__view_hidden"></canvas>
+                </div>
 
-		</div>
+            </div>
+        </div>
 	</body>
 </html>
