@@ -379,7 +379,6 @@ function init() {
 				x: 3700,
 				y: 550,
 				z: 10,
-				interactive: true,
 				animation: {
 					door: {
 						soundSrc: 'assets/models/ready/doorToTheNextLavel/door_sound.ogg'
@@ -459,8 +458,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	audio
-		.init();
-		//.initSplashSound();
+		.init()
+		.initSplashSound();
 
 	video
 		.init();
@@ -469,7 +468,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		document.body.className += ' _noscroll';
 		document.querySelector('.start__run').onclick = function () {
 			document.body.removeChild( document.querySelector('.start') );
-			fullScreen();
+			//fullScreen();
 
 			audio.finishSplashSound();
 

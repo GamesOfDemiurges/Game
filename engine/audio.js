@@ -156,17 +156,21 @@ var audio = (function() {
 	}
 
 	function fadeIn() {
-		var currTime  = audio.getContext().currentTime;
+		if (context) {
+			var currTime  = audio.getContext().currentTime;
 
-		audio.getGainNode().gain.linearRampToValueAtTime(0, currTime);
-		audio.getGainNode().gain.linearRampToValueAtTime(1, currTime + fadeDuration);
+			audio.getGainNode().gain.linearRampToValueAtTime(0, currTime);
+			audio.getGainNode().gain.linearRampToValueAtTime(1, currTime + fadeDuration);
+		}
 	}
 
 	function fadeOut() {
-		var currTime  = audio.getContext().currentTime;
+		if (context) {
+			var currTime  = audio.getContext().currentTime;
 
-		audio.getGainNode().gain.linearRampToValueAtTime(1, currTime);
-		audio.getGainNode().gain.linearRampToValueAtTime(0, currTime + fadeDuration);
+			audio.getGainNode().gain.linearRampToValueAtTime(1, currTime);
+			audio.getGainNode().gain.linearRampToValueAtTime(0, currTime + fadeDuration);
+		}
 	}
 
 	function handleVisibilityChange() {
@@ -181,8 +185,8 @@ var audio = (function() {
 	return {
 
 		init: function () {
-		/*
-			initContext();
+
+			//initContext();
 
 			document.addEventListener("visibilitychange", function() {
 				handleVisibilityChange();
@@ -191,7 +195,7 @@ var audio = (function() {
 			document.addEventListener("webkitvisibilitychange", function() {
 				handleVisibilityChange();
 			});
-		*/
+
 			return this;
 		},
 

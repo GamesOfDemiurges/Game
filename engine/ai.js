@@ -1,3 +1,23 @@
+// Дерево откатывается
+function moveTree() {
+	globals.paths.jump2.breakpath = true;
+	globals.paths.tree1.breakpath = true;
+	graph.buildGraph({
+		callback: function() {
+			globals.objects.tree.moveTo({
+				path: 'groundTreeToLeft',
+				chain: 4,
+				animationName: 'animation',
+				speedValue: 2
+			})
+		}
+	});
+
+}
+
+document.addEventListener('hero.stop.inGraphId.8', function( p ) { moveTree() })
+document.addEventListener('hero.breakpoint.inGraphId.8', function( p ) { moveTree() })
+
 // Клик на птицу
 document.addEventListener('bird.objectClick', function( p ) {
 
@@ -101,6 +121,59 @@ document.addEventListener('hero.breakpoint.inGraphId.5', function( p ) {
 	}
 });
 
+// Крышка мусорного бака шевелится
+function checkGarbageBucket() {
+
+	if (globals.triggers.garbageBucketIsOpen) return;
+
+	var currentChain = globals.objects.hero.getPosition().chain;
+
+	if (currentChain > 1 && currentChain < 9) {
+
+		globals.objects.garbageBucket.animate({
+			animation: 'live'
+		})
+	}
+
+	setTimeout(function() {
+		if ( globals.objects.hero.getPosition().path !== 'treeToSemaphore' ) return;
+		checkGarbageBucket();
+	}, 1200);
+}
+
+document.addEventListener('hero.stop.inGraphId.5', function( p ) { checkGarbageBucket() })
+document.addEventListener('hero.breakpoint.inGraphId.5', function( p ) { checkGarbageBucket() })
+document.addEventListener('hero.stop.inGraphId.11', function( p ) { checkGarbageBucket() })
+document.addEventListener('hero.breakpoint.inGraphId.11', function( p ) { checkGarbageBucket() })
+
+document.addEventListener('garbageBucket.objectClick', function( p ) {
+	if ( globals.triggers.garbageBucketIsOpen ) return;
+
+	var currentChain = globals.objects.hero.getPosition().chain;
+	if ( !((globals.objects.hero.getPosition().path == 'treeToSemaphore') && (currentChain == 6 || currentChain == 7)) ) return;
+
+ 	globals.triggers.garbageBucketIsOpen = true;
+	globals.objects.garbageBucket.animate({
+		animation: 'open',
+		callback: function() {
+
+			globals.objects.butterfly.move({
+				z: 15
+			})
+
+			globals.triggers.butterflyIsFree = true;
+
+			globals.objects.butterfly.moveTo( {
+				path: 'butterflyPath2',
+				chain: 0,
+				animationName: 'butterfly',
+				speedValue: 4
+			})
+
+		}
+	})
+})
+
 // Клик на злодея под деревом
 document.addEventListener('villain.objectClick', function( p ) {
 
@@ -175,6 +248,8 @@ document.addEventListener('semaphore.objectClick', function( p ) {
 							globals.objects.barrier.animate({
 								animation: 'barrier'
 							})
+
+							clearTimeout( globals.triggers.centralActionHint );
 						}
 					});
 				}
@@ -187,27 +262,6 @@ document.addEventListener('semaphore.objectClick', function( p ) {
 
 
 // Бабочка летает
-/*document.addEventListener('butterfly.objectAdded', function( p ) {
-
-
-	//globals.paths.semaphoreToTV.breakpath = false;
-
-
-	// setTimeout, потому что может не успеть проинициализироваться
-	setTimeout(function() {
-
-		globals.objects.butterfly.move({
-			z: 15
-		})
-
-		globals.objects.butterfly.moveTo( {
-			path: 'butterflyPath2',
-			chain: 0,
-			animationName: 'butterfly',
-			speedValue: 4
-		})
-	}, 3000)
-})*/
 
 function catchButterfly() {
 	globals.objects.hero.animate({
@@ -308,40 +362,44 @@ document.addEventListener('butterfly.objectClick', function( p ) {
 		clearInterval(globals.triggers.butterflyInerval);
 	}
 
+	if ( !globals.triggers.butterflyCanBeCatched ) {
+
+		if ( globals.objects.butterfly.getPosition().path == 'butterflyPath' ) {
+			globals.objects.hero.moveTo({
+				path: 'treeToSemaphore',
+				chain: 8
+			})
+		}
+
+		if ( globals.objects.butterfly.getPosition().path == 'butterflyPath2' ) {
+			globals.objects.hero.moveTo({
+				path: 'treeToSemaphore',
+				chain: 7
+			})
+		}
+
+		if ( globals.objects.butterfly.getPosition().path == 'butterflyPath3' ) {
+			globals.objects.hero.moveTo({
+				path: 'treeToSemaphore',
+				chain: 6
+			})
+		}
+
+		if ( globals.objects.butterfly.getPosition().path == 'butterflyPath4' ) {
+			globals.objects.hero.moveTo({
+				path: 'treeToSemaphore',
+				chain: 5
+			})
+		}
+
+	}
+
 	globals.triggers.butterflyCanBeCatched = true;
 
 	globals.triggers.butterflyInerval = setTimeout(function() {
 		globals.triggers.butterflyCanBeCatched = false;
 	}, 25000);
 
-
-	if ( globals.objects.butterfly.getPosition().path == 'butterflyPath' ) {
-		globals.objects.hero.moveTo({
-			path: 'treeToSemaphore',
-			chain: 8
-		})
-	}
-
-	if ( globals.objects.butterfly.getPosition().path == 'butterflyPath2' ) {
-		globals.objects.hero.moveTo({
-			path: 'treeToSemaphore',
-			chain: 7
-		})
-	}
-
-	if ( globals.objects.butterfly.getPosition().path == 'butterflyPath3' ) {
-		globals.objects.hero.moveTo({
-			path: 'treeToSemaphore',
-			chain: 6
-		})
-	}
-
-	if ( globals.objects.butterfly.getPosition().path == 'butterflyPath4' ) {
-		globals.objects.hero.moveTo({
-			path: 'treeToSemaphore',
-			chain: 5
-		})
-	}
 
 });
 
@@ -454,7 +512,6 @@ document.addEventListener('villain2.objectClick', function( p ) {
 });
 
 // Телевизор
-
 function TVPictures() {
 	globals.objects.tv.animate({
 		animation: 'TV stop',
@@ -488,8 +545,6 @@ document.addEventListener('tv.objectClick', function( p ) {
 	}
 });
 
-
-
 //второй вариант
 document.addEventListener('roadSing.objectClick', function( p ){
 
@@ -509,6 +564,8 @@ document.addEventListener('roadSing.objectClick', function( p ){
 						   animation:'door',
 						   callback: function () {
 								globals.triggers.exit = true;
+
+								clearTimeout( globals.triggers.levelEndHint );
 						   }
 					   })
 
@@ -525,118 +582,102 @@ document.addEventListener('hero.stop.inGraphId.32', function( p ) {
 
 	if (globals.triggers.exit) {
 		alert('Уровень пройден!');
+	} else {
+		hint.message('Глухой забор.');
 	}
 })
-
-
-function checkGarbageBucket() {
-
-	if (globals.triggers.garbageBucketIsOpen) return;
-
-	var currentChain = globals.objects.hero.getPosition().chain;
-
-	if (currentChain > 1 && currentChain < 9) {
-
-		globals.objects.garbageBucket.animate({
-			animation: 'live'
-		})
-	}
-
-	setTimeout(function() {
-		if ( globals.objects.hero.getPosition().path !== 'treeToSemaphore' ) return;
-		checkGarbageBucket();
-	}, 1200);
-}
-
-document.addEventListener('hero.stop.inGraphId.5', function( p ) { checkGarbageBucket() })
-document.addEventListener('hero.breakpoint.inGraphId.5', function( p ) { checkGarbageBucket() })
-document.addEventListener('hero.stop.inGraphId.11', function( p ) { checkGarbageBucket() })
-document.addEventListener('hero.breakpoint.inGraphId.11', function( p ) { checkGarbageBucket() })
-
-document.addEventListener('garbageBucket.objectClick', function( p ) {
-	if ( globals.triggers.garbageBucketIsOpen ) return;
-
-	var currentChain = globals.objects.hero.getPosition().chain;
-	if ( !((globals.objects.hero.getPosition().path == 'treeToSemaphore') && (currentChain == 6 || currentChain == 7)) ) return;
-
- 	globals.triggers.garbageBucketIsOpen = true;
-	globals.objects.garbageBucket.animate({
-		animation: 'open',
-		callback: function() {
-
-			globals.objects.butterfly.move({
-				z: 15
-			})
-
-			globals.objects.butterfly.moveTo( {
-				path: 'butterflyPath2',
-				chain: 0,
-				animationName: 'butterfly',
-				speedValue: 4
-			})
-
-		}
-	})
-})
-
-function moveTree() {
-	globals.paths.jump2.breakpath = true;
-	globals.paths.tree1.breakpath = true;
-	graph.buildGraph({
-		callback: function() {
-			globals.objects.tree.moveTo({
-				path: 'groundTreeToLeft',
-				chain: 4,
-				animationName: 'animation',
-				speedValue: 2
-			})
-		}
-	});
-
-}
-
-document.addEventListener('hero.stop.inGraphId.8', function( p ) { moveTree() })
-document.addEventListener('hero.breakpoint.inGraphId.8', function( p ) { moveTree() })
 
 /* === Подсказки */
 
 
 
 // Лестница
-/*
-document.addEventListener('hero.objectAdded', function( p ) {
 
-	globals.triggers.stairHint = setInterval(function() {
+function stairHint() {
+	var time = utils.getRandomValue(10000, 20000);
 
+	globals.triggers.stairHint = setTimeout(function() {
 		hint.message('Высоко тут...');
+		stairHint();
+	}, time);
+}
 
-	}, utils.getRandomValue(60000, 90000) );
+document.addEventListener('hero.objectAdded', function( p ) {
+	stairHint();
 })
 
 document.addEventListener('hero.stop.inGraphId.2', function( p ) {
-	bucketHint();
-	clearInterval( globals.triggers.stairHint );
+	if (!globals.triggers.bucketHint) bucketHint();
+	clearTimeout( globals.triggers.stairHint );
 })
 
 document.addEventListener('hero.breakpoint.inGraphId.2', function( p ) {
-	bucketHint();
-	clearInterval( globals.triggers.stairHint );
+	if (!globals.triggers.bucketHint) bucketHint();
+	clearTimeout( globals.triggers.stairHint );
+
 })
 
 // Ведро
 function bucketHint() {
-	if (globals.triggers.bucketHint) return;
+	var time = utils.getRandomValue(10000, 20000);
 
-	globals.triggers.bucketHint = setInterval(function() {
+	globals.triggers.bucketHint = setTimeout(function() {
 
 		if ( ~['tree1', 'jump2', 'treeInside', 'treeToBucket'].indexOf(globals.objects.hero.getPosition().path)  ) {
 			hint.message('Додумался же кто-то повесить ведро на дерево!');
 		}
+		bucketHint();
 
-	}, utils.getRandomValue(60000, 90000) );
+	}, time);
 }
 
-document.addEventListener('hero.bucketToGround.inGraphId.3', function( p ) {
-	clearInterval( globals.triggers.bucketHint );
+document.addEventListener('hero.stop.inGraphId.3', function( p ) {
+	if (!globals.triggers.centralActionHint) centralAction();
+	clearTimeout( globals.triggers.bucketHint );
 })
-*/
+
+document.addEventListener('hero.breakpoint.inGraphId.3', function( p ) {
+	if (!globals.triggers.centralActionHint) centralAction();
+	clearTimeout( globals.triggers.bucketHint );
+})
+
+// Центральная сцена
+function centralAction() {
+	var time = utils.getRandomValue(10000, 20000);
+
+	globals.triggers.centralActionHint = setTimeout(function() {
+
+		if (globals.triggers.semaphoreIsClickable && (globals.triggers.butterflyWasCatched || globals.triggers.butterflyIsFree)) {
+			hint.message('Наверное, светофор должен быть зеленым...');
+		} else if ( globals.objects.hero.getPosition().path == 'treeToSemaphore' && !globals.triggers.butterflyWasCatched && !globals.triggers.butterflyIsFree ) {
+			hint.message('Кажется, в баке кто-то есть...');
+		} else if ( globals.objects.hero.getPosition().path == 'semaphoreBreakPath' && !globals.triggers.semaphoreIsClickable ) {
+			hint.message('Вот бы скинуть Кривоноса с забора!');
+		}
+
+		centralAction();
+	}, time);
+}
+
+document.addEventListener('hero.stop.inGraphId.13', function( p ) {
+	if (!globals.triggers.levelEndHint) levelEnd();
+})
+
+document.addEventListener('hero.breakpoint.inGraphId.13', function( p ) {
+	if (!globals.triggers.levelEndHint) levelEnd();
+})
+
+// Переключатель на выход
+function levelEnd() {
+
+	var time = utils.getRandomValue(10000, 20000);
+
+	globals.triggers.levelEndHint = setTimeout(function() {
+
+		if ( ~['endPath', 'endPath1', 'elephantPath'].indexOf(globals.objects.hero.getPosition().path)  ) {
+			hint.message('Кто знает, что может быть в этой куче мусора?');
+		}
+
+		levelEnd();
+	}, time);
+}
