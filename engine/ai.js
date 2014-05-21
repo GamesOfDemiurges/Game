@@ -193,7 +193,7 @@ document.addEventListener('villain.objectClick', function( p ) {
 		})
 	}
 
-	hint.message('Этот сиккарах выглядит рассерженным. Вряд ли он пропустит меня.')
+	hint.message('villainFirstHintText');
 });
 
 // Светофор качается
@@ -581,9 +581,10 @@ document.addEventListener('roadSing.objectClick', function( p ){
 document.addEventListener('hero.stop.inGraphId.32', function( p ) {
 
 	if (globals.triggers.exit) {
-		alert('Уровень пройден!');
+		audio.fadeOut();
+		utils.fadeIn();
 	} else {
-		hint.message('Глухой забор.');
+		hint.message('endPathFailText');
 	}
 })
 
@@ -597,7 +598,7 @@ function stairHint() {
 	var time = utils.getRandomValue(10000, 20000);
 
 	globals.triggers.stairHint = setTimeout(function() {
-		hint.message('Высоко тут...');
+		hint.message('stairHintText');
 		stairHint();
 	}, time);
 }
@@ -624,7 +625,7 @@ function bucketHint() {
 	globals.triggers.bucketHint = setTimeout(function() {
 
 		if ( ~['tree1', 'jump2', 'treeInside', 'treeToBucket'].indexOf(globals.objects.hero.getPosition().path)  ) {
-			hint.message('Додумался же кто-то повесить ведро на дерево!');
+			hint.message('bucketHintText');
 		}
 		bucketHint();
 
@@ -648,11 +649,11 @@ function centralAction() {
 	globals.triggers.centralActionHint = setTimeout(function() {
 
 		if (globals.triggers.semaphoreIsClickable && (globals.triggers.butterflyWasCatched || globals.triggers.butterflyIsFree)) {
-			hint.message('Наверное, светофор должен быть зеленым...');
+			hint.message('semaphoreHintText');
 		} else if ( globals.objects.hero.getPosition().path == 'treeToSemaphore' && !globals.triggers.butterflyWasCatched && !globals.triggers.butterflyIsFree ) {
-			hint.message('Кажется, в баке кто-то есть...');
+			hint.message('garbageHintText');
 		} else if ( globals.objects.hero.getPosition().path == 'semaphoreBreakPath' && !globals.triggers.semaphoreIsClickable ) {
-			hint.message('Вот бы скинуть Кривоноса с забора!');
+			hint.message('villainHintText');
 		}
 
 		centralAction();
@@ -675,7 +676,7 @@ function levelEnd() {
 	globals.triggers.levelEndHint = setTimeout(function() {
 
 		if ( ~['endPath', 'endPath1', 'elephantPath'].indexOf(globals.objects.hero.getPosition().path)  ) {
-			hint.message('Кто знает, что может быть в этой куче мусора?');
+			hint.message('finalGarbageHintText');
 		}
 
 		levelEnd();

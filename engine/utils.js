@@ -365,6 +365,14 @@ var utils = (function() {
 
 			callback();
 
+		},
+
+		fadeIn: function() {
+			document.querySelector('.black-fade').className += ' black-fade_active';
+		},
+
+		fadeOut: function() {
+			document.querySelector('.black-fade').className = document.querySelector('.black-fade').className.replace(/\sblack-fade_active/ig, '');
 		}
 	}
 

@@ -26,6 +26,7 @@
 		<script type="text/javascript" src="engine/ai.js"></script>
 		<script type="text/javascript" src="engine/audio.js"></script>
 		<script type="text/javascript" src="engine/video.js"></script>
+		<script type="text/javascript" src="engine/translations.js"></script>
 		<script type="text/javascript" src="engine/hint.js"></script>
 		<script type="text/javascript" src="engine/loader.js"></script>
 
@@ -38,60 +39,77 @@
 
 	</head>
 	<body>
-            <canvas id="view"></canvas>
+		<canvas id="view"></canvas>
 
-            <div class="start" style="display: none">
-                <div class="start__splash">
-                    <img src="assets/background/SignatureTune.png" class="start__img" alt="" />
-                    <button class="start__run">Начать</button>
-                </div>
-            </div>
+		<div class="start" style="display: none">
+			<div class="start__splash">
+				<img src="assets/background/SignatureTune.png" class="start__img" alt="" />
 
-            <video src="assets/video/intro2.mp4"></video>
-            <div class="hint"></div>
+				<label class="start__label start__label_volume">
+					Уровень громкости
+					<br />
+					<input class="start__volume" type="range" min="0" max="1" step="0.05" value="0.5" />
+				</label>
 
-            <div class="debug__wrap">
-                <div class="debug">
-                    <div class="debug__control">
+				<label class="start__label">
+					Язык
+					<br />
+					<select class="start__language">
+						<option value="ru">Русский</option>
+						<option value="en-US">English</option>
+					</select>
+				</label>
 
-                        <div class="debug__control-data">
-                            <div class="debug__control-traects">
-                                <select size="10" class="debug__control-traects-list"></select>
-                                <label class="debug__control-traects-label"><input type="checkbox" class="debug__control-traects-break" disabled/>breakpath</label>
+				<button class="start__run">Начать</button>
+			</div>
+		</div>
 
-                                <div>
-                                    <button class="debug__button debug__button_add">Добавить траекторию</button>
-                                    <button class="debug__button debug__button_remove">Удалить траекторию</button>
-                                </div>
-                            </div>
+		<video src="assets/video/intro2.mp4"></video>
+		<div class="hint"></div>
+		<div class="black-fade"></div>
 
-                            <div class="debug__control-objects">
-                                <select class="debug__control-objects-list" size="4" ></select>
-                                <button class="debug__button debug__button_remove-object" disabled="disabled">Отвязать объект</button>
-                                <hr />
-                                <select class="debug__control-objects-anim" size="3" ></select>
+		<div class="debug__wrap">
+			<div class="debug">
+				<div class="debug__control">
 
-                                <label class="debug__control-traects-label">
-                                    <input type="number" value="0" class="debug__control-traects-speed" min="0" />Скорость
-                                </label>
+					<div class="debug__control-data">
+						<div class="debug__control-traects">
+							<select size="10" class="debug__control-traects-list"></select>
+							<label class="debug__control-traects-label"><input type="checkbox" class="debug__control-traects-break" disabled/>breakpath</label>
 
-                                <button class="debug__button debug__button_remember-animation">Задать анимацию</button>
-                            </div>
-                        </div>
+							<div>
+								<button class="debug__button debug__button_add">Добавить траекторию</button>
+								<button class="debug__button debug__button_remove">Удалить траекторию</button>
+							</div>
+						</div>
 
-                        <div class="debug__control-buttons">
+						<div class="debug__control-objects">
+							<select class="debug__control-objects-list" size="4" ></select>
+							<button class="debug__button debug__button_remove-object" disabled="disabled">Отвязать объект</button>
+							<hr />
+							<select class="debug__control-objects-anim" size="3" ></select>
+
+							<label class="debug__control-traects-label">
+								<input type="number" value="0" class="debug__control-traects-speed" min="0" />Скорость
+							</label>
+
+							<button class="debug__button debug__button_remember-animation">Задать анимацию</button>
+						</div>
+					</div>
+
+					<div class="debug__control-buttons">
 
 
-                            <hr />
-                            <button class="debug__button debug__button_toggle-overlay">Переключить оверлей</button>
-                            <hr />
-                            <button class="debug__button debug__button_save">Записать в файл</button>
-                        </div>
-                    </div>
+						<hr />
+						<button class="debug__button debug__button_toggle-overlay">Переключить оверлей</button>
+						<hr />
+						<button class="debug__button debug__button_save">Записать в файл</button>
+					</div>
+				</div>
 
-                    <canvas class="debug__view debug__view_hidden"></canvas>
-                </div>
+				<canvas class="debug__view debug__view_hidden"></canvas>
+			</div>
 
-            </div>
+		</div>
 	</body>
 </html>

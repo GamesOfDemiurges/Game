@@ -427,7 +427,6 @@ function init() {
 				.addObj(roadSing);
 
 			viewport.init();
-			hint.init();
 
 			queue.startQueue();
 
@@ -461,11 +460,23 @@ document.addEventListener("DOMContentLoaded", function () {
 		.init()
 		.initSplashSound();
 
-	video
-		.init();
+	video.init();
+	hint.init();
 
 	if (!debug) {
 		document.body.className += ' _noscroll';
+
+		document.querySelector('.start__volume').onmousemove = document.querySelector('.start__volume').onchange = function () {
+			globals.volume = this.value;
+			audio.setVolume();
+		}
+
+		document.querySelector('.start__language option[value="' + globals.locale + '"]').selected = true;
+
+		document.querySelector('.start__language').onchange = function () {
+			globals.locale = this.value;
+		}
+
 		document.querySelector('.start__run').onclick = function () {
 			document.body.removeChild( document.querySelector('.start') );
 			//fullScreen();

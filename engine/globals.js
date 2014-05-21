@@ -9,5 +9,7 @@ var globals = {
 		resize: false,
 		scale: 1
 	},
-	scale: 1
+	scale: 1,
+	volume: 0.5,
+	locale: 'ru'
 }

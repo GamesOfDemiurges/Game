@@ -45,14 +45,18 @@ var hint = (function() {
 				check();
 			}
 
+			globals.locale = window.navigator.userLanguage || window.navigator.language || globals.locale;
+
 			return this;
 
 		},
 
 		message: function ( text ) {
 
-			messageStack.push( text );
-			check();
+			if (translations[text] && translations[text][globals.locale]) {
+				messageStack.push( translations[text][globals.locale] );
+				check();
+			}
 
 			return this;
 		},

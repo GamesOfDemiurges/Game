@@ -10,6 +10,7 @@ body {
 	height: 100%;
 	width: 100%;
 	position: relative;
+	font-family: Tahoma, sans-serif;
 
 	background-color: #000;
 	background-repeat: no-repeat;
@@ -68,10 +69,41 @@ body._cursor #view {
 
 .start__run {
 	display: block;
-	margin: 20px auto;
+	margin: 30px auto 10px;
 	width: 100px;
 	height: 30px;
 	cursor: pointer;
+}
+
+.start__label {
+	display: block;
+	padding-top: 20px;
+}
+
+body._nomusic .start__label_volume {
+	display: none;
+}
+
+.black-fade {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: black;
+	opacity: 0;
+	z-index: -1;
+
+	-webkit-transition: opacity 1s, z-index 1s 0;
+	transition: opacity 1s, z-index 1s 0;
+}
+
+.black-fade_active {
+	opacity: 1;
+	z-index: 5;
+
+	-webkit-transition: opacity 1s;
+	transition: opacity 1s;
 }
 
 /* Hint */

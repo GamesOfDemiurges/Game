@@ -90,6 +90,7 @@ var audio = (function() {
 	var context,
 		gainNode,
 		fadeDuration = 1,
+		fadeOverlay,
 		splashMusic = track(),
 		backgroundMusic = track();
 
@@ -107,6 +108,7 @@ var audio = (function() {
 			gainNode.connect(context.destination);
 		} catch(e) {
 			context = false;
+			document.body.className += ' _nomusic';
 		}
 
 	}
@@ -155,30 +157,20 @@ var audio = (function() {
 		})
 	}
 
-	function fadeIn() {
+	function updateVolume() {
 		if (context) {
 			var currTime  = audio.getContext().currentTime;
 
-			audio.getGainNode().gain.linearRampToValueAtTime(0, currTime);
-			audio.getGainNode().gain.linearRampToValueAtTime(1, currTime + fadeDuration);
-		}
-	}
-
-	function fadeOut() {
-		if (context) {
-			var currTime  = audio.getContext().currentTime;
-
-			audio.getGainNode().gain.linearRampToValueAtTime(1, currTime);
-			audio.getGainNode().gain.linearRampToValueAtTime(0, currTime + fadeDuration);
+			audio.getGainNode().gain.linearRampToValueAtTime(globals.volume, currTime);
 		}
 	}
 
 	function handleVisibilityChange() {
 
 		if (document.webkitHidden || document.hidden) {
-			fadeOut();
+			audio.fadeOut();
 		} else {
-			fadeIn();
+			audio.fadeIn();
 		}
 	}
 
@@ -187,6 +179,7 @@ var audio = (function() {
 		init: function () {
 
 			//initContext();
+			updateVolume();
 
 			document.addEventListener("visibilitychange", function() {
 				handleVisibilityChange();
@@ -218,12 +211,12 @@ var audio = (function() {
 				var duration = 1,
 					currTime = audio.getContext().currentTime;
 
-				fadeOut();
+				audio.fadeOut();
 
 				setTimeout(function() {
 					splashMusic.stop();
 					splashMusic.play = function() {};
-					fadeIn();
+					audio.fadeIn();
 				}, 1000)
 			}
 
@@ -233,6 +226,32 @@ var audio = (function() {
 
 		updateWorldSound: function ( p ) {
 			updateSound( p );
+
+			return this;
+		},
+
+		setVolume: function () {
+			updateVolume();
+
+			return this;
+		},
+
+	 	fadeIn: function () {
+			if (context) {
+				var currTime  = audio.getContext().currentTime;
+
+				audio.getGainNode().gain.linearRampToValueAtTime(0, currTime);
+				audio.getGainNode().gain.linearRampToValueAtTime(globals.volume, currTime + fadeDuration);
+			}
+		},
+
+	 	fadeOut:function () {
+			if (context) {
+				var currTime  = audio.getContext().currentTime;
+
+				audio.getGainNode().gain.linearRampToValueAtTime(globals.volume, currTime);
+				audio.getGainNode().gain.linearRampToValueAtTime(0, currTime + fadeDuration);
+			}
 		},
 
 		getContext: function () {
