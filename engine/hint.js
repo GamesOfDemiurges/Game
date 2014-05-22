@@ -46,6 +46,7 @@ var hint = (function() {
 			}
 
 			globals.locale = window.navigator.userLanguage || window.navigator.language || globals.locale;
+			globals.locale = globals.locale.toLowerCase();
 
 			return this;
 

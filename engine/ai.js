@@ -1,3 +1,15 @@
+// Снег
+document.addEventListener('snow.objectAdded', function( p ) {
+	(function startSnow() {
+		globals.objects.snow.animate({
+			animation: 'animation',
+			callback: function() {
+				startSnow();
+			}
+		})
+	})();
+});
+
 // Дерево откатывается
 function moveTree() {
 	globals.paths.jump2.breakpath = true;

@@ -5,7 +5,7 @@ var loader = (function() {
 		var assetsLoader = new PIXI.AssetLoader(p.resources),
 			callback = p.callback || function() {};
 
-		assetsLoader.onComplete = function () { console.log('Ресурсы загружены');
+		assetsLoader.onComplete = function () {
 			callback();
 		}
 
@@ -20,7 +20,7 @@ var loader = (function() {
 		readTraect.open("GET", 'tools/traect.json?' + new Date().getTime());
 		readTraect.onreadystatechange = function () {
 
-			if (readTraect.readyState==4) { console.log('Траектории загружены')
+			if (readTraect.readyState==4) {
 				globals.paths = JSON.parse(readTraect.responseText);
 
 				// Построить траектории
@@ -29,7 +29,7 @@ var loader = (function() {
 
 						// Построить граф
 						graph.buildGraph({
-							callback: function () { console.log('Граф построен');
+							callback: function () {
 								callback();
 								pathfinder.start();
 							}
@@ -125,19 +125,13 @@ function init() {
 			"assets/background/background.jpg",
 			"assets/background/backgroundVillainPatch.png",
 
+			"assets/models/ready/snow/snow.json",
+			"assets/models/ready/snow/snow.anim",
+
 			"assets/models/ready/tree/tree.json",
 			"assets/models/ready/tree/tree.anim"
 		],
 		callback: function () {
-
-			relay
-				/*.listen('breakpoint')
-				.listen('start')
-				.listen('stop')
-				.listen('hero.startAnimation')
-				.listen('hero.endAnimation')*/
-				.listen('objectClick')
-				.listen('objectAdded');
 
 			var currentPath = 'stair2',
 				birdPath = 'birdTreePath',
@@ -177,6 +171,15 @@ function init() {
 				scale: 1.15,
 				step: 275,
 				path: groundPath
+			});
+
+			var snow = obj().create({
+				name: 'snow',
+				src: 'assets/models/ready/snow/snow.anim',
+				x: 950,
+				y: 800,
+				z: 20,
+				pz: 10
 			});
 
 			var hero = obj().create({
@@ -409,6 +412,7 @@ function init() {
 				.addObj(background)
 				.addObj(backgroundVillainPatch)
 				.addObj(tree)
+				.addObj(snow)
 				.addObj(hero)
 				.addObj(villain)
 				.addObj(villain2)
@@ -429,8 +433,6 @@ function init() {
 			viewport.init();
 
 			queue.startQueue();
-
-			console.log('Загрузка завершена');
 
 			if (debug) {
 				document.querySelector('.debug__wrap' ).style.display = "block";
