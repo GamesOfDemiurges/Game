@@ -481,7 +481,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		document.querySelector('.start__run').onclick = function () {
 			document.body.removeChild( document.querySelector('.start') );
-			//fullScreen();
+			fullScreen();
 
 			audio.finishSplashSound();
 

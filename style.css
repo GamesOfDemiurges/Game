@@ -75,6 +75,10 @@ body._cursor #view {
 	cursor: pointer;
 }
 
+.start__volume {
+	vertical-align: middle;
+}
+
 .start__label {
 	display: block;
 	padding-top: 20px;
