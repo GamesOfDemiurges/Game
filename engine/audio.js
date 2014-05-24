@@ -178,7 +178,7 @@ var audio = (function() {
 
 		init: function () {
 
-			initContext();
+			//initContext();
 			updateVolume();
 
 			document.addEventListener("visibilitychange", function() {
