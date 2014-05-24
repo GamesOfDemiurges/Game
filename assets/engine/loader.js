@@ -171,8 +171,8 @@ function init() {
 			var snow = obj().create({
 				name: 'snow',
 				src: 'assets/models/ready/snow/snow.anim',
-				x: 950,
-				y: 800,
+				x: 300,
+				y: 400,
 				z: 20,
 				pz: 10
 			});
