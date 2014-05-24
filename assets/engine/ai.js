@@ -2,7 +2,7 @@
 document.addEventListener('snow.objectAdded', function( p ) {
 	(function startSnow() {
 		globals.objects.snow.animate({
-			animation: 'animation',
+			animation: 'snow',
 			callback: function() {
 				startSnow();
 			}

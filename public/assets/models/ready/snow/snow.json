@@ -2,19 +2,35 @@
 
 "snow.png":
 {
-	"frame": {"x":2,"y":2,"w":1804,"h":1584},
+	"frame": {"x":2,"y":2,"w":586,"h":1164},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":34,"y":2,"w":1804,"h":1584},
-	"sourceSize": {"w":1852,"h":1600}
+	"spriteSourceSize": {"x":44,"y":24,"w":586,"h":1164},
+	"sourceSize": {"w":676,"h":1200}
+},
+"snow2.png":
+{
+	"frame": {"x":590,"y":2,"w":632,"h":1176},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":17,"y":11,"w":632,"h":1176},
+	"sourceSize": {"w":676,"h":1200}
+},
+"snow3.png":
+{
+	"frame": {"x":1224,"y":2,"w":594,"h":1148},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":45,"y":31,"w":594,"h":1148},
+	"sourceSize": {"w":676,"h":1200}
 }},
 "meta": {
 	"app": "http://www.codeandweb.com/texturepacker ",
 	"version": "1.0",
 	"image": "snow.png",
 	"format": "RGBA8888",
-	"size": {"w":1808,"h":1588},
+	"size": {"w":1820,"h":1180},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:fcddcd5243aad9af91d1a4d5a9d20a08:52cf12db71917406dd41e8afaf6218ac:06a2c7225e748b9073bdcc44bcdfe832$"
+	"smartupdate": "$TexturePacker:SmartUpdate:eeda7860b342096881c9319371263b09:2a2baac82d07f80730bae89eefaf24f6:06a2c7225e748b9073bdcc44bcdfe832$"
 }
 }
