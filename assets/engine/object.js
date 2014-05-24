@@ -63,11 +63,29 @@ function obj() {
 				}
 			}
 
+			function setAnimation() {
+				if (p.animation) {
+					_this.animation = {};
+
+					for (var animationName in p.animation) {
+						_this.animation[animationName] = {};
+
+						if (p.animation[animationName].soundSrc) {
+
+							_this.animation[animationName].track = track().load({
+								obj: _this,
+								url: p.animation[animationName].soundSrc
+							})
+						}
+					}
+				}
+			}
+
 			function setInteractive() {
 				if (p.interactive) {
 					_this.image.setInteractive(true);
 
-					_this.image.click = _this.image.tap = function(data) {
+					_this.image.click = _this.image.tap = function (data) {
 						if (globals.viewport.resize) return false;
 
 						globals.objectClicked = true;
@@ -77,7 +95,32 @@ function obj() {
 							type: 'objectClick'
 						});
 					}
+
+					_this.image.mouseover = function () {
+
+						document.body.className += ' _cursor';
+					}
+
+					_this.image.mouseout = function () {
+						document.body.className = document.body.className.replace(/\s_cursor/ig, '');
+					}
 				}
+			}
+
+			function setAI() {
+				if (p.ai) {
+
+					_this.ai = ai().init({
+
+						probMatrix: p.ai.probMatrix,
+						moveAnimation: p.ai.moveAnimation,
+						stayAnimation: p.ai.stayAnimation,
+						availablesPaths: p.ai.availablesPaths,
+						lookDistance: p.ai.lookDistance,
+						obj: _this
+					});
+				}
+
 			}
 
 			if (p.src.indexOf('.anim') !== -1) {
@@ -108,7 +151,9 @@ function obj() {
 			setObjectPosition();
 			setObjectScale();
 			setReverse();
+			setAnimation();
 			setInteractive();
+			setAI();
 
 			return _this;
 		},
@@ -137,7 +182,7 @@ function obj() {
 				if ( dx < 0 ) {
 
 					// Автоматический разворот модели в зависимости от направления движения
-					if ( (_this.image.state.current.name != 'stairCaseWalk') && (_this.image.scale.x > 0) ) {
+					if ( (_this.image.state.current.name !== 'stairCaseWalk' && _this.id !== 'tree') && (_this.image.scale.x > 0) ) {
 						_this.image.scale.x *= -1;
 					}
 				}
@@ -200,6 +245,11 @@ function obj() {
 				callback = p.callback || function() {};
 
 			_this.image.state.setAnimationByName( p.animation , false);
+
+			if (_this.animation && _this.animation[p.animation]) {
+				_this.animation[p.animation].track.play();
+			}
+
 			var duration = _this.image.state.current.duration * 1000,
 				animationId = Math.random();
 
@@ -222,6 +272,41 @@ function obj() {
 			});
 
 			return _this;
+		},
+
+		getPosition: function() {
+
+			var _this = this,
+				path = _this.path,
+				chain,
+				graphId,
+				orientation = Math.abs(_this.image.scale.x)/_this.image.scale.x;
+
+			for (var i = 0; i < globals.paths[ _this.path ].controlPath.length; i++) {
+
+				if ( Math.abs(globals.paths[ _this.path ].controlPath[i].step - _this.step) < 10 ) {
+
+					chain = i;
+					break;
+				}
+
+			}
+
+			if ( _this.step < 10 ) {
+				graphId = globals.paths[ path ].dots[0].graphId;
+			}
+
+			if ( Math.abs(globals.paths[ path ].steps.length - _this.step) < 10 ) {
+				graphId = globals.paths[ path ].dots[ globals.paths[ path ].dots.length-1 ].graphId;
+			}
+
+			return {
+				path: path,
+				chain: chain,
+				graphId: graphId,
+				orientation: orientation
+			}
+
 		}
 	}
 }

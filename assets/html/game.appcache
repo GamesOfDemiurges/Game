@@ -1,0 +1,16 @@
+CACHE MANIFEST
+
+# This is a comment
+
+CACHE:
+/index.html
+/css/style.css
+/js/index.js
+
+/assets/background/SignatureTune.png
+/assets/video/intro2.mp4
+
+FALLBACK:
+
+NETWORK:
+*

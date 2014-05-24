@@ -199,9 +199,9 @@ var graph = (function() {
 		// Отдает вершину графа, если совпадает с заданным шагом
 		getGraphIdByStep: function( p ) {
 
-			if (p.step < 5) {
+			if (p.step < 10) {
 				return globals.paths[p.path].dots[ 0 ].graphId;
-			} else if ( (globals.paths[p.path].steps.length-1) - p.step < 5  ) {
+			} else if ( (globals.paths[p.path].steps.length-1) - p.step < 10  ) {
 				return globals.paths[p.path].dots[ globals.paths[p.path].dots.length-1 ].graphId;
 			} else {
 				return undefined;

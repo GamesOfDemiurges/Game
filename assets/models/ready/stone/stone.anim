@@ -1,0 +1,1 @@
+{"bones":[{"name":"root"},{"name":"stone","parent":"root"}],"slots":[{"name":"stone","bone":"stone","attachment":"stone"}],"skins":{"default":{"stone":{"stone":{"width":38,"height":19}}}},"animations":{"animation":{}}}

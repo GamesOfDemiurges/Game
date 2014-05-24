@@ -1,0 +1,20 @@
+{"frames": {
+
+"garbageBucket.png":
+{
+	"frame": {"x":2,"y":2,"w":70,"h":47},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":70,"h":47},
+	"sourceSize": {"w":70,"h":47}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker ",
+	"version": "1.0",
+	"image": "garbageBucket.png",
+	"format": "RGBA8888",
+	"size": {"w":74,"h":51},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:e0b47f1f4005190c35b3f67a7b3b5772:beb0a2ae22cc6f7f5241bab83951b103:544172ae53b2ef3a22861e055ca9820a$"
+}
+}

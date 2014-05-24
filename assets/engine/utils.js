@@ -2,6 +2,17 @@ var utils = (function() {
 
 	return {
 
+		getRandomValue: function ( low, high ) {
+			var innerLow = high
+					? low
+					: 0,
+				innerHigh = high
+					? high
+					: low;
+
+			return innerLow + Math.round( Math.random()*(innerHigh-innerLow) );
+		},
+
 		// Возвращает Эвклидово расстояния
 		//p.x1
 		//p.y1
@@ -354,6 +365,14 @@ var utils = (function() {
 
 			callback();
 
+		},
+
+		fadeIn: function() {
+			document.querySelector('.black-fade').className += ' black-fade_active';
+		},
+
+		fadeOut: function() {
+			document.querySelector('.black-fade').className = document.querySelector('.black-fade').className.replace(/\sblack-fade_active/ig, '');
 		}
 	}
 

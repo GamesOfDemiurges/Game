@@ -53,16 +53,24 @@ gulp.task('buildHTML', function() {
         .on('error', console.log)
     .pipe(gulp.dest('./' + path[pathSwitcher] + '/'));
 
+    gulp.src('./assets/html/game.appcache')
+    .pipe(gulp.dest('./' + path[pathSwitcher] + '/'));
+
+    gulp.src('./assets/html/.htaccess')
+    .pipe(gulp.dest('./' + path[pathSwitcher] + '/'));
+
 });
 
 gulp.task('buildPrimaryJS', function() {
     gulp.src([
-    		'./assets/engine/spine-runtime/pixi/bin/pixi.dev.js',
+    		'./assets/engine/pixi.dev.js',
+    		'./assets/engine/localforage.js',
     		'./assets/engine/globals.js',
     		'./assets/engine/scene.js',
     		'./assets/engine/zplain.js',
     		'./assets/engine/viewport.js',
     		'./assets/engine/pathfinder.js',
+    		'./assets/engine/bot.js',
     		'./assets/engine/object.js',
     		'./assets/engine/utils.js',
     		'./assets/engine/graph.js',
@@ -70,6 +78,10 @@ gulp.task('buildPrimaryJS', function() {
     		'./assets/engine/queue.js',
     		'./assets/engine/relay.js',
     		'./assets/engine/ai.js',
+    		'./assets/engine/audio.js',
+    		'./assets/engine/video.js',
+    		'./assets/engine/translations.js',
+    		'./assets/engine/hint.js',
     		'./assets/engine/loader.js'
     	])
         .pipe(concat('index.js'))
@@ -99,9 +111,16 @@ gulp.task('buildImages', function() {
 	    .pipe(gulpif(minify, imagemin()))
         .pipe(gulp.dest('./' + path[pathSwitcher] + '/assets/background/'));
 
+    gulp.src('./assets/video/*')
+        .pipe(gulp.dest('./' + path[pathSwitcher] + '/assets/video/'));
+
+    gulp.src('./assets/music/*')
+        .pipe(gulp.dest('./' + path[pathSwitcher] + '/assets/music/'));
+
+
     gulp.src('./assets/models/ready/**/*.png')
 	    .pipe(gulpif(minify, imagemin()))
-        .pipe(gulp.dest('./' + path[pathSwitcher] + '/assets/models/ready/'))
+        .pipe(gulp.dest('./' + path[pathSwitcher] + '/assets/models/ready/'));
 
 });
 
@@ -118,7 +137,7 @@ gulp.task('buildModels', function() {
 --------------------------------------------------------------------------------------*/
 
 gulp.task('run-default', function() {
-    gulp.start('buildCSS', 'buildHTML', 'buildPrimaryJS', 'buildModels');
+    gulp.start('buildCSS', 'buildHTML', 'buildPrimaryJS', 'buildModels', 'buildImages');
 })
 
 gulp.task('run-dev-full', function() {

@@ -9049,10 +9049,74 @@ PIXI.BaseTexture = function(source)
 	 * @property source
 	 * @type Image
 	 */
-	this.source = source;
+	this.source = new Image();
+
 
 	if(!source)return;
 
+	var request,
+		scope = this;
+
+	function imageFromArrayBuffer (imageArrayBuffer) {
+		var blob = new Blob([imageArrayBuffer]),
+			imageURI = window.URL.createObjectURL(blob);
+
+		scope.source.onload = function () {
+
+			scope.hasLoaded = true;
+			scope.width = scope.source.width;
+			scope.height = scope.source.height;
+
+			// add it to somewhere...
+			PIXI.texturesToUpdate.push(scope);
+			scope.dispatchEvent( { type: 'loaded', content: scope } );
+		}
+
+		scope.source.src = imageURI;
+	}
+
+	if (!!window.openDatabase || !!window.indexedDB || !!window.webkitIndexedDB || !!window.mozIndexedDB || !!window.oIndexedDB || !!window.msIndexedDB) {
+		localforage.getItem(source, function(imageArrayBuffer) {
+
+			if (imageArrayBuffer) {
+				console.log(source + ' was loaded from cache.');
+				imageFromArrayBuffer(imageArrayBuffer);
+
+			} else {
+				console.log(source + ' was requested from network.');
+				request = new XMLHttpRequest();
+				request.open('GET', source, true);
+				request.responseType = 'arraybuffer';
+
+				request.addEventListener('readystatechange', function() {
+					if (request.readyState == 4) { // readyState DONE
+						localforage.setItem(source, request.response, function(imageArrayBuffer) {
+							imageFromArrayBuffer(imageArrayBuffer);
+						})
+					}
+				});
+
+				request.send(null);
+			}
+		});
+
+	} else {
+		console.log('No cache optimizations for ' + source);
+		scope.source.onload = function () {
+
+			scope.hasLoaded = true;
+			scope.width = scope.source.width;
+			scope.height = scope.source.height;
+
+			// add it to somewhere...
+			PIXI.texturesToUpdate.push(scope);
+			scope.dispatchEvent( { type: 'loaded', content: scope } );
+		}
+
+		scope.source.src = source;
+	}
+
+/*
 	if(this.source instanceof Image || this.source instanceof HTMLImageElement)
 	{
 		if(this.source.complete)
@@ -9088,6 +9152,7 @@ PIXI.BaseTexture = function(source)
 
 		PIXI.texturesToUpdate.push(this);
 	}
+*/
 
 	this._powerOf2 = false;
 }
@@ -9125,13 +9190,17 @@ PIXI.BaseTexture.fromImage = function(imageUrl, crossorigin)
 	{
 		// new Image() breaks tex loading in some versions of Chrome.
 		// See https://code.google.com/p/chromium/issues/detail?id=238071
+
+/*
 		var image = new Image();//document.createElement('img');
 		if (crossorigin)
 		{
 			image.crossOrigin = '';
 		}
 		image.src = imageUrl;
-		baseTexture = new PIXI.BaseTexture(image);
+*/
+
+		baseTexture = new PIXI.BaseTexture(imageUrl); //image
 		PIXI.BaseTextureCache[imageUrl] = baseTexture;
 	}
 
@@ -9790,15 +9859,47 @@ PIXI.JsonLoader.prototype.constructor = PIXI.JsonLoader;
  * @method load
  */
 PIXI.JsonLoader.prototype.load = function () {
-	this.ajaxRequest = new AjaxRequest();
-	var scope = this;
-	this.ajaxRequest.onreadystatechange = function () {
-		scope.onJSONLoaded();
-	};
 
-	this.ajaxRequest.open("GET", this.url, true);
-	if (this.ajaxRequest.overrideMimeType) this.ajaxRequest.overrideMimeType("application/json");
-	this.ajaxRequest.send(null);
+	var scope = this;
+
+	function makeRequest() {
+		scope.ajaxRequest = new AjaxRequest();
+
+		scope.ajaxRequest.onreadystatechange = function () {
+			if (scope.ajaxRequest.readyState == 4) {
+				if (scope.ajaxRequest.status == 200 || window.location.href.indexOf("http") == -1) {
+					scope.json = JSON.parse(scope.ajaxRequest.responseText);
+
+					localforage.setItem(scope.url, scope.json, function() {
+						scope.onJSONLoaded();
+					})
+				} else {
+					scope.onError();
+				}
+			}
+		};
+
+		scope.ajaxRequest.open("GET", scope.url, true);
+		if (scope.ajaxRequest.overrideMimeType) scope.ajaxRequest.overrideMimeType("application/json");
+		scope.ajaxRequest.send(null);
+
+	}
+
+
+	localforage.getItem(scope.url, function(json) {
+		if (json) {
+
+			console.log(scope.url + ' was loaded from cache.');
+			scope.json = JSON.parse(JSON.stringify(json));
+			scope.onJSONLoaded();
+		} else {
+
+			console.log(scope.url + ' was loaded from network.');
+			makeRequest();
+		}
+
+	})
+
 };
 
 /**
@@ -9808,9 +9909,10 @@ PIXI.JsonLoader.prototype.load = function () {
  * @private
  */
 PIXI.JsonLoader.prototype.onJSONLoaded = function () {
-	if (this.ajaxRequest.readyState == 4) {
-		if (this.ajaxRequest.status == 200 || window.location.href.indexOf("http") == -1) {
-			this.json = JSON.parse(this.ajaxRequest.responseText);
+
+
+
+
 
 			if(this.json.frames)
 			{
@@ -9860,12 +9962,7 @@ PIXI.JsonLoader.prototype.onJSONLoaded = function () {
 			{
 				this.onLoaded();
 			}
-		}
-		else
-		{
-			this.onError();
-		}
-	}
+
 };
 
 /**
@@ -10387,6 +10484,2060 @@ PIXI.SpineLoader.prototype.onLoaded = function () {
 
 
 }).call(this);
+/*!
+    localForage -- Offline Storage, Improved
+    Version 0.8.1
+    http://mozilla.github.io/localForage
+    (c) 2013-2014 Mozilla, Apache License 2.0
+*/
+(function() {
+var define, requireModule, require, requirejs;
+
+(function() {
+  var registry = {}, seen = {};
+
+  define = function(name, deps, callback) {
+    registry[name] = { deps: deps, callback: callback };
+  };
+
+  requirejs = require = requireModule = function(name) {
+  requirejs._eak_seen = registry;
+
+    if (seen[name]) { return seen[name]; }
+    seen[name] = {};
+
+    if (!registry[name]) {
+      throw new Error("Could not find module " + name);
+    }
+
+    var mod = registry[name],
+        deps = mod.deps,
+        callback = mod.callback,
+        reified = [],
+        exports;
+
+    for (var i=0, l=deps.length; i<l; i++) {
+      if (deps[i] === 'exports') {
+        reified.push(exports = {});
+      } else {
+        reified.push(requireModule(resolve(deps[i])));
+      }
+    }
+
+    var value = callback.apply(this, reified);
+    return seen[name] = exports || value;
+
+    function resolve(child) {
+      if (child.charAt(0) !== '.') { return child; }
+      var parts = child.split("/");
+      var parentBase = name.split("/").slice(0, -1);
+
+      for (var i=0, l=parts.length; i<l; i++) {
+        var part = parts[i];
+
+        if (part === '..') { parentBase.pop(); }
+        else if (part === '.') { continue; }
+        else { parentBase.push(part); }
+      }
+
+      return parentBase.join("/");
+    }
+  };
+})();
+
+define("promise/all", 
+  ["./utils","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    /* global toString */
+
+    var isArray = __dependency1__.isArray;
+    var isFunction = __dependency1__.isFunction;
+
+    /**
+      Returns a promise that is fulfilled when all the given promises have been
+      fulfilled, or rejected if any of them become rejected. The return promise
+      is fulfilled with an array that gives all the values in the order they were
+      passed in the `promises` array argument.
+
+      Example:
+
+      ```javascript
+      var promise1 = RSVP.resolve(1);
+      var promise2 = RSVP.resolve(2);
+      var promise3 = RSVP.resolve(3);
+      var promises = [ promise1, promise2, promise3 ];
+
+      RSVP.all(promises).then(function(array){
+        // The array here would be [ 1, 2, 3 ];
+      });
+      ```
+
+      If any of the `promises` given to `RSVP.all` are rejected, the first promise
+      that is rejected will be given as an argument to the returned promises's
+      rejection handler. For example:
+
+      Example:
+
+      ```javascript
+      var promise1 = RSVP.resolve(1);
+      var promise2 = RSVP.reject(new Error("2"));
+      var promise3 = RSVP.reject(new Error("3"));
+      var promises = [ promise1, promise2, promise3 ];
+
+      RSVP.all(promises).then(function(array){
+        // Code here never runs because there are rejected promises!
+      }, function(error) {
+        // error.message === "2"
+      });
+      ```
+
+      @method all
+      @for RSVP
+      @param {Array} promises
+      @param {String} label
+      @return {Promise} promise that is fulfilled when all `promises` have been
+      fulfilled, or rejected if any of them become rejected.
+    */
+    function all(promises) {
+      /*jshint validthis:true */
+      var Promise = this;
+
+      if (!isArray(promises)) {
+        throw new TypeError('You must pass an array to all.');
+      }
+
+      return new Promise(function(resolve, reject) {
+        var results = [], remaining = promises.length,
+        promise;
+
+        if (remaining === 0) {
+          resolve([]);
+        }
+
+        function resolver(index) {
+          return function(value) {
+            resolveAll(index, value);
+          };
+        }
+
+        function resolveAll(index, value) {
+          results[index] = value;
+          if (--remaining === 0) {
+            resolve(results);
+          }
+        }
+
+        for (var i = 0; i < promises.length; i++) {
+          promise = promises[i];
+
+          if (promise && isFunction(promise.then)) {
+            promise.then(resolver(i), reject);
+          } else {
+            resolveAll(i, promise);
+          }
+        }
+      });
+    }
+
+    __exports__.all = all;
+  });
+define("promise/asap", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    var browserGlobal = (typeof window !== 'undefined') ? window : {};
+    var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
+    var local = (typeof global !== 'undefined') ? global : (this === undefined? window:this);
+
+    // node
+    function useNextTick() {
+      return function() {
+        process.nextTick(flush);
+      };
+    }
+
+    function useMutationObserver() {
+      var iterations = 0;
+      var observer = new BrowserMutationObserver(flush);
+      var node = document.createTextNode('');
+      observer.observe(node, { characterData: true });
+
+      return function() {
+        node.data = (iterations = ++iterations % 2);
+      };
+    }
+
+    function useSetTimeout() {
+      return function() {
+        local.setTimeout(flush, 1);
+      };
+    }
+
+    var queue = [];
+    function flush() {
+      for (var i = 0; i < queue.length; i++) {
+        var tuple = queue[i];
+        var callback = tuple[0], arg = tuple[1];
+        callback(arg);
+      }
+      queue = [];
+    }
+
+    var scheduleFlush;
+
+    // Decide what async method to use to triggering processing of queued callbacks:
+    if (typeof process !== 'undefined' && {}.toString.call(process) === '[object process]') {
+      scheduleFlush = useNextTick();
+    } else if (BrowserMutationObserver) {
+      scheduleFlush = useMutationObserver();
+    } else {
+      scheduleFlush = useSetTimeout();
+    }
+
+    function asap(callback, arg) {
+      var length = queue.push([callback, arg]);
+      if (length === 1) {
+        // If length is 1, that means that we need to schedule an async flush.
+        // If additional callbacks are queued before the queue is flushed, they
+        // will be processed by this flush that we are scheduling.
+        scheduleFlush();
+      }
+    }
+
+    __exports__.asap = asap;
+  });
+define("promise/config", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    var config = {
+      instrument: false
+    };
+
+    function configure(name, value) {
+      if (arguments.length === 2) {
+        config[name] = value;
+      } else {
+        return config[name];
+      }
+    }
+
+    __exports__.config = config;
+    __exports__.configure = configure;
+  });
+define("promise/polyfill", 
+  ["./promise","./utils","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
+    "use strict";
+    /*global self*/
+    var RSVPPromise = __dependency1__.Promise;
+    var isFunction = __dependency2__.isFunction;
+
+    function polyfill() {
+      var local;
+
+      if (typeof global !== 'undefined') {
+        local = global;
+      } else if (typeof window !== 'undefined' && window.document) {
+        local = window;
+      } else {
+        local = self;
+      }
+
+      var es6PromiseSupport = 
+        "Promise" in local &&
+        // Some of these methods are missing from
+        // Firefox/Chrome experimental implementations
+        "resolve" in local.Promise &&
+        "reject" in local.Promise &&
+        "all" in local.Promise &&
+        "race" in local.Promise &&
+        // Older version of the spec had a resolver object
+        // as the arg rather than a function
+        (function() {
+          var resolve;
+          new local.Promise(function(r) { resolve = r; });
+          return isFunction(resolve);
+        }());
+
+      if (!es6PromiseSupport) {
+        local.Promise = RSVPPromise;
+      }
+    }
+
+    __exports__.polyfill = polyfill;
+  });
+define("promise/promise", 
+  ["./config","./utils","./all","./race","./resolve","./reject","./asap","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__, __dependency6__, __dependency7__, __exports__) {
+    "use strict";
+    var config = __dependency1__.config;
+    var configure = __dependency1__.configure;
+    var objectOrFunction = __dependency2__.objectOrFunction;
+    var isFunction = __dependency2__.isFunction;
+    var now = __dependency2__.now;
+    var all = __dependency3__.all;
+    var race = __dependency4__.race;
+    var staticResolve = __dependency5__.resolve;
+    var staticReject = __dependency6__.reject;
+    var asap = __dependency7__.asap;
+
+    var counter = 0;
+
+    config.async = asap; // default async is asap;
+
+    function Promise(resolver) {
+      if (!isFunction(resolver)) {
+        throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
+      }
+
+      if (!(this instanceof Promise)) {
+        throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
+      }
+
+      this._subscribers = [];
+
+      invokeResolver(resolver, this);
+    }
+
+    function invokeResolver(resolver, promise) {
+      function resolvePromise(value) {
+        resolve(promise, value);
+      }
+
+      function rejectPromise(reason) {
+        reject(promise, reason);
+      }
+
+      try {
+        resolver(resolvePromise, rejectPromise);
+      } catch(e) {
+        rejectPromise(e);
+      }
+    }
+
+    function invokeCallback(settled, promise, callback, detail) {
+      var hasCallback = isFunction(callback),
+          value, error, succeeded, failed;
+
+      if (hasCallback) {
+        try {
+          value = callback(detail);
+          succeeded = true;
+        } catch(e) {
+          failed = true;
+          error = e;
+        }
+      } else {
+        value = detail;
+        succeeded = true;
+      }
+
+      if (handleThenable(promise, value)) {
+        return;
+      } else if (hasCallback && succeeded) {
+        resolve(promise, value);
+      } else if (failed) {
+        reject(promise, error);
+      } else if (settled === FULFILLED) {
+        resolve(promise, value);
+      } else if (settled === REJECTED) {
+        reject(promise, value);
+      }
+    }
+
+    var PENDING   = void 0;
+    var SEALED    = 0;
+    var FULFILLED = 1;
+    var REJECTED  = 2;
+
+    function subscribe(parent, child, onFulfillment, onRejection) {
+      var subscribers = parent._subscribers;
+      var length = subscribers.length;
+
+      subscribers[length] = child;
+      subscribers[length + FULFILLED] = onFulfillment;
+      subscribers[length + REJECTED]  = onRejection;
+    }
+
+    function publish(promise, settled) {
+      var child, callback, subscribers = promise._subscribers, detail = promise._detail;
+
+      for (var i = 0; i < subscribers.length; i += 3) {
+        child = subscribers[i];
+        callback = subscribers[i + settled];
+
+        invokeCallback(settled, child, callback, detail);
+      }
+
+      promise._subscribers = null;
+    }
+
+    Promise.prototype = {
+      constructor: Promise,
+
+      _state: undefined,
+      _detail: undefined,
+      _subscribers: undefined,
+
+      then: function(onFulfillment, onRejection) {
+        var promise = this;
+
+        var thenPromise = new this.constructor(function() {});
+
+        if (this._state) {
+          var callbacks = arguments;
+          config.async(function invokePromiseCallback() {
+            invokeCallback(promise._state, thenPromise, callbacks[promise._state - 1], promise._detail);
+          });
+        } else {
+          subscribe(this, thenPromise, onFulfillment, onRejection);
+        }
+
+        return thenPromise;
+      },
+
+      'catch': function(onRejection) {
+        return this.then(null, onRejection);
+      }
+    };
+
+    Promise.all = all;
+    Promise.race = race;
+    Promise.resolve = staticResolve;
+    Promise.reject = staticReject;
+
+    function handleThenable(promise, value) {
+      var then = null,
+      resolved;
+
+      try {
+        if (promise === value) {
+          throw new TypeError("A promises callback cannot return that same promise.");
+        }
+
+        if (objectOrFunction(value)) {
+          then = value.then;
+
+          if (isFunction(then)) {
+            then.call(value, function(val) {
+              if (resolved) { return true; }
+              resolved = true;
+
+              if (value !== val) {
+                resolve(promise, val);
+              } else {
+                fulfill(promise, val);
+              }
+            }, function(val) {
+              if (resolved) { return true; }
+              resolved = true;
+
+              reject(promise, val);
+            });
+
+            return true;
+          }
+        }
+      } catch (error) {
+        if (resolved) { return true; }
+        reject(promise, error);
+        return true;
+      }
+
+      return false;
+    }
+
+    function resolve(promise, value) {
+      if (promise === value) {
+        fulfill(promise, value);
+      } else if (!handleThenable(promise, value)) {
+        fulfill(promise, value);
+      }
+    }
+
+    function fulfill(promise, value) {
+      if (promise._state !== PENDING) { return; }
+      promise._state = SEALED;
+      promise._detail = value;
+
+      config.async(publishFulfillment, promise);
+    }
+
+    function reject(promise, reason) {
+      if (promise._state !== PENDING) { return; }
+      promise._state = SEALED;
+      promise._detail = reason;
+
+      config.async(publishRejection, promise);
+    }
+
+    function publishFulfillment(promise) {
+      publish(promise, promise._state = FULFILLED);
+    }
+
+    function publishRejection(promise) {
+      publish(promise, promise._state = REJECTED);
+    }
+
+    __exports__.Promise = Promise;
+  });
+define("promise/race", 
+  ["./utils","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    /* global toString */
+    var isArray = __dependency1__.isArray;
+
+    /**
+      `RSVP.race` allows you to watch a series of promises and act as soon as the
+      first promise given to the `promises` argument fulfills or rejects.
+
+      Example:
+
+      ```javascript
+      var promise1 = new RSVP.Promise(function(resolve, reject){
+        setTimeout(function(){
+          resolve("promise 1");
+        }, 200);
+      });
+
+      var promise2 = new RSVP.Promise(function(resolve, reject){
+        setTimeout(function(){
+          resolve("promise 2");
+        }, 100);
+      });
+
+      RSVP.race([promise1, promise2]).then(function(result){
+        // result === "promise 2" because it was resolved before promise1
+        // was resolved.
+      });
+      ```
+
+      `RSVP.race` is deterministic in that only the state of the first completed
+      promise matters. For example, even if other promises given to the `promises`
+      array argument are resolved, but the first completed promise has become
+      rejected before the other promises became fulfilled, the returned promise
+      will become rejected:
+
+      ```javascript
+      var promise1 = new RSVP.Promise(function(resolve, reject){
+        setTimeout(function(){
+          resolve("promise 1");
+        }, 200);
+      });
+
+      var promise2 = new RSVP.Promise(function(resolve, reject){
+        setTimeout(function(){
+          reject(new Error("promise 2"));
+        }, 100);
+      });
+
+      RSVP.race([promise1, promise2]).then(function(result){
+        // Code here never runs because there are rejected promises!
+      }, function(reason){
+        // reason.message === "promise2" because promise 2 became rejected before
+        // promise 1 became fulfilled
+      });
+      ```
+
+      @method race
+      @for RSVP
+      @param {Array} promises array of promises to observe
+      @param {String} label optional string for describing the promise returned.
+      Useful for tooling.
+      @return {Promise} a promise that becomes fulfilled with the value the first
+      completed promises is resolved with if the first completed promise was
+      fulfilled, or rejected with the reason that the first completed promise
+      was rejected with.
+    */
+    function race(promises) {
+      /*jshint validthis:true */
+      var Promise = this;
+
+      if (!isArray(promises)) {
+        throw new TypeError('You must pass an array to race.');
+      }
+      return new Promise(function(resolve, reject) {
+        var results = [], promise;
+
+        for (var i = 0; i < promises.length; i++) {
+          promise = promises[i];
+
+          if (promise && typeof promise.then === 'function') {
+            promise.then(resolve, reject);
+          } else {
+            resolve(promise);
+          }
+        }
+      });
+    }
+
+    __exports__.race = race;
+  });
+define("promise/reject", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    /**
+      `RSVP.reject` returns a promise that will become rejected with the passed
+      `reason`. `RSVP.reject` is essentially shorthand for the following:
+
+      ```javascript
+      var promise = new RSVP.Promise(function(resolve, reject){
+        reject(new Error('WHOOPS'));
+      });
+
+      promise.then(function(value){
+        // Code here doesn't run because the promise is rejected!
+      }, function(reason){
+        // reason.message === 'WHOOPS'
+      });
+      ```
+
+      Instead of writing the above, your code now simply becomes the following:
+
+      ```javascript
+      var promise = RSVP.reject(new Error('WHOOPS'));
+
+      promise.then(function(value){
+        // Code here doesn't run because the promise is rejected!
+      }, function(reason){
+        // reason.message === 'WHOOPS'
+      });
+      ```
+
+      @method reject
+      @for RSVP
+      @param {Any} reason value that the returned promise will be rejected with.
+      @param {String} label optional string for identifying the returned promise.
+      Useful for tooling.
+      @return {Promise} a promise that will become rejected with the given
+      `reason`.
+    */
+    function reject(reason) {
+      /*jshint validthis:true */
+      var Promise = this;
+
+      return new Promise(function (resolve, reject) {
+        reject(reason);
+      });
+    }
+
+    __exports__.reject = reject;
+  });
+define("promise/resolve", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    function resolve(value) {
+      /*jshint validthis:true */
+      if (value && typeof value === 'object' && value.constructor === this) {
+        return value;
+      }
+
+      var Promise = this;
+
+      return new Promise(function(resolve) {
+        resolve(value);
+      });
+    }
+
+    __exports__.resolve = resolve;
+  });
+define("promise/utils", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    function objectOrFunction(x) {
+      return isFunction(x) || (typeof x === "object" && x !== null);
+    }
+
+    function isFunction(x) {
+      return typeof x === "function";
+    }
+
+    function isArray(x) {
+      return Object.prototype.toString.call(x) === "[object Array]";
+    }
+
+    // Date.now is not available in browsers < IE9
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now#Compatibility
+    var now = Date.now || function() { return new Date().getTime(); };
+
+
+    __exports__.objectOrFunction = objectOrFunction;
+    __exports__.isFunction = isFunction;
+    __exports__.isArray = isArray;
+    __exports__.now = now;
+  });
+requireModule('promise/polyfill').polyfill();
+}());// Some code originally from async_storage.js in
+// [Gaia](https://github.com/mozilla-b2g/gaia).
+(function() {
+    'use strict';
+
+    // Originally found in https://github.com/mozilla-b2g/gaia/blob/e8f624e4cc9ea945727278039b3bc9bcb9f8667a/shared/js/async_storage.js
+
+    // Promises!
+    var Promise = (typeof module !== 'undefined' && module.exports) ?
+                  require('promise') : this.Promise;
+
+    var db = null;
+    var dbInfo = {};
+
+    // Initialize IndexedDB; fall back to vendor-prefixed versions if needed.
+    var indexedDB = indexedDB || this.indexedDB || this.webkitIndexedDB ||
+                    this.mozIndexedDB || this.OIndexedDB ||
+                    this.msIndexedDB;
+
+    // If IndexedDB isn't available, we get outta here!
+    if (!indexedDB) {
+        return;
+    }
+
+    // Open the IndexedDB database (automatically creates one if one didn't
+    // previously exist), using any options set in the config.
+    function _initStorage(options) {
+        if (options) {
+            for (var i in options) {
+                dbInfo[i] = options[i];
+            }
+        }
+
+        return new Promise(function(resolve, reject) {
+            var openreq = indexedDB.open(dbInfo.name, dbInfo.version);
+            openreq.onerror = function withStoreOnError() {
+                reject(openreq.error);
+            };
+            openreq.onupgradeneeded = function withStoreOnUpgradeNeeded() {
+                // First time setup: create an empty object store
+                openreq.result.createObjectStore(dbInfo.storeName);
+            };
+            openreq.onsuccess = function withStoreOnSuccess() {
+                db = openreq.result;
+                resolve();
+            };
+        });
+    }
+
+    function getItem(key, callback) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            _this.ready().then(function() {
+                var store = db.transaction(dbInfo.storeName, 'readonly')
+                              .objectStore(dbInfo.storeName);
+                var req = store.get(key);
+
+                req.onsuccess = function() {
+                    var value = req.result;
+                    if (value === undefined) {
+                        value = null;
+                    }
+
+                    if (callback) {
+                        callback(value);
+                    }
+
+                    resolve(value);
+                };
+
+                req.onerror = function() {
+                    if (callback) {
+                        callback(null, req.error);
+                    }
+
+                    reject(req.error);
+                };
+            });
+        });
+    }
+
+    function setItem(key, value, callback) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            _this.ready().then(function() {
+                var store = db.transaction(dbInfo.storeName, 'readwrite')
+                              .objectStore(dbInfo.storeName);
+
+                // Cast to undefined so the value passed to callback/promise is
+                // the same as what one would get out of `getItem()` later.
+                // This leads to some weirdness (setItem('foo', undefined) will
+                // return "null"), but it's not my fault localStorage is our
+                // baseline and that it's weird.
+                if (value === undefined) {
+                    value = null;
+                }
+
+                var req = store.put(value, key);
+                req.onsuccess = function() {
+                    if (callback) {
+                        callback(value);
+                    }
+
+                    resolve(value);
+                };
+                req.onerror = function() {
+                    if (callback) {
+                        callback(null, req.error);
+                    }
+
+                    reject(req.error);
+                };
+            });
+        });
+    }
+
+    function removeItem(key, callback) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            _this.ready().then(function() {
+                var store = db.transaction(dbInfo.storeName, 'readwrite')
+                              .objectStore(dbInfo.storeName);
+
+                // We use `['delete']` instead of `.delete` because IE 8 will
+                // throw a fit if it sees the reserved word "delete" in this
+                // scenario. See: https://github.com/mozilla/localForage/pull/67
+                //
+                // This can be removed once we no longer care about IE 8, for
+                // what that's worth.
+                // TODO: Write a test against this? Maybe IE in general? Also,
+                // make sure the minify step doesn't optimise this to `.delete`,
+                // though it currently doesn't.
+                var req = store['delete'](key);
+                req.onsuccess = function() {
+                    if (callback) {
+                        callback();
+                    }
+
+                    resolve();
+                };
+
+                req.onerror = function() {
+                    if (callback) {
+                        callback(req.error);
+                    }
+
+                    reject(req.error);
+                };
+
+                // The request will be aborted if we've exceeded our storage
+                // space. In this case, we will reject with a specific
+                // "QuotaExceededError".
+                req.onabort = function(event) {
+                    var error = event.target.error;
+                    if (error === 'QuotaExceededError') {
+                        if (callback) {
+                            callback(error);
+                        }
+
+                        reject(error);
+                    }
+                };
+            });
+        });
+    }
+
+    function clear(callback) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            _this.ready().then(function() {
+                var store = db.transaction(dbInfo.storeName, 'readwrite')
+                              .objectStore(dbInfo.storeName);
+                var req = store.clear();
+
+                req.onsuccess = function() {
+                    if (callback) {
+                        callback();
+                    }
+
+                    resolve();
+                };
+
+                req.onerror = function() {
+                    if (callback) {
+                        callback(null, req.error);
+                    }
+
+                    reject(req.error);
+                };
+            });
+        });
+    }
+
+    function length(callback) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            _this.ready().then(function() {
+                var store = db.transaction(dbInfo.storeName, 'readonly')
+                              .objectStore(dbInfo.storeName);
+                var req = store.count();
+
+                req.onsuccess = function() {
+                    if (callback) {
+                        callback(req.result);
+                    }
+
+                    resolve(req.result);
+                };
+
+                req.onerror = function() {
+                    if (callback) {
+                        callback(null, req.error);
+                    }
+
+                    reject(req.error);
+                };
+            });
+        });
+    }
+
+    function key(n, callback) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            if (n < 0) {
+                if (callback) {
+                    callback(null);
+                }
+
+                resolve(null);
+
+                return;
+            }
+
+            _this.ready().then(function() {
+                var store = db.transaction(dbInfo.storeName, 'readonly')
+                              .objectStore(dbInfo.storeName);
+
+                var advanced = false;
+                var req = store.openCursor();
+                req.onsuccess = function() {
+                    var cursor = req.result;
+                    if (!cursor) {
+                        // this means there weren't enough keys
+                        if (callback) {
+                            callback(null);
+                        }
+
+                        resolve(null);
+
+                        return;
+                    }
+
+                    if (n === 0) {
+                        // We have the first key, return it if that's what they
+                        // wanted.
+                        if (callback) {
+                            callback(cursor.key);
+                        }
+
+                        resolve(cursor.key);
+                    } else {
+                        if (!advanced) {
+                            // Otherwise, ask the cursor to skip ahead n
+                            // records.
+                            advanced = true;
+                            cursor.advance(n);
+                        } else {
+                            // When we get here, we've got the nth key.
+                            if (callback) {
+                                callback(cursor.key);
+                            }
+
+                            resolve(cursor.key);
+                        }
+                    }
+                };
+
+                req.onerror = function() {
+                    if (callback) {
+                        callback(null, req.error);
+                    }
+
+                    reject(req.error);
+                };
+            });
+        });
+    }
+
+    var asyncStorage = {
+        _driver: 'asyncStorage',
+        _initStorage: _initStorage,
+        getItem: getItem,
+        setItem: setItem,
+        removeItem: removeItem,
+        clear: clear,
+        length: length,
+        key: key
+    };
+
+    if (typeof define === 'function' && define.amd) {
+        define('asyncStorage', function() {
+            return asyncStorage;
+        });
+    } else if (typeof module !== 'undefined' && module.exports) {
+        module.exports = asyncStorage;
+    } else {
+        this.asyncStorage = asyncStorage;
+    }
+}).call(this);
+// If IndexedDB isn't available, we'll fall back to localStorage.
+// Note that this will have considerable performance and storage
+// side-effects (all data will be serialized on save and only data that
+// can be converted to a string via `JSON.stringify()` will be saved).
+(function() {
+    'use strict';
+
+    var keyPrefix = '';
+    var dbInfo = {};
+    // Promises!
+    var Promise = (typeof module !== 'undefined' && module.exports) ?
+                  require('promise') : this.Promise;
+    var localStorage = null;
+
+    // If the app is running inside a Google Chrome packaged webapp, or some
+    // other context where localStorage isn't available, we don't use
+    // localStorage. This feature detection is preferred over the old
+    // `if (window.chrome && window.chrome.runtime)` code.
+    // See: https://github.com/mozilla/localForage/issues/68
+    try {
+        // Initialize localStorage and create a variable to use throughout
+        // the code.
+        localStorage = this.localStorage;
+    } catch (e) {
+        return;
+    }
+
+    // Config the localStorage backend, using options set in the config.
+    function _initStorage(options) {
+        if (options) {
+            for (var i in options) {
+                dbInfo[i] = options[i];
+            }
+        }
+
+        keyPrefix = dbInfo.name + '/';
+
+        return Promise.resolve();
+    }
+
+    var SERIALIZED_MARKER = '__lfsc__:';
+    var SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER.length;
+
+    // OMG the serializations!
+    var TYPE_ARRAYBUFFER = 'arbf';
+    var TYPE_BLOB = 'blob';
+    var TYPE_INT8ARRAY = 'si08';
+    var TYPE_UINT8ARRAY = 'ui08';
+    var TYPE_UINT8CLAMPEDARRAY = 'uic8';
+    var TYPE_INT16ARRAY = 'si16';
+    var TYPE_INT32ARRAY = 'si32';
+    var TYPE_UINT16ARRAY = 'ur16';
+    var TYPE_UINT32ARRAY = 'ui32';
+    var TYPE_FLOAT32ARRAY = 'fl32';
+    var TYPE_FLOAT64ARRAY = 'fl64';
+    var TYPE_SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER_LENGTH + TYPE_ARRAYBUFFER.length;
+
+    // Remove all keys from the datastore, effectively destroying all data in
+    // the app's key/value store!
+    function clear(callback) {
+        var _this = this;
+        return new Promise(function(resolve) {
+            _this.ready().then(function() {
+                localStorage.clear();
+
+                if (callback) {
+                    callback();
+                }
+
+                resolve();
+            });
+        });
+    }
+
+    // Retrieve an item from the store. Unlike the original async_storage
+    // library in Gaia, we don't modify return values at all. If a key's value
+    // is `undefined`, we pass that value to the callback function.
+    function getItem(key, callback) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            _this.ready().then(function() {
+                try {
+                    var result = localStorage.getItem(keyPrefix + key);
+
+                    // If a result was found, parse it from the serialized
+                    // string into a JS object. If result isn't truthy, the key
+                    // is likely undefined and we'll pass it straight to the
+                    // callback.
+                    if (result) {
+                        result = _deserialize(result);
+                    }
+
+                    if (callback) {
+                        callback(result, null);
+                    }
+
+                    resolve(result);
+                } catch (e) {
+                    if (callback) {
+                        callback(null, e);
+                    }
+
+                    reject(e);
+                }
+            });
+        });
+    }
+
+    // Same as localStorage's key() method, except takes a callback.
+    function key(n, callback) {
+        var _this = this;
+        return new Promise(function(resolve) {
+            _this.ready().then(function() {
+                var result = localStorage.key(n);
+
+                // Remove the prefix from the key, if a key is found.
+                if (result) {
+                    result = result.substring(keyPrefix.length);
+                }
+
+                if (callback) {
+                    callback(result);
+                }
+                resolve(result);
+            });
+        });
+    }
+
+    // Supply the number of keys in the datastore to the callback function.
+    function length(callback) {
+        var _this = this;
+        return new Promise(function(resolve) {
+            _this.ready().then(function() {
+                var result = localStorage.length;
+
+                if (callback) {
+                    callback(result);
+                }
+
+                resolve(result);
+            });
+        });
+    }
+
+    // Remove an item from the store, nice and simple.
+    function removeItem(key, callback) {
+        var _this = this;
+        return new Promise(function(resolve) {
+            _this.ready().then(function() {
+                localStorage.removeItem(keyPrefix + key);
+
+                if (callback) {
+                    callback();
+                }
+
+                resolve();
+            });
+        });
+    }
+
+    // Deserialize data we've inserted into a value column/field. We place
+    // special markers into our strings to mark them as encoded; this isn't
+    // as nice as a meta field, but it's the only sane thing we can do whilst
+    // keeping localStorage support intact.
+    //
+    // Oftentimes this will just deserialize JSON content, but if we have a
+    // special marker (SERIALIZED_MARKER, defined above), we will extract
+    // some kind of arraybuffer/binary data/typed array out of the string.
+    function _deserialize(value) {
+        // If we haven't marked this string as being specially serialized (i.e.
+        // something other than serialized JSON), we can just return it and be
+        // done with it.
+        if (value.substring(0, SERIALIZED_MARKER_LENGTH) !== SERIALIZED_MARKER) {
+            return JSON.parse(value);
+        }
+
+        // The following code deals with deserializing some kind of Blob or
+        // TypedArray. First we separate out the type of data we're dealing
+        // with from the data itself.
+        var serializedString = value.substring(TYPE_SERIALIZED_MARKER_LENGTH);
+        var type = value.substring(SERIALIZED_MARKER_LENGTH, TYPE_SERIALIZED_MARKER_LENGTH);
+
+        // Fill the string into a ArrayBuffer.
+        var buffer = new ArrayBuffer(serializedString.length * 2); // 2 bytes for each char
+        var bufferView = new Uint16Array(buffer);
+        for (var i = serializedString.length - 1; i >= 0; i--) {
+            bufferView[i] = serializedString.charCodeAt(i);
+        }
+
+        // Return the right type based on the code/type set during
+        // serialization.
+        switch (type) {
+            case TYPE_ARRAYBUFFER:
+                return buffer;
+            case TYPE_BLOB:
+                return new Blob([buffer]);
+            case TYPE_INT8ARRAY:
+                return new Int8Array(buffer);
+            case TYPE_UINT8ARRAY:
+                return new Uint8Array(buffer);
+            case TYPE_UINT8CLAMPEDARRAY:
+                return new Uint8ClampedArray(buffer);
+            case TYPE_INT16ARRAY:
+                return new Int16Array(buffer);
+            case TYPE_UINT16ARRAY:
+                return new Uint16Array(buffer);
+            case TYPE_INT32ARRAY:
+                return new Int32Array(buffer);
+            case TYPE_UINT32ARRAY:
+                return new Uint32Array(buffer);
+            case TYPE_FLOAT32ARRAY:
+                return new Float32Array(buffer);
+            case TYPE_FLOAT64ARRAY:
+                return new Float64Array(buffer);
+            default:
+                throw new Error('Unkown type: ' + type);
+        }
+    }
+
+    // Converts a buffer to a string to store, serialized, in the backend
+    // storage library.
+    function _bufferToString(buffer) {
+        var str = '';
+        var uint16Array = new Uint16Array(buffer);
+
+        try {
+            str = String.fromCharCode.apply(null, uint16Array);
+        } catch (e) {
+            // This is a fallback implementation in case the first one does
+            // not work. This is required to get the phantomjs passing...
+            for (var i = 0; i < uint16Array.length; i++) {
+                str += String.fromCharCode(uint16Array[i]);
+            }
+        }
+
+        return str;
+    }
+
+    // Serialize a value, afterwards executing a callback (which usually
+    // instructs the `setItem()` callback/promise to be executed). This is how
+    // we store binary data with localStorage.
+    function _serialize(value, callback) {
+        var valueString = '';
+        if (value) {
+            valueString = value.toString();
+        }
+
+        // Cannot use `value instanceof ArrayBuffer` or such here, as these
+        // checks fail when running the tests using casper.js...
+        //
+        // TODO: See why those tests fail and use a better solution.
+        if (value && (value.toString() === '[object ArrayBuffer]' ||
+                      value.buffer && value.buffer.toString() === '[object ArrayBuffer]')) {
+            // Convert binary arrays to a string and prefix the string with
+            // a special marker.
+            var buffer;
+            var marker = SERIALIZED_MARKER;
+
+            if (value instanceof ArrayBuffer) {
+                buffer = value;
+                marker += TYPE_ARRAYBUFFER;
+            } else {
+                buffer = value.buffer;
+
+                if (valueString === '[object Int8Array]') {
+                    marker += TYPE_INT8ARRAY;
+                } else if (valueString === '[object Uint8Array]') {
+                    marker += TYPE_UINT8ARRAY;
+                } else if (valueString === '[object Uint8ClampedArray]') {
+                    marker += TYPE_UINT8CLAMPEDARRAY;
+                } else if (valueString === '[object Int16Array]') {
+                    marker += TYPE_INT16ARRAY;
+                } else if (valueString === '[object Uint16Array]') {
+                    marker += TYPE_UINT16ARRAY;
+                } else if (valueString === '[object Int32Array]') {
+                    marker += TYPE_INT32ARRAY;
+                } else if (valueString === '[object Uint32Array]') {
+                    marker += TYPE_UINT32ARRAY;
+                } else if (valueString === '[object Float32Array]') {
+                    marker += TYPE_FLOAT32ARRAY;
+                } else if (valueString === '[object Float64Array]') {
+                    marker += TYPE_FLOAT64ARRAY;
+                } else {
+                    callback(new Error("Failed to get type for BinaryArray"));
+                }
+            }
+
+            callback(marker + _bufferToString(buffer));
+        } else if (valueString === "[object Blob]") {
+            // Conver the blob to a binaryArray and then to a string.
+            var fileReader = new FileReader();
+
+            fileReader.onload = function() {
+                var str = _bufferToString(this.result);
+
+                callback(SERIALIZED_MARKER + TYPE_BLOB + str);
+            };
+
+            fileReader.readAsArrayBuffer(value);
+        } else {
+            try {
+                callback(JSON.stringify(value));
+            } catch (e) {
+                if (this.console && this.console.error) {
+                    this.console.error("Couldn't convert value into a JSON string: ", value);
+                }
+
+                callback(null, e);
+            }
+        }
+    }
+
+    // Set a key's value and run an optional callback once the value is set.
+    // Unlike Gaia's implementation, the callback function is passed the value,
+    // in case you want to operate on that value only after you're sure it
+    // saved, or something like that.
+    function setItem(key, value, callback) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            _this.ready().then(function() {
+                // Convert undefined values to null.
+                // https://github.com/mozilla/localForage/pull/42
+                if (value === undefined) {
+                    value = null;
+                }
+
+                // Save the original value to pass to the callback.
+                var originalValue = value;
+
+                _serialize(value, function(value, error) {
+                    if (error) {
+                        if (callback) {
+                            callback(null, error);
+                        }
+
+                        reject(error);
+                    } else {
+                        try {
+                            localStorage.setItem(keyPrefix + key, value);
+                        } catch (e) {
+                            // localStorage capacity exceeded.
+                            // TODO: Make this a specific error/event.
+                            if (e.name === 'QuotaExceededError' ||
+                                e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                                if (callback) {
+                                    callback(null, e);
+                                }
+
+                                reject(e);
+                            }
+                        }
+
+                        if (callback) {
+                            callback(originalValue);
+                        }
+
+                        resolve(originalValue);
+                    }
+                });
+            });
+        });
+    }
+
+    var localStorageWrapper = {
+        _driver: 'localStorageWrapper',
+        _initStorage: _initStorage,
+        // Default API, from Gaia/localStorage.
+        getItem: getItem,
+        setItem: setItem,
+        removeItem: removeItem,
+        clear: clear,
+        length: length,
+        key: key
+    };
+
+    if (typeof define === 'function' && define.amd) {
+        define('localStorageWrapper', function() {
+            return localStorageWrapper;
+        });
+    } else if (typeof module !== 'undefined' && module.exports) {
+        module.exports = localStorageWrapper;
+    } else {
+        this.localStorageWrapper = localStorageWrapper;
+    }
+}).call(this);
+/*
+ * Includes code from:
+ *
+ * base64-arraybuffer
+ * https://github.com/niklasvh/base64-arraybuffer
+ *
+ * Copyright (c) 2012 Niklas von Hertzen
+ * Licensed under the MIT license.
+ */
+(function() {
+    'use strict';
+
+    // Sadly, the best way to save binary data in WebSQL is Base64 serializing
+    // it, so this is how we store it to prevent very strange errors with less
+    // verbose ways of binary <-> string data storage.
+    var BASE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+    // Promises!
+    var Promise = (typeof module !== 'undefined' && module.exports) ?
+                  require('promise') : this.Promise;
+
+    var openDatabase = this.openDatabase;
+    var db = null;
+    var dbInfo = {};
+
+    var SERIALIZED_MARKER = '__lfsc__:';
+    var SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER.length;
+
+    // OMG the serializations!
+    var TYPE_ARRAYBUFFER = 'arbf';
+    var TYPE_BLOB = 'blob';
+    var TYPE_INT8ARRAY = 'si08';
+    var TYPE_UINT8ARRAY = 'ui08';
+    var TYPE_UINT8CLAMPEDARRAY = 'uic8';
+    var TYPE_INT16ARRAY = 'si16';
+    var TYPE_INT32ARRAY = 'si32';
+    var TYPE_UINT16ARRAY = 'ur16';
+    var TYPE_UINT32ARRAY = 'ui32';
+    var TYPE_FLOAT32ARRAY = 'fl32';
+    var TYPE_FLOAT64ARRAY = 'fl64';
+    var TYPE_SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER_LENGTH + TYPE_ARRAYBUFFER.length;
+
+    // If WebSQL methods aren't available, we can stop now.
+    if (!openDatabase) {
+        return;
+    }
+
+    // Open the WebSQL database (automatically creates one if one didn't
+    // previously exist), using any options set in the config.
+    function _initStorage(options) {
+        var _this = this;
+
+        if (options) {
+            for (var i in options) {
+                dbInfo[i] = typeof(options[i]) !== 'string' ? options[i].toString() : options[i];
+            }
+        }
+
+        return new Promise(function(resolve) {
+            // Open the database; the openDatabase API will automatically
+            // create it for us if it doesn't exist.
+            try {
+                db = openDatabase(dbInfo.name, dbInfo.version,
+                                  dbInfo.description, dbInfo.size);
+            } catch (e) {
+                return _this.setDriver('localStorageWrapper').then(resolve);
+            }
+
+            // Create our key/value table if it doesn't exist.
+            db.transaction(function(t) {
+                t.executeSql('CREATE TABLE IF NOT EXISTS ' + dbInfo.storeName + 
+                             ' (id INTEGER PRIMARY KEY, key unique, value)', [], function() {
+                    resolve();
+                }, null);
+            });
+        });
+    }
+
+    function getItem(key, callback) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            _this.ready().then(function() {
+                db.transaction(function(t) {
+                    t.executeSql('SELECT * FROM ' + dbInfo.storeName + 
+                                 ' WHERE key = ? LIMIT 1', [key], function(t, results) {
+                        var result = results.rows.length ? results.rows.item(0).value : null;
+
+                        // Check to see if this is serialized content we need to
+                        // unpack.
+                        if (result) {
+                            result = _deserialize(result);
+                        }
+
+                        if (callback) {
+                            callback(result);
+                        }
+
+                        resolve(result);
+                    }, function(t, error) {
+                        if (callback) {
+                            callback(null, error);
+                        }
+
+                        reject(error);
+                    });
+                });
+            });
+        });
+    }
+
+    function setItem(key, value, callback) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            _this.ready().then(function() {
+                // The localStorage API doesn't return undefined values in an
+                // "expected" way, so undefined is always cast to null in all
+                // drivers. See: https://github.com/mozilla/localForage/pull/42
+                if (value === undefined) {
+                    value = null;
+                }
+
+                // Save the original value to pass to the callback.
+                var originalValue = value;
+
+                _serialize(value, function(value, error) {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        db.transaction(function(t) {
+                            t.executeSql('INSERT OR REPLACE INTO ' + dbInfo.storeName + 
+                                         ' (key, value) VALUES (?, ?)', [key, value], function() {
+                                if (callback) {
+                                    callback(originalValue);
+                                }
+
+                                resolve(originalValue);
+                            }, function(t, error) {
+                                if (callback) {
+                                    callback(null, error);
+                                }
+
+                                reject(error);
+                            });
+                        }, function(sqlError) { // The transaction failed; check
+                                                // to see if it's a quota error.
+                            if (sqlError.code === sqlError.QUOTA_ERR) {
+                                // We reject the callback outright for now, but
+                                // it's worth trying to re-run the transaction.
+                                // Even if the user accepts the prompt to use
+                                // more storage on Safari, this error will
+                                // be called.
+                                //
+                                // TODO: Try to re-run the transaction.
+                                if (callback) {
+                                    callback(null, sqlError);
+                                }
+
+                                reject(sqlError);
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    }
+
+    function removeItem(key, callback) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            _this.ready().then(function() {
+                db.transaction(function(t) {
+                    t.executeSql('DELETE FROM ' + dbInfo.storeName + 
+                                 ' WHERE key = ?', [key], function() {
+                        if (callback) {
+                            callback();
+                        }
+
+                        resolve();
+                    }, function(t, error) {
+                        if (callback) {
+                            callback(error);
+                        }
+
+                        reject(error);
+                    });
+                });
+            });
+        });
+    }
+
+    // Deletes every item in the table.
+    // TODO: Find out if this resets the AUTO_INCREMENT number.
+    function clear(callback) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            _this.ready().then(function() {
+                db.transaction(function(t) {
+                    t.executeSql('DELETE FROM ' + dbInfo.storeName, [], function() {
+                        if (callback) {
+                            callback();
+                        }
+
+                        resolve();
+                    }, function(t, error) {
+                        if (callback) {
+                            callback(error);
+                        }
+
+                        reject(error);
+                    });
+                });
+            });
+        });
+    }
+
+    // Does a simple `COUNT(key)` to get the number of items stored in
+    // localForage.
+    function length(callback) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            _this.ready().then(function() {
+                db.transaction(function(t) {
+                    // Ahhh, SQL makes this one soooooo easy.
+                    t.executeSql('SELECT COUNT(key) as c FROM ' + 
+                                 dbInfo.storeName, [], function(t, results) {
+                        var result = results.rows.item(0).c;
+
+                        if (callback) {
+                            callback(result);
+                        }
+
+                        resolve(result);
+                    }, function(t, error) {
+                        if (callback) {
+                            callback(null, error);
+                        }
+
+                        reject(error);
+                    });
+                });
+            });
+        });
+    }
+
+    // Return the key located at key index X; essentially gets the key from a
+    // `WHERE id = ?`. This is the most efficient way I can think to implement
+    // this rarely-used (in my experience) part of the API, but it can seem
+    // inconsistent, because we do `INSERT OR REPLACE INTO` on `setItem()`, so
+    // the ID of each key will change every time it's updated. Perhaps a stored
+    // procedure for the `setItem()` SQL would solve this problem?
+    // TODO: Don't change ID on `setItem()`.
+    function key(n, callback) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            _this.ready().then(function() {
+                db.transaction(function(t) {
+                    t.executeSql('SELECT key FROM ' + dbInfo.storeName +
+                                 ' WHERE id = ? LIMIT 1', [n + 1], function(t, results) {
+                        var result = results.rows.length ? results.rows.item(0).key : null;
+
+                        if (callback) {
+                            callback(result);
+                        }
+
+                        resolve(result);
+                    }, function(t, error) {
+                        if (callback) {
+                            callback(null, error);
+                        }
+
+                        reject(error);
+                    });
+                });
+            });
+        });
+    }
+
+    // Converts a buffer to a string to store, serialized, in the backend
+    // storage library.
+    function _bufferToString(buffer) {
+        // base64-arraybuffer
+        var bytes = new Uint8Array(buffer);
+        var i;
+        var base64String = '';
+
+        for (i = 0; i < bytes.length; i += 3) {
+            /*jslint bitwise: true */
+            base64String += BASE_CHARS[bytes[i] >> 2];
+            base64String += BASE_CHARS[((bytes[i] & 3) << 4) | (bytes[i + 1] >> 4)];
+            base64String += BASE_CHARS[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
+            base64String += BASE_CHARS[bytes[i + 2] & 63];
+        }
+
+        if ((bytes.length % 3) === 2) {
+            base64String = base64String.substring(0, base64String.length - 1) + "=";
+        } else if (bytes.length % 3 === 1) {
+            base64String = base64String.substring(0, base64String.length - 2) + "==";
+        }
+
+        return base64String;
+    }
+
+    // Deserialize data we've inserted into a value column/field. We place
+    // special markers into our strings to mark them as encoded; this isn't
+    // as nice as a meta field, but it's the only sane thing we can do whilst
+    // keeping localStorage support intact.
+    //
+    // Oftentimes this will just deserialize JSON content, but if we have a
+    // special marker (SERIALIZED_MARKER, defined above), we will extract
+    // some kind of arraybuffer/binary data/typed array out of the string.
+    function _deserialize(value) {
+        // If we haven't marked this string as being specially serialized (i.e.
+        // something other than serialized JSON), we can just return it and be
+        // done with it.
+        if (value.substring(0, SERIALIZED_MARKER_LENGTH) !== SERIALIZED_MARKER) {
+            return JSON.parse(value);
+        }
+
+        // The following code deals with deserializing some kind of Blob or
+        // TypedArray. First we separate out the type of data we're dealing
+        // with from the data itself.
+        var serializedString = value.substring(TYPE_SERIALIZED_MARKER_LENGTH);
+        var type = value.substring(SERIALIZED_MARKER_LENGTH, TYPE_SERIALIZED_MARKER_LENGTH);
+
+        // Fill the string into a ArrayBuffer.
+        var bufferLength = serializedString.length * 0.75;
+        var len = serializedString.length;
+        var i;
+        var p = 0;
+        var encoded1, encoded2, encoded3, encoded4;
+
+        if (serializedString[serializedString.length - 1] === "=") {
+            bufferLength--;
+            if (serializedString[serializedString.length - 2] === "=") {
+                bufferLength--;
+            }
+        }
+
+        var buffer = new ArrayBuffer(bufferLength);
+        var bytes = new Uint8Array(buffer);
+
+        for (i = 0; i < len; i+=4) {
+            encoded1 = BASE_CHARS.indexOf(serializedString[i]);
+            encoded2 = BASE_CHARS.indexOf(serializedString[i+1]);
+            encoded3 = BASE_CHARS.indexOf(serializedString[i+2]);
+            encoded4 = BASE_CHARS.indexOf(serializedString[i+3]);
+
+            /*jslint bitwise: true */
+            bytes[p++] = (encoded1 << 2) | (encoded2 >> 4);
+            bytes[p++] = ((encoded2 & 15) << 4) | (encoded3 >> 2);
+            bytes[p++] = ((encoded3 & 3) << 6) | (encoded4 & 63);
+        }
+
+        // Return the right type based on the code/type set during
+        // serialization.
+        switch (type) {
+            case TYPE_ARRAYBUFFER:
+                return buffer;
+            case TYPE_BLOB:
+                return new Blob([buffer]);
+            case TYPE_INT8ARRAY:
+                return new Int8Array(buffer);
+            case TYPE_UINT8ARRAY:
+                return new Uint8Array(buffer);
+            case TYPE_UINT8CLAMPEDARRAY:
+                return new Uint8ClampedArray(buffer);
+            case TYPE_INT16ARRAY:
+                return new Int16Array(buffer);
+            case TYPE_UINT16ARRAY:
+                return new Uint16Array(buffer);
+            case TYPE_INT32ARRAY:
+                return new Int32Array(buffer);
+            case TYPE_UINT32ARRAY:
+                return new Uint32Array(buffer);
+            case TYPE_FLOAT32ARRAY:
+                return new Float32Array(buffer);
+            case TYPE_FLOAT64ARRAY:
+                return new Float64Array(buffer);
+            default:
+                throw new Error('Unkown type: ' + type);
+        }
+    }
+
+    // Serialize a value, afterwards executing a callback (which usually
+    // instructs the `setItem()` callback/promise to be executed). This is how
+    // we store binary data with localStorage.
+    function _serialize(value, callback) {
+        var valueString = '';
+        if (value) {
+            valueString = value.toString();
+        }
+
+        // Cannot use `value instanceof ArrayBuffer` or such here, as these
+        // checks fail when running the tests using casper.js...
+        //
+        // TODO: See why those tests fail and use a better solution.
+        if (value && (value.toString() === '[object ArrayBuffer]' ||
+                      value.buffer && value.buffer.toString() === '[object ArrayBuffer]')) {
+            // Convert binary arrays to a string and prefix the string with
+            // a special marker.
+            var buffer;
+            var marker = SERIALIZED_MARKER;
+
+            if (value instanceof ArrayBuffer) {
+                buffer = value;
+                marker += TYPE_ARRAYBUFFER;
+            } else {
+                buffer = value.buffer;
+
+                if (valueString === '[object Int8Array]') {
+                    marker += TYPE_INT8ARRAY;
+                } else if (valueString === '[object Uint8Array]') {
+                    marker += TYPE_UINT8ARRAY;
+                } else if (valueString === '[object Uint8ClampedArray]') {
+                    marker += TYPE_UINT8CLAMPEDARRAY;
+                } else if (valueString === '[object Int16Array]') {
+                    marker += TYPE_INT16ARRAY;
+                } else if (valueString === '[object Uint16Array]') {
+                    marker += TYPE_UINT16ARRAY;
+                } else if (valueString === '[object Int32Array]') {
+                    marker += TYPE_INT32ARRAY;
+                } else if (valueString === '[object Uint32Array]') {
+                    marker += TYPE_UINT32ARRAY;
+                } else if (valueString === '[object Float32Array]') {
+                    marker += TYPE_FLOAT32ARRAY;
+                } else if (valueString === '[object Float64Array]') {
+                    marker += TYPE_FLOAT64ARRAY;
+                } else {
+                    callback(new Error("Failed to get type for BinaryArray"));
+                }
+            }
+
+            callback(marker + _bufferToString(buffer));
+        } else if (valueString === "[object Blob]") {
+            // Conver the blob to a binaryArray and then to a string.
+            var fileReader = new FileReader();
+
+            fileReader.onload = function() {
+                var str = _bufferToString(this.result);
+
+                callback(SERIALIZED_MARKER + TYPE_BLOB + str);
+            };
+
+            fileReader.readAsArrayBuffer(value);
+        } else {
+            try {
+                callback(JSON.stringify(value));
+            } catch (e) {
+                if (this.console && this.console.error) {
+                    this.console.error("Couldn't convert value into a JSON string: ", value);
+                }
+
+                callback(null, e);
+            }
+        }
+    }
+
+    var webSQLStorage = {
+        _driver: 'webSQLStorage',
+        _initStorage: _initStorage,
+        getItem: getItem,
+        setItem: setItem,
+        removeItem: removeItem,
+        clear: clear,
+        length: length,
+        key: key
+    };
+
+    if (typeof define === 'function' && define.amd) {
+        define('webSQLStorage', function() {
+            return webSQLStorage;
+        });
+    } else if (typeof module !== 'undefined' && module.exports) {
+        module.exports = webSQLStorage;
+    } else {
+        this.webSQLStorage = webSQLStorage;
+    }
+}).call(this);
+(function() {
+    'use strict';
+
+    // Promises!
+    var Promise = (typeof module !== 'undefined' && module.exports) ?
+                  require('promise') : this.Promise;
+
+    // Avoid those magic constants!
+    var MODULE_TYPE_DEFINE = 1;
+    var MODULE_TYPE_EXPORT = 2;
+    var MODULE_TYPE_WINDOW = 3;
+
+    // Attaching to window (i.e. no module loader) is the assumed,
+    // simple default.
+    var moduleType = MODULE_TYPE_WINDOW;
+
+    // Find out what kind of module setup we have; if none, we'll just attach
+    // localForage to the main window.
+    if (typeof define === 'function' && define.amd) {
+        moduleType = MODULE_TYPE_DEFINE;
+    } else if (typeof module !== 'undefined' && module.exports) {
+        moduleType = MODULE_TYPE_EXPORT;
+    }
+
+    // Initialize IndexedDB; fall back to vendor-prefixed versions if needed.
+    var indexedDB = indexedDB || this.indexedDB || this.webkitIndexedDB ||
+                    this.mozIndexedDB || this.OIndexedDB ||
+                    this.msIndexedDB;
+
+    var supportsIndexedDB = indexedDB &&
+                            indexedDB.open('_localforage_spec_test', 1)
+                                     .onupgradeneeded === null;
+
+    // Check for WebSQL.
+    var openDatabase = this.openDatabase;
+
+    // The actual localForage object that we expose as a module or via a global.
+    // It's extended by pulling in one of our other libraries.
+    var _this = this;
+    var localForage = {
+        INDEXEDDB: 'asyncStorage',
+        LOCALSTORAGE: 'localStorageWrapper',
+        WEBSQL: 'webSQLStorage',
+
+        _config: {
+            description: '',
+            name: 'localforage',
+            // Default DB size is _JUST UNDER_ 5MB, as it's the highest size
+            // we can use without a prompt.
+            size: 4980736,
+            storeName: 'keyvaluepairs',
+            version: 1.0
+        },
+
+        // Set any config values for localForage; can be called anytime before
+        // the first API call (e.g. `getItem`, `setItem`).
+        // We loop through options so we don't overwrite existing config
+        // values.
+        config: function(options) {
+            // If the options argument is an object, we use it to set values.
+            // Otherwise, we return either a specified config value or all
+            // config values.
+            if (typeof(options) === 'object') {
+                // If localforage is ready and fully initialized, we can't set
+                // any new configuration values. Instead, we return an error.
+                if (this._ready) {
+                    return new Error("Can't call config() after localforage " +
+                                     "has been used.");
+                }
+
+                for (var i in options) {
+                    this._config[i] = options[i];
+                }
+
+                return true;
+            } else if (typeof(options) === 'string') {
+                return this._config[options];
+            } else {
+                return this._config;
+            }
+        },
+
+        driver: function() {
+            return this._driver || null;
+        },
+
+        _ready: Promise.reject(new Error("setDriver() wasn't called")),
+
+        setDriver: function(driverName, callback) {
+            var driverSet = new Promise(function(resolve, reject) {
+                if ((!supportsIndexedDB &&
+                     driverName === localForage.INDEXEDDB) ||
+                    (!openDatabase && driverName === localForage.WEBSQL)) {
+                    reject(localForage);
+
+                    return;
+                }
+
+                localForage._ready = null;
+
+                // We allow localForage to be declared as a module or as a library
+                // available without AMD/require.js.
+                if (moduleType === MODULE_TYPE_DEFINE) {
+                    require([driverName], function(lib) {
+                        localForage._extend(lib);
+
+                        resolve(localForage);
+                    });
+
+                    // Return here so we don't resolve the promise twice.
+                    return;
+                } else if (moduleType === MODULE_TYPE_EXPORT) {
+                    // Making it browserify friendly
+                    var driver;
+                    switch (driverName) {
+                        case localForage.INDEXEDDB:
+                            driver = require('./drivers/indexeddb');
+                            break;
+                        case localForage.LOCALSTORAGE:
+                            driver = require('./drivers/localstorage');
+                            break;
+                        case localForage.WEBSQL:
+                            driver = require('./drivers/websql');
+                    }
+
+                    localForage._extend(driver);
+                } else {
+                    localForage._extend(_this[driverName]);
+                }
+
+                resolve(localForage);
+            });
+
+            driverSet.then(callback, callback);
+
+            return driverSet;
+        },
+
+        ready: function(callback) {
+            if (this._ready === null) {
+                this._ready = this._initStorage(this._config);
+            }
+
+            this._ready.then(callback, callback);
+
+            return this._ready;
+        },
+
+        _extend: function(libraryMethodsAndProperties) {
+            for (var i in libraryMethodsAndProperties) {
+                if (libraryMethodsAndProperties.hasOwnProperty(i)) {
+                    this[i] = libraryMethodsAndProperties[i];
+                }
+            }
+        }
+    };
+
+    // Select our storage library.
+    var storageLibrary;
+    // Check to see if IndexedDB is available and if it is the latest
+    // implementation; it's our preferred backend library. We use "_spec_test"
+    // as the name of the database because it's not the one we'll operate on,
+    // but it's useful to make sure its using the right spec.
+    // See: https://github.com/mozilla/localForage/issues/128
+    if (supportsIndexedDB) {
+        storageLibrary = localForage.INDEXEDDB;
+    } else if (openDatabase) { // WebSQL is available, so we'll use that.
+        storageLibrary = localForage.WEBSQL;
+    } else { // If nothing else is available, we use localStorage.
+        storageLibrary = localForage.LOCALSTORAGE;
+    }
+
+    // If window.localForageConfig is set, use it for configuration.
+    if (this.localForageConfig) {
+        localForage.config = this.localForageConfig;
+    }
+
+    // Set the (default) driver.
+    localForage.setDriver(storageLibrary);
+
+    // We allow localForage to be declared as a module or as a library
+    // available without AMD/require.js.
+    if (moduleType === MODULE_TYPE_DEFINE) {
+        define(function() {
+            return localForage;
+        });
+    } else if (moduleType === MODULE_TYPE_EXPORT) {
+        module.exports = localForage;
+    } else {
+        this.localforage = localForage;
+    }
+}).call(this);
+
 var globals = {
 
 	paths: {},
@@ -10398,7 +12549,9 @@ var globals = {
 		resize: false,
 		scale: 1
 	},
-	scale: 1
+	scale: 1,
+	volume: 0.5,
+	locale: 'ru'
 }
 var scene = function scene() {
 
@@ -10410,10 +12563,6 @@ var scene = function scene() {
 		x = 0, y = 0; // точки отсчета для сцены
 
 	function repaintCanvas() {
-		if (Z.zchange) {
-			Z.drawZindex(playGround);
-		}
-
 		requestAnimFrame(repaintCanvas);
 		renderer.render(stage);
 	}
@@ -10431,19 +12580,29 @@ var scene = function scene() {
 
 			// Обертка над оператором рендера PIXI
 			masterCanvas = document.getElementById(p.canvasId); // указатель на DOM
-			stage = new PIXI.Stage(0xFFFFFF, true); // Корневая сцена
+			stage = new PIXI.Stage(0x000000, true); // Корневая сцена
 
-			_this.scale = 800/masterCanvas.clientHeight;
+			_this.scale = globals.sceneHeight/masterCanvas.clientHeight;
 			_this.width = _this.scale * masterCanvas.clientWidth;
 			_this.height = _this.scale * masterCanvas.clientHeight;
 
-			renderer = new PIXI.CanvasRenderer(_this.width, 800, masterCanvas, false);
+			renderer = new PIXI.CanvasRenderer(_this.width, globals.sceneHeight, masterCanvas, false);
+
 			window.addEventListener('resize', function() {
-				_this.scale = 800/masterCanvas.clientHeight;
+				_this.scale = globals.sceneHeight/masterCanvas.clientHeight;
 				_this.width = _this.scale * masterCanvas.clientWidth;
 				_this.height = _this.scale * masterCanvas.clientHeight;
 
-				renderer.resize(_this.width, 800);
+				renderer.resize(_this.width, globals.sceneHeight);
+
+				globals.scale = globals.sceneHeight / document.body.clientHeight;
+
+				if (globals.objects.hero) {
+					globals.objects.hero.move({
+						x: globals.objects.hero.image.position.x,
+						y: globals.objects.hero.image.position.y
+					})
+				}
 
 				if (!!graph) {
 					graph.buildGraph({});
@@ -10476,6 +12635,10 @@ var scene = function scene() {
 
 			Z.addZindex( p );
 
+			if (p.ai) {
+				p.ai.start();
+			}
+
 			return _this;
 		},
 
@@ -10484,10 +12647,15 @@ var scene = function scene() {
 		// p.dy
 		move: function ( p ) {
 			var _this = this,
-				maxYShift = ( _this.height / globals.scale - (_this.height / globals.scale ) * (globals.viewport.scale ) ) * globals.scale;
+				maxYShift = ( _this.height / globals.scale - (_this.height / globals.scale ) * (globals.viewport.scale ) ) * globals.scale,
+				maxXShift = ( _this.width / globals.scale - (globals.sceneWidth / globals.scale ) * (globals.viewport.scale ) ) * globals.scale;
 
 			_this.playGround.position.x = ( p.dx || _this.playGround.position.x );
 			_this.playGround.position.y = ( p.dy || _this.playGround.position.y );
+
+			_this.playGround.position.x = _this.playGround.position.x < maxXShift
+				? maxXShift
+				: _this.playGround.position.x;
 
 			_this.playGround.position.x = _this.playGround.position.x > 0
 				? 0
@@ -10521,7 +12689,6 @@ var Z = function() {
 		}
 
 	return {
-		zchange: false,
 		getZindex: function () {
 			return zindex;
 		},
@@ -10653,7 +12820,7 @@ var Z = function() {
 			}
 			p.stackZindex = stackIndex; // отражает позицию в стеке на отрисовку
 
-			Z.zchange = true;
+			Z.drawZindex(scene.playGround);
 		},
 		changeZindex: function ( p ) {
 			// Оч. грубо — удалим приоритет из списка
@@ -10694,7 +12861,6 @@ var Z = function() {
 
 				currentPlain = currentPlain.next;
 			}
-			Z.zchange = false;
 		}
 	}
 
@@ -10707,8 +12873,8 @@ var viewport = (function() {
 		globals.viewport.resize = true;
 		globals.viewport.distance = Math.sqrt( ( p.x1 - p.x2 )*( p.x1 - p.x2 ) + ( p.y1 - p.y2 )*( p.y1 - p.y2 ) );
 
-		globals.viewport.sceneX = scene.playGround.position.x - globals.objects['hero'].image.position.x * (1 - globals.viewport.scale);
-		globals.viewport.sceneY = scene.playGround.position.y - (globals.objects['hero'].image.position.y + magicYHeroShift) * (1 - globals.viewport.scale);
+		globals.viewport.sceneX = scene.playGround.position.x - globals.objects.hero.image.position.x * (1 - globals.viewport.scale);
+		globals.viewport.sceneY = scene.playGround.position.y - (globals.objects.hero.image.position.y + magicYHeroShift) * (1 - globals.viewport.scale);
 	}
 
 	function viewportProcessScale( p ) {
@@ -10726,11 +12892,16 @@ var viewport = (function() {
 			return false;
 		}
 
-		var x = (globals.objects['hero'].image.position.x) * (1-k),
-			y = (globals.objects['hero'].image.position.y + magicYHeroShift) * (1-k),
+		var x = (globals.objects.hero.image.position.x) * (1-k),
+			y = (globals.objects.hero.image.position.y + magicYHeroShift) * (1-k),
 			rx = globals.viewport.sceneX + x,
 			ry = globals.viewport.sceneY + y,
-			maxYShift = (scene.height / globals.scale - (scene.height / globals.scale ) * (k) ) * globals.scale;
+			maxYShift = (scene.height / globals.scale - (scene.height / globals.scale ) * (k) ) * globals.scale,
+			maxXShift = (scene.width / globals.scale - (globals.sceneWidth / globals.scale ) * (k) ) * globals.scale;
+
+		rx = rx < maxXShift
+			? maxXShift
+			: rx;
 
 		rx = (rx > 0)
 			? 0
@@ -10859,15 +13030,8 @@ var pathfinder = (function() {
 			// 1. Задана явно
 			// 2. Взята из параметров траектории для этого объкта
 			// 3. Первая анимация из всех доступных для этого объекта
-			if (!resultAnimation.animation || !resultAnimation.speed) {
-				if (!!globals.paths[ p.pathId ].objects && !!globals.paths[ p.pathId ].objects[ p.obj ] ) {
-					resultAnimation.animation = globals.paths[ p.pathId ].objects[ p.obj ].animation;
-					resultAnimation.speed = globals.paths[ p.pathId ].objects[ p.obj ].speed;
-				} else {
-					resultAnimation.animation = globals.objects[ p.obj ].image.spineData.animations[0].name
-					resultAnimation.speed = 0;
-				}
-			}
+			resultAnimation.animation = resultAnimation.animation || (globals.paths[ p.pathId ].objects && globals.paths[ p.pathId ].objects[ p.obj ] && globals.paths[ p.pathId ].objects[ p.obj ].animation) || globals.objects[ p.obj ].image.spineData.animations[0].name;
+			resultAnimation.speed = resultAnimation.speed || (globals.paths[ p.pathId ].objects && globals.paths[ p.pathId ].objects[ p.obj ] && globals.paths[ p.pathId ].objects[ p.obj ].speed) || 0;
 
 			return resultAnimation;
 		}
@@ -10948,8 +13112,6 @@ var pathfinder = (function() {
 			}
 		}
 
-
-
 		var pathId = p.pathArray[ p.pathArray.length-1 ],
 			objectAnimation = getAnimation({
 				obj: p.currentObject.id,
@@ -10964,7 +13126,7 @@ var pathfinder = (function() {
 			animation: objectAnimation.animation,
 			speed: objectAnimation.speed,
 			step: step
-		})
+		});
 
 		queue.addToObjPaths({
 			objectId: p.currentObject.id,
@@ -11000,7 +13162,7 @@ var pathfinder = (function() {
 	}
 
 	function findPathToChain( p ) {
-		if (!p.currentObject) return false;
+		if (!p.currentObject || !globals.paths[p.path] || !globals.paths[ p.currentObject.path ]) return false;
 
 		var path = p.path,
 			chain = p.chain,
@@ -11200,6 +13362,195 @@ var pathfinder = (function() {
 
 
 
+function ai() {
+
+	var probMatrix = [
+		[
+			{yes: 1, no: 1},
+			{yes: 3, no: 2},
+			{yes: 2, no: 2},
+			{yes: 3, no: 3},
+			{yes: 1, no: 2}
+		],
+		[
+			{yes: 2, no: 4},
+			{yes: 0, no: 0},
+			{yes: 4, no: 1},
+			{yes: 3, no: 3},
+			{yes: 1, no: 2}
+		],
+		[
+			{yes: 1, no: 3},
+			{yes: 2, no: 1},
+			{yes: 1, no: 1},
+			{yes: 5, no: 3},
+			{yes: 1, no: 2}
+		],
+		[
+			{yes: 1, no: 2},
+			{yes: 3, no: 1},
+			{yes: 2, no: 2},
+			{yes: 3, no: 3},
+			{yes: 1, no: 2}
+		],
+		[
+			{yes: 3, no: 5},
+			{yes: 2, no: 1},
+			{yes: 3, no: 2},
+			{yes: 2, no: 2},
+			{yes: 0, no: 0}
+		]
+	],
+	obj,
+	moveAnimation,
+	stayAnimation,
+	availablesPaths,
+	lookDistance,
+	stayTime,
+	currentState,
+	heroIsVisible = false,
+	stop = false;
+
+	function stayOnPlace() {
+		currentState = 0;
+
+		setTimeout(function() {
+			processAction();
+		}, utils.getRandomValue(stayTime) );
+	}
+
+	function rotateObject() {
+		currentState = 1;
+
+		obj.image.scale.x *= -1;
+
+		processAction();
+	}
+
+	function moveToPoint() {
+		currentState = 2;
+
+		if (moveAnimation && availablesPaths) {
+
+			var targetChain =  utils.getRandomValue(globals.paths[availablesPaths].controlPath.length-1);
+
+			obj.moveTo({
+				path: availablesPaths,
+				chain: targetChain,
+				animationName: moveAnimation,
+				callback: function () {
+					processAction();
+				}
+			})
+
+		} else {
+			processAction();
+		}
+	}
+
+	function playAnimation() {
+		currentState = 3;
+
+		if (stayAnimation) {
+			obj.animate({
+				animation: stayAnimation,
+				callback: function () {
+					processAction();
+				}
+			})
+		} else {
+			processAction();
+		}
+	}
+
+	function lookAround() {
+
+		currentState = 4;
+
+		if (utils.getDistance({
+			x1: obj.image.position.x,
+			x2: globals.objects.hero.image.position.x,
+			y1: obj.image.position.y,
+			y2: globals.objects.hero.image.position.y
+		}) < lookDistance) {
+			heroIsVisible = true;
+		} else {
+			heroIsVisible = false;
+		}
+
+		processAction();
+	}
+
+	function processAction() {
+		if (stop) return;
+
+		var prob = utils.getRandomValue(10),
+			sum = 0,
+			isVisible = heroIsVisible
+				? 'yes'
+				: 'no';
+
+		for (var i = 0; i < 4; i++)	 {
+			sum += probMatrix[currentState][i][isVisible];
+
+			if (sum >= prob) break;
+		}
+
+		switch (i) {
+
+			case 0:
+				stayOnPlace();
+				break;
+
+			case 1:
+				rotateObject();
+				break;
+
+			case 2:
+				moveToPoint();
+				break;
+
+			case 3:
+				playAnimation();
+				break;
+
+			default:
+				lookAround();
+		}
+
+	}
+
+	function initParams( p ) {
+
+		probMatrix = p.probMatrix || probMatrix;
+		moveAnimation = p.moveAnimation || false;
+		stayAnimation = p.stayAnimation || false;
+		availablesPaths = p.availablesPaths || false;
+		lookDistance = p.lookDistance || 300;
+		stayTime = p.stayTime || 3000;
+		obj = p.obj;
+	}
+
+	return {
+
+		init: function ( p ) {
+
+			initParams( p );
+
+			return this;
+		},
+
+		start: function() {
+			stop = false;
+			currentState = 4;
+			processAction();
+		},
+
+		stop: function() {
+			stop = true;
+		}
+	}
+}
 function obj() {
 
 	/* Private */
@@ -11265,11 +13616,29 @@ function obj() {
 				}
 			}
 
+			function setAnimation() {
+				if (p.animation) {
+					_this.animation = {};
+
+					for (var animationName in p.animation) {
+						_this.animation[animationName] = {};
+
+						if (p.animation[animationName].soundSrc) {
+
+							_this.animation[animationName].track = track().load({
+								obj: _this,
+								url: p.animation[animationName].soundSrc
+							})
+						}
+					}
+				}
+			}
+
 			function setInteractive() {
 				if (p.interactive) {
 					_this.image.setInteractive(true);
 
-					_this.image.click = _this.image.tap = function(data) {
+					_this.image.click = _this.image.tap = function (data) {
 						if (globals.viewport.resize) return false;
 
 						globals.objectClicked = true;
@@ -11279,7 +13648,32 @@ function obj() {
 							type: 'objectClick'
 						});
 					}
+
+					_this.image.mouseover = function () {
+
+						document.body.className += ' _cursor';
+					}
+
+					_this.image.mouseout = function () {
+						document.body.className = document.body.className.replace(/\s_cursor/ig, '');
+					}
 				}
+			}
+
+			function setAI() {
+				if (p.ai) {
+
+					_this.ai = ai().init({
+
+						probMatrix: p.ai.probMatrix,
+						moveAnimation: p.ai.moveAnimation,
+						stayAnimation: p.ai.stayAnimation,
+						availablesPaths: p.ai.availablesPaths,
+						lookDistance: p.ai.lookDistance,
+						obj: _this
+					});
+				}
+
 			}
 
 			if (p.src.indexOf('.anim') !== -1) {
@@ -11310,7 +13704,9 @@ function obj() {
 			setObjectPosition();
 			setObjectScale();
 			setReverse();
+			setAnimation();
 			setInteractive();
+			setAI();
 
 			return _this;
 		},
@@ -11339,7 +13735,7 @@ function obj() {
 				if ( dx < 0 ) {
 
 					// Автоматический разворот модели в зависимости от направления движения
-					if ( (_this.image.state.current.name != 'stairCaseWalk') && (_this.image.scale.x > 0) ) {
+					if ( (_this.image.state.current.name !== 'stairCaseWalk' && _this.id !== 'tree') && (_this.image.scale.x > 0) ) {
 						_this.image.scale.x *= -1;
 					}
 				}
@@ -11402,6 +13798,11 @@ function obj() {
 				callback = p.callback || function() {};
 
 			_this.image.state.setAnimationByName( p.animation , false);
+
+			if (_this.animation && _this.animation[p.animation]) {
+				_this.animation[p.animation].track.play();
+			}
+
 			var duration = _this.image.state.current.duration * 1000,
 				animationId = Math.random();
 
@@ -11424,12 +13825,58 @@ function obj() {
 			});
 
 			return _this;
+		},
+
+		getPosition: function() {
+
+			var _this = this,
+				path = _this.path,
+				chain,
+				graphId,
+				orientation = Math.abs(_this.image.scale.x)/_this.image.scale.x;
+
+			for (var i = 0; i < globals.paths[ _this.path ].controlPath.length; i++) {
+
+				if ( Math.abs(globals.paths[ _this.path ].controlPath[i].step - _this.step) < 10 ) {
+
+					chain = i;
+					break;
+				}
+
+			}
+
+			if ( _this.step < 10 ) {
+				graphId = globals.paths[ path ].dots[0].graphId;
+			}
+
+			if ( Math.abs(globals.paths[ path ].steps.length - _this.step) < 10 ) {
+				graphId = globals.paths[ path ].dots[ globals.paths[ path ].dots.length-1 ].graphId;
+			}
+
+			return {
+				path: path,
+				chain: chain,
+				graphId: graphId,
+				orientation: orientation
+			}
+
 		}
 	}
 }
 var utils = (function() {
 
 	return {
+
+		getRandomValue: function ( low, high ) {
+			var innerLow = high
+					? low
+					: 0,
+				innerHigh = high
+					? high
+					: low;
+
+			return innerLow + Math.round( Math.random()*(innerHigh-innerLow) );
+		},
 
 		// Возвращает Эвклидово расстояния
 		//p.x1
@@ -11783,6 +14230,14 @@ var utils = (function() {
 
 			callback();
 
+		},
+
+		fadeIn: function() {
+			document.querySelector('.black-fade').className += ' black-fade_active';
+		},
+
+		fadeOut: function() {
+			document.querySelector('.black-fade').className = document.querySelector('.black-fade').className.replace(/\sblack-fade_active/ig, '');
 		}
 	}
 
@@ -11994,9 +14449,9 @@ var graph = (function() {
 		// Отдает вершину графа, если совпадает с заданным шагом
 		getGraphIdByStep: function( p ) {
 
-			if (p.step < 5) {
+			if (p.step < 10) {
 				return globals.paths[p.path].dots[ 0 ].graphId;
-			} else if ( (globals.paths[p.path].steps.length-1) - p.step < 5  ) {
+			} else if ( (globals.paths[p.path].steps.length-1) - p.step < 10  ) {
 				return globals.paths[p.path].dots[ globals.paths[p.path].dots.length-1 ].graphId;
 			} else {
 				return undefined;
@@ -12025,9 +14480,17 @@ var move = (function() {
 			? stepDirection = stepDirection / Math.abs(stepDirection)
 			: 0;
 
+		audio.updateWorldSound({
+			id: p.id
+		})
+
 		// Анимация запукается циклически
 		if (globals.objects[p.id].image.state.isComplete()) {
 			globals.objects[p.id].image.state.setAnimationByName( p.animation , false);
+
+			if (globals.objects[p.id].animation && globals.objects[p.id].animation[p.animation]) {
+				globals.objects[p.id].animation[p.animation].track.play();
+			}
 		}
 
 		globals.objects[p.id].step = globals.objects[p.id].step + stepDirection * p.speed;
@@ -12175,7 +14638,6 @@ var queue = (function() {
 
 				}
 
-
 			} else {
 				// Если цепочка анимаций для объекта пустая, добавляем его на вычистку из очереди
 				// Удалять будем по завершении цикла всё вместе, поэтому массив
@@ -12235,121 +14697,162 @@ var relay = (function() {
 	return {
 
 		drop: function( p ) {
-			var _this = this;
+			var _this = this,
+				evt, objEvt,
+				inGraphId = p.graphId
+					? '.inGraphId.' + p.graphId
+					: '';
 
-			if (window.CustomEvent) {
-				var event = new CustomEvent( p.type , {detail: p });
+			if (typeof window.CustomEvent === 'function') {
+				evt = new CustomEvent( p.type , {detail: p });
+				objEvt = new CustomEvent( p.obj + '.' + p.type + inGraphId , {detail: p });
 			} else {
-				var event = document.createEvent( p.type );
-				event.initCustomEvent(p.type, true, true, p );
+				evt = document.createEvent( 'CustomEvent' );
+				evt.initCustomEvent(p.type, true, true, p );
+
+				objEvt = document.createEvent( 'CustomEvent' );
+				objEvt.initCustomEvent( p.obj + '.' + p.type + inGraphId, true, true, p );
 			}
 
-			document.dispatchEvent(event);
+			document.dispatchEvent(evt);
+			document.dispatchEvent(objEvt);
 
 			return _this;
 
 		},
 
-		listen: function( eventName) {
+		listen: function( eventName ) {
 			var _this = this;
 
 			document.addEventListener(eventName, function( p ) {
-				console.log( p.detail )
+				console.log( p.detail );
 			})
 
 			return _this;
 		}
 	}
 })();
+// Снег
+document.addEventListener('snow.objectAdded', function( p ) {
+	(function startSnow() {
+		globals.objects.snow.animate({
+			animation: 'animation',
+			callback: function() {
+				startSnow();
+			}
+		})
+	})();
+});
+
+// Дерево откатывается
+function moveTree() {
+	globals.paths.jump2.breakpath = true;
+	globals.paths.tree1.breakpath = true;
+	graph.buildGraph({
+		callback: function() {
+			globals.objects.tree.moveTo({
+				path: 'groundTreeToLeft',
+				chain: 4,
+				animationName: 'animation',
+				speedValue: 2
+			})
+		}
+	});
+
+}
+
+document.addEventListener('hero.stop.inGraphId.8', function( p ) { moveTree() })
+document.addEventListener('hero.breakpoint.inGraphId.8', function( p ) { moveTree() })
+
 // Клик на птицу
-document.addEventListener('objectClick', function( p ) {
-	if( p.detail.obj == 'bird' ) {
+document.addEventListener('bird.objectClick', function( p ) {
 
-		if ( (globals.objects.hero.path == 'treeInside') && (globals.objects.hero.step == 126) ) {
-			// Запретить пользователю ходить на время анимации
-			globals.preventClick = true;
+	if ( (globals.objects.hero.getPosition().path == 'treeInside') && (globals.objects.hero.getPosition().graphId == 4) ) {
+		// Запретить пользователю ходить на время анимации
+		globals.preventClick = true;
 
-			globals.objects.hero.animate({
-				animation: 'slope',
-				callback: function() {
+		globals.objects.hero.animate({
+			animation: 'slope',
+			callback: function() {
 
-					// Разрешить спуститься
-					globals.paths.treeToBucket.breakpath = false;
+				// Разрешить спуститься
+				globals.paths.treeToBucket.breakpath = false;
 
-					graph.buildGraph({
-						callback: function() {
+				graph.buildGraph({
+					callback: function() {
 
-							// Дойти до ведра
-							globals.objects.hero.moveTo( {
-								path: 'treeToBucket',
-								chain: 0,
-								animationName: 'new',
-								speedValue: 3,
-								callback: function() {
+						// Дойти до ведра
+						globals.objects.hero.moveTo( {
+							path: 'treeToBucket',
+							chain: 0,
+							animationName: 'new',
+							speedValue: 3,
+							callback: function() {
 
-									// Бросить ведро вниз
-									globals.objects.bucket.animate({
-										animation: 'bucket',
-										callback: function() {
+								// Бросить ведро вниз
+								globals.objects.bucket.animate({
+									animation: 'bucket',
+									callback: function() {
 
-											// Развернуть героя для спуска по веревке
+										// Развернуть героя для спуска по веревке
+										if (globals.objects.hero.getPosition().orientation == 1) {
 											globals.objects.hero.image.scale.x *= -1;
-
-											// Спустить героя на землю
-											globals.objects.hero.moveTo( {
-												path: 'groundTreeToLeft',
-												chain: 1
-											})
-
 										}
-									})
-								}
-							})
 
-						}
-					});
-				}
+										// Спустить героя на землю
+										globals.objects.hero.moveTo( {
+											path: 'groundTreeToLeft',
+											chain: 1
+										})
+
+									}
+								})
+							}
+						})
+
+					}
+				});
+			}
+		})
+
+		// Запустить птицу через таймер, потому что улетает в середине анимации
+		setTimeout(function() {
+			globals.objects.bird.moveTo( {
+				path: 'birdTreePath',
+				chain: 3,
+				animationName: 'bird',
+				speedValue: 4
 			})
 
-			// Запустить птицу через таймер, потому что улетает в середине анимации
-			setTimeout(function() {
-				globals.objects.bird.moveTo( {
-					path: 'birdTreePath',
-					chain: 3,
-					animationName: 'bird',
-					speedValue: 4
-				})
+		}, 400)
 
-			}, 400)
+	}
 
-		}
+	// Если потянуться за птицей с земли
+	if ( (globals.objects.hero.path == 'treeToSemaphore') && (globals.objects.hero.step == 207) &&
+		(globals.objects.bird.path == 'birdTreePath') && (globals.objects.bird.step == 456 ) ) {
 
-		// Если потянуться за птицей с земли
-		if ( (globals.objects.hero.path == 'treeToSemaphore') && (globals.objects.hero.step == 207) &&
-			(globals.objects.bird.path == 'birdTreePath') && (globals.objects.bird.step == 456 ) ) {
+		globals.objects.hero.animate({
+			animation: 'ReachOut'
+		})
 
-			globals.objects.hero.animate({
-				animation: 'ReachOut'
+		// Птица улетает до того, как герой дотянется
+		setTimeout(function() {
+
+			globals.objects.bird.moveTo( {
+				path: 'birdTreePath2',
+				chain: 3,
+				animationName: 'bird',
+				speedValue: 4
 			})
 
-			// Птица улетает до того, как герой дотянется
-			setTimeout(function() {
-
-				globals.objects.bird.moveTo( {
-					path: 'birdTreePath2',
-					chain: 3,
-					animationName: 'bird',
-					speedValue: 4
-				})
-
-			}, 300)
-		}
+		}, 300)
 	}
 });
 
 // Спуск героя по веревке на землю
-document.addEventListener('breakpoint', function( p ) {
-	if (p.detail.obj == 'hero' && p.detail.graphId == '5' && (!globals.triggers.heroOnTheGround)) {
+document.addEventListener('hero.breakpoint.inGraphId.5', function( p ) {
+	if ( !globals.triggers.heroOnTheGround) {
 		// Запретить подниматься обратно наверх
 		globals.paths.bucketToGround.breakpath = true;
 
@@ -12364,50 +14867,102 @@ document.addEventListener('breakpoint', function( p ) {
 	}
 });
 
-// Клик на злодея под деревом
-document.addEventListener('objectClick', function( p ) {
-	if (p.detail.obj == 'villain') {
-		// Если герой тоит вплотную к злодею, можно попробовать его поймать
-		if ( (globals.objects.hero.path == 'groundTreeToLeft') && (globals.objects.hero.step == 333) ) {
-			globals.objects.hero.animate({
-				animation: 'catch',
-				callback: function() {
-					globals.objects.villain.animate({
-						animation: 'animation'
-					})
-				}
-			})
-		} else {
-			globals.objects.villain.animate({
-				animation: 'animation'
-			})
-		}
+// Крышка мусорного бака шевелится
+function checkGarbageBucket() {
+
+	if (globals.triggers.garbageBucketIsOpen) return;
+
+	var currentChain = globals.objects.hero.getPosition().chain;
+
+	if (currentChain > 1 && currentChain < 9) {
+
+		globals.objects.garbageBucket.animate({
+			animation: 'live'
+		})
 	}
+
+	setTimeout(function() {
+		if ( globals.objects.hero.getPosition().path !== 'treeToSemaphore' ) return;
+		checkGarbageBucket();
+	}, 1200);
+}
+
+document.addEventListener('hero.stop.inGraphId.5', function( p ) { checkGarbageBucket() })
+document.addEventListener('hero.breakpoint.inGraphId.5', function( p ) { checkGarbageBucket() })
+document.addEventListener('hero.stop.inGraphId.11', function( p ) { checkGarbageBucket() })
+document.addEventListener('hero.breakpoint.inGraphId.11', function( p ) { checkGarbageBucket() })
+
+document.addEventListener('garbageBucket.objectClick', function( p ) {
+	if ( globals.triggers.garbageBucketIsOpen ) return;
+
+	var currentChain = globals.objects.hero.getPosition().chain;
+	if ( !((globals.objects.hero.getPosition().path == 'treeToSemaphore') && (currentChain == 6 || currentChain == 7)) ) return;
+
+ 	globals.triggers.garbageBucketIsOpen = true;
+	globals.objects.garbageBucket.animate({
+		animation: 'open',
+		callback: function() {
+
+			globals.objects.butterfly.move({
+				z: 15
+			})
+
+			globals.triggers.butterflyIsFree = true;
+
+			globals.objects.butterfly.moveTo( {
+				path: 'butterflyPath2',
+				chain: 0,
+				animationName: 'butterfly',
+				speedValue: 4
+			})
+
+		}
+	})
+})
+
+// Клик на злодея под деревом
+document.addEventListener('villain.objectClick', function( p ) {
+
+	// Если герой стоит вплотную к злодею, можно попробовать его поймать
+	if ( (globals.objects.hero.getPosition().path == 'groundTreeToLeft') && (globals.objects.hero.getPosition().chain == 3) ) {
+		globals.objects.hero.animate({
+			animation: 'catch',
+			callback: function() {
+				globals.objects.villain.animate({
+					animation: 'animation'
+				})
+			}
+		})
+	} else {
+		globals.objects.villain.animate({
+			animation: 'animation'
+		})
+	}
+
+	hint.message('villainFirstHintText');
 });
 
 // Светофор качается
-document.addEventListener('objectAdded', function( p ) {
-	if (p.detail.obj == 'semaphore') {
+document.addEventListener('semaphore.objectAdded', function( p ) {
 
-		(function startSemaphore() {
-			if (!globals.triggers.stopSemaphore) {
-				globals.objects.semaphore.animate({
-					animation: 'trafficLight',
-					callback: function() {
-						startSemaphore();
-					}
-				})
-			}
-		})();
+	(function startSemaphore() {
+		if (!globals.triggers.stopSemaphore) {
+			globals.objects.semaphore.animate({
+				animation: 'trafficLight',
+				callback: function() {
+					startSemaphore();
+				}
+			})
+		}
+	})();
 
-	}
 });
 
 // Положить птицу в Светофор
-document.addEventListener('objectClick', function( p ) {
-	if ( (p.detail.obj == 'semaphore') && (globals.triggers.semaphoreIsClickable) ) {
+document.addEventListener('semaphore.objectClick', function( p ) {
+	if ( globals.triggers.semaphoreIsClickable ) {
 
-		if ( (globals.objects.hero.path == 'semaphoreTurnOnPath') && (globals.objects.hero.step < 10) ) {
+		if ( globals.objects.hero.getPosition().graphId == 17 ) {
 
 			globals.triggers.stopSemaphore = true;
 
@@ -12434,7 +14989,13 @@ document.addEventListener('objectClick', function( p ) {
 					globals.paths.semaphoreToTV.breakpath = false;
 					graph.buildGraph({
 						callback: function() {
-							alert('Шлагбаум поднялся!');
+
+							//шлагбаум поднимается
+							globals.objects.barrier.animate({
+								animation: 'barrier'
+							})
+
+							clearTimeout( globals.triggers.centralActionHint );
 						}
 					});
 				}
@@ -12444,24 +15005,9 @@ document.addEventListener('objectClick', function( p ) {
 });
 
 
+
+
 // Бабочка летает
-document.addEventListener('objectAdded', function( p ) {
-	if (p.detail.obj == 'butterfly') {
-	/*!!!!*/
-	/*globals.paths.semaphoreToTV.breakpath = false;*/
-	
-	
-		// setTimeout, потому что может не успеть проинициализироваться
-		setTimeout(function() {
-			globals.objects.butterfly.moveTo( {
-				path: 'butterflyPath2',
-				chain: 0,
-				animationName: 'butterfly',
-				speedValue: 4
-			})
-		}, 1000)
-	}
-})
 
 function catchButterfly() {
 	globals.objects.hero.animate({
@@ -12472,124 +15018,208 @@ function catchButterfly() {
 		}
 	})
 
+	globals.objects.butterfly.move({
+		z: 0
+	})
+
 	globals.objects.butterfly.moveTo( {
 		path: 'butterflyStopPath',
-		chain: 2,
+		chain: 1,
 		animationName: 'butterfly',
 		speedValue: 10
 	})
-
-	// Скрыть птицу
-	setTimeout(function() {
-		globals.objects.butterfly.move({
-			z: 0
-		})
-	}, 100)
 }
 
-document.addEventListener('stop', function( p ) {
-	if (p.detail.obj == 'butterfly') {
-		if ( p.detail.graphId == 17 ) {
-			globals.objects.butterfly.moveTo( {
-				path: 'butterflyPath2',
-				chain: 0,
-				animationName: 'butterfly',
-				speedValue: 4
-			})
+document.addEventListener('butterfly.stop.inGraphId.18', function( p ) {
+	globals.objects.butterfly.moveTo( {
+		path: 'butterflyPath2',
+		chain: 0,
+		animationName: 'butterfly',
+		speedValue: 4
+	})
 
+	if ( globals.triggers.butterflyCanBeCatched) {
+
+		if (globals.objects.hero.getPosition().path == 'treeToSemaphore' && globals.objects.hero.getPosition().chain == 6) {
+			globals.preventClick = true;
+			catchButterfly();
 		}
 
-		if ( p.detail.graphId == 18 ) {
-			globals.objects.butterfly.moveTo( {
-				path: 'butterflyPath3',
-				chain: 0,
-				animationName: 'butterfly',
-				speedValue: 4
-			})
-
-			if ( (globals.triggers.butterflyCanBeCatched) &&
-				( ((globals.objects.hero.path == 'semaphoreBreakPath') && (globals.objects.hero.step < 10)) ||
-				((globals.objects.hero.path == 'treeToSemaphore') && (globals.objects.hero.step > 890 && globals.objects.hero.step < 900))) ) {
-
-				globals.preventClick = true;
-
-				// С таймером, потому что ловля бабочки не в самом начале её движения
-				setTimeout(function() {
-					catchButterfly();
-				}, 1000)
-			}
-		}
-
-		if ( p.detail.graphId == 19 ) {
-			globals.objects.butterfly.moveTo( {
-				path: 'butterflyPath4',
-				chain: 0,
-				animationName: 'butterfly',
-				speedValue: 4
-			})
-
-			if ( (globals.triggers.butterflyCanBeCatched) && (globals.objects.hero.path == 'treeToSemaphore') && (globals.objects.hero.step > 630 && globals.objects.hero.step < 740) ) {
-
-				globals.preventClick = true;
-
-				if (globals.objects.hero.step > 730) {
-
-					// С таймером, потому что ловля бабочки не в самом начале её движения
-					setTimeout(function() {
-						catchButterfly();
-					}, 1000);
-
-
-				} else {
-
-					// С таймером, потому что ловля бабочки не в самом начале её движения
-					setTimeout(function() {
-						catchButterfly();
-					}, 1500);
-				}
-			}
-		}
-
-		if ( p.detail.graphId == 20 ) {
-			globals.objects.butterfly.moveTo( {
-				path: 'butterflyPath',
-				chain: 0,
-				animationName: 'butterfly',
-				speedValue: 3
-			})
-		}
 	}
+})
+
+document.addEventListener('butterfly.stop.inGraphId.19', function( p ) {
+	globals.objects.butterfly.moveTo( {
+		path: 'butterflyPath3',
+		chain: 0,
+		animationName: 'butterfly',
+		speedValue: 4
+	})
+
+	if ( globals.triggers.butterflyCanBeCatched) {
+
+		if (globals.objects.hero.getPosition().path == 'treeToSemaphore' && globals.objects.hero.getPosition().chain == 5) {
+			globals.preventClick = true;
+			catchButterfly();
+		}
+
+	}
+})
+
+document.addEventListener('butterfly.stop.inGraphId.20', function( p ) {
+	globals.objects.butterfly.moveTo( {
+		path: 'butterflyPath4',
+		chain: 0,
+		animationName: 'butterfly',
+		speedValue: 4
+	})
+
+	if ( (globals.triggers.butterflyCanBeCatched) ) {
+
+		if (globals.objects.hero.getPosition().graphId == 11 ) {
+			globals.preventClick = true;
+			catchButterfly();
+		}
+
+	}
+})
+
+document.addEventListener('butterfly.stop.inGraphId.21', function( p ) {
+	globals.objects.butterfly.moveTo( {
+		path: 'butterflyPath',
+		chain: 0,
+		animationName: 'butterfly',
+		speedValue: 3
+	})
+
+	if ( globals.triggers.butterflyCanBeCatched) {
+
+		if (globals.objects.hero.getPosition().path == 'treeToSemaphore' && globals.objects.hero.getPosition().chain == 7) {
+			globals.preventClick = true;
+			catchButterfly();
+		}
+
+	}
+})
+
+document.addEventListener('butterfly.objectClick', function( p ) {
+
+	if (globals.triggers.butterflyInerval) {
+		clearInterval(globals.triggers.butterflyInerval);
+	}
+
+	if ( !globals.triggers.butterflyCanBeCatched ) {
+
+		if ( globals.objects.butterfly.getPosition().path == 'butterflyPath' ) {
+			globals.objects.hero.moveTo({
+				path: 'treeToSemaphore',
+				chain: 8
+			})
+		}
+
+		if ( globals.objects.butterfly.getPosition().path == 'butterflyPath2' ) {
+			globals.objects.hero.moveTo({
+				path: 'treeToSemaphore',
+				chain: 7
+			})
+		}
+
+		if ( globals.objects.butterfly.getPosition().path == 'butterflyPath3' ) {
+			globals.objects.hero.moveTo({
+				path: 'treeToSemaphore',
+				chain: 6
+			})
+		}
+
+		if ( globals.objects.butterfly.getPosition().path == 'butterflyPath4' ) {
+			globals.objects.hero.moveTo({
+				path: 'treeToSemaphore',
+				chain: 5
+			})
+		}
+
+	}
+
+	globals.triggers.butterflyCanBeCatched = true;
+
+	globals.triggers.butterflyInerval = setTimeout(function() {
+		globals.triggers.butterflyCanBeCatched = false;
+	}, 25000);
+
+
 });
 
-document.addEventListener('objectClick', function( p ) {
-	if (p.detail.obj == 'butterfly') {
-		if (globals.triggers.butterflyInerval) {
-			clearInterval(globals.triggers.butterflyInerval);
-		}
 
-		globals.triggers.butterflyCanBeCatched = true;
 
-		globals.triggers.butterflyInerval = setTimeout(function() {
-			globals.triggers.butterflyCanBeCatched = false;
-		}, 3000);
+function getTheStone(cb) {
+	var callback = cb || function() {};
+
+	if (!globals.triggers.ihavestone) {
+		globals.objects.hero.animate({
+			animation: 'slope',
+			callback: function() {
+				globals.triggers.ihavestone	 = true;
+				callback();
+			}
+		})
+
+		setTimeout(function() {
+			globals.objects.stone.move({
+				z: 0
+			})
+
+			globals.objects.stone.moveTo({
+				path: 'stoneToHand',
+				chain: 1,
+				speedValue: 20
+			})
+		}, 700)
+
+	} else {
+		callback();
 	}
-});
+
+}
 
 // Кинуть камень в злодея
 
 function dropToVillain() {
 
-	globals.objects.hero.animate({
-		animation: 'slope',
-		callback: function() {
+	getTheStone(function() {
 
-			globals.preventClick = false;
+		globals.preventClick = false;
 
-			// С таймером, потому что камень должен долететь
-			setTimeout(function() {
+		if (globals.objects.hero.getPosition().orientation == -1) {
+			globals.objects.hero.image.scale.x *= -1;
+		}
 
-				globals.paths.semaphoreBreakPath.breakpath = false;
+		globals.objects.stone.move({
+			z: 10
+		})
 
+		globals.objects.stone.moveTo({
+			path: 'stoneToHand',
+			chain: 3,
+			speedValue: 18,
+			callback: function() {
+
+				globals.objects.stone.move({
+					z: 0
+				})
+
+				globals.objects.villain2.ai.stop();
+				globals.objects.villain2.moveTo( {
+					path: 'semaphoreVillainPath',
+					chain: 1,
+					animationName: 'down',
+					speedValue: 15
+				});
+
+				globals.paths.semaphoreTurnOnPath.breakpath = false;
+
+/* === */
+//				globals.paths.semaphoreToTV.breakpath = false;
+/* === */
 				graph.buildGraph({
 					callback: function() {
 						globals.triggers.semaphoreIsClickable = true;
@@ -12598,48 +15228,36 @@ function dropToVillain() {
 
 				globals.objects.villain2.image.setInteractive(false);
 
-				globals.objects.villain2.moveTo( {
-					path: 'semaphoreVillainPath',
-					chain: 1,
-					animationName: 'down',
-					speedValue: 15
-				});
-			}, 300)
-		}
+			}
+		})
 	})
 }
 
-document.addEventListener('objectClick', function( p ) {
-	if (p.detail.obj == 'villain2') {
+document.addEventListener('stone.objectClick', function( p ) {
 
-		if (globals.objects.hero.path == 'treeToSemaphore') {
+	if ( globals.objects.hero.getPosition().graphId == 11 ) {
+		getTheStone();
+	}
+})
 
-			if (globals.objects.hero.step > 730) {
-				globals.preventClick = true;
+document.addEventListener('villain2.objectClick', function( p ) {
 
-				if (globals.objects.hero.step < 890) {
-
-					globals.objects.hero.moveTo( {
-						path: 'treeToSemaphore',
-						chain: 8,
-						animationName: 'new',
-						speedValue: 3,
-						callback: function() {
-							dropToVillain();
-						}
-					});
-				} else {
-					dropToVillain();
-				}
-
+	if (globals.objects.hero.getPosition().graphId == 11) {
+		dropToVillain();
+	} else if ( ~['treeToSemaphore', 'semaphoreBreakPath'].indexOf( globals.objects.hero.getPosition().path ) ) {
+		globals.objects.hero.moveTo( {
+			path: 'treeToSemaphore',
+			chain: 8,
+			animationName: 'new',
+			speedValue: 3,
+			callback: function() {
+				dropToVillain();
 			}
-
-		}
+		});
 	}
 });
 
 // Телевизор
-
 function TVPictures() {
 	globals.objects.tv.animate({
 		animation: 'TV stop',
@@ -12649,204 +15267,634 @@ function TVPictures() {
 	})
 }
 
-document.addEventListener('objectClick', function( p ) {
+document.addEventListener('tv.objectClick', function( p ) {
 
-	if ( p.detail.obj == 'tv' ) {
+	if ( globals.objects.hero.path == 'TVPath' ) {
 
-		if ( globals.objects.hero.path == 'TVPath' ) {
+		globals.objects.hero.moveTo( {
+			path: 'TVPath',
+			chain: 2,
+			callback: function() {
 
-			globals.objects.hero.moveTo( {
-				path: 'TVPath',
-				chain: 2,
-				callback: function() {
+				globals.objects.tv.animate({
+					animation: 'TV run',
+					callback: function() {
 
-					globals.objects.tv.animate({
-						animation: 'TV run',
-						callback: function() {
+						globals.paths.pathToMonitors.breakpath = false;
+						graph.buildGraph();
 
-							globals.paths.TVBreakPath.breakpath = false;
-							graph.buildGraph();
+						TVPictures();
+					}
+				})
+			}
+		});
+	}
+});
 
-							TVPictures();
-						}
-					})
-				}
-			});
+//второй вариант
+document.addEventListener('roadSing.objectClick', function( p ){
+
+   if( (globals.objects.hero.getPosition().path == 'elephantPath') && (globals.objects.hero.getPosition().chain == 1) ){
+
+	   globals.objects.hero.animate({
+		   animation:'ReachOut',
+		   callback: function(){
+
+			   //знак меняется на противоположный
+			   globals.objects.roadSing.animate({
+				   animation:'roadSing',
+				   callback: function () {
+
+					   //дверь открывается
+					   globals.objects.doorToTheNextLavel.animate({
+						   animation:'door',
+						   callback: function () {
+								globals.triggers.exit = true;
+
+								clearTimeout( globals.triggers.levelEndHint );
+						   }
+					   })
+
+				   }
+			   });
+		   }
+	   })
+   }
+
+})
+
+// Конец уровня
+document.addEventListener('hero.stop.inGraphId.32', function( p ) {
+
+	if (globals.triggers.exit) {
+		audio.fadeOut();
+		utils.fadeIn();
+	} else {
+		hint.message('endPathFailText');
+	}
+})
+
+/* === Подсказки */
+
+
+
+// Лестница
+
+function stairHint() {
+	var time = utils.getRandomValue(10000, 20000);
+
+	globals.triggers.stairHint = setTimeout(function() {
+		hint.message('stairHintText');
+		stairHint();
+	}, time);
+}
+
+document.addEventListener('hero.objectAdded', function( p ) {
+	stairHint();
+})
+
+document.addEventListener('hero.stop.inGraphId.2', function( p ) {
+	if (!globals.triggers.bucketHint) bucketHint();
+	clearTimeout( globals.triggers.stairHint );
+})
+
+document.addEventListener('hero.breakpoint.inGraphId.2', function( p ) {
+	if (!globals.triggers.bucketHint) bucketHint();
+	clearTimeout( globals.triggers.stairHint );
+
+})
+
+// Ведро
+function bucketHint() {
+	var time = utils.getRandomValue(10000, 20000);
+
+	globals.triggers.bucketHint = setTimeout(function() {
+
+		if ( ~['tree1', 'jump2', 'treeInside', 'treeToBucket'].indexOf(globals.objects.hero.getPosition().path)  ) {
+			hint.message('bucketHintText');
+		}
+		bucketHint();
+
+	}, time);
+}
+
+document.addEventListener('hero.stop.inGraphId.3', function( p ) {
+	if (!globals.triggers.centralActionHint) centralAction();
+	clearTimeout( globals.triggers.bucketHint );
+})
+
+document.addEventListener('hero.breakpoint.inGraphId.3', function( p ) {
+	if (!globals.triggers.centralActionHint) centralAction();
+	clearTimeout( globals.triggers.bucketHint );
+})
+
+// Центральная сцена
+function centralAction() {
+	var time = utils.getRandomValue(10000, 20000);
+
+	globals.triggers.centralActionHint = setTimeout(function() {
+
+		if (globals.triggers.semaphoreIsClickable && (globals.triggers.butterflyWasCatched || globals.triggers.butterflyIsFree)) {
+			hint.message('semaphoreHintText');
+		} else if ( globals.objects.hero.getPosition().path == 'treeToSemaphore' && !globals.triggers.butterflyWasCatched && !globals.triggers.butterflyIsFree ) {
+			hint.message('garbageHintText');
+		} else if ( globals.objects.hero.getPosition().path == 'semaphoreBreakPath' && !globals.triggers.semaphoreIsClickable ) {
+			hint.message('villainHintText');
+		}
+
+		centralAction();
+	}, time);
+}
+
+document.addEventListener('hero.stop.inGraphId.13', function( p ) {
+	if (!globals.triggers.levelEndHint) levelEnd();
+})
+
+document.addEventListener('hero.breakpoint.inGraphId.13', function( p ) {
+	if (!globals.triggers.levelEndHint) levelEnd();
+})
+
+// Переключатель на выход
+function levelEnd() {
+
+	var time = utils.getRandomValue(10000, 20000);
+
+	globals.triggers.levelEndHint = setTimeout(function() {
+
+		if ( ~['endPath', 'endPath1', 'elephantPath'].indexOf(globals.objects.hero.getPosition().path)  ) {
+			hint.message('finalGarbageHintText');
+		}
+
+		levelEnd();
+	}, time);
+}
+function track() {
+
+	var sound = false,
+		parentObject;
+
+	return {
+
+		source: false,
+
+		load: function ( p ) {
+
+			var _this = this,
+				callback = p.callback || function() {};
+
+			if ( audio.getContext() ) {
+
+				parentObject = p.obj;
+
+				var xhr = new XMLHttpRequest();
+				xhr.open('GET', p.url, true);
+				xhr.responseType = 'arraybuffer';
+				xhr.onload = function(e) {
+
+					audio.getContext().decodeAudioData(
+						this.response,
+						function (decodedArrayBuffer) {
+							sound = decodedArrayBuffer;
+
+							parentObject.panner = audio.getContext().createPanner();
+							parentObject.panner.rolloffFactor = 0.01;
+							parentObject.panner.connect( audio.getGainNode() );
+
+							if (Object.keys(p.obj).length !== 1) {
+
+								audio.updateWorldSound({
+									id: p.obj.id
+								})
+							}
+
+							callback();
+							return _this;
+
+						}, function (e) {
+							// fail
+						});
+
+					callback();
+				};
+				xhr.send();
+
+			} else {
+				callback();
+			}
+
+			return _this;
+		},
+
+		play: function ( p ) {
+
+			var _this = this,
+				loop = (p && p.loop) || false,
+				callback = (p && p.callback) || function() {};
+
+			if (sound) {
+				_this.source = audio.getContext().createBufferSource();
+
+				_this.source.buffer = sound;
+				_this.source.connect( parentObject.panner );
+				_this.source.loop = loop;
+
+				_this.source.start(0);
+
+				setTimeout(function() {
+					callback();
+				}, _this.source.buffer.duration * 1000);
+			}
+
+			return _this;
+		},
+
+		stop: function() {
+			this.source && this.source.stop();
 		}
 	}
-});
-/*
-document.addEventListener('stop', function(p){
+}
 
-	if(p.detail.obj =='addHero2' && p.detail.graphId =='27') {
-	// Развернуть героя
-	globals.objects.addHero2.image.scale.x *= -1;
-		setTimeout(function(){
-			pathfinder.moveObjectByChain({
-				id: 'addHero2',
-				path:'addHero2Path',
-				chain: 7,
-				speedValue: 5
-			})
-		}, 1000)
+
+var audio = (function() {
+
+	var context,
+		gainNode,
+		fadeDuration = 1,
+		fadeOverlay,
+		splashMusic = track(),
+		backgroundMusic = track();
+
+	function initContext() {
+		try {
+			window.AudioContext = window.AudioContext||window.webkitAudioContext;
+			context = (context === undefined)
+				? new AudioContext()
+				: context;
+
+			gainNode = (context.createGain)
+						? context.createGain()
+						: context.createGainNode();
+
+			gainNode.connect(context.destination);
+		} catch(e) {
+			context = false;
+			document.body.className += ' _nomusic';
+		}
+
 	}
 
-	if(p.detail.obj =='addHero2' && p.detail.graphId =='28') {
-		setTimeout(function(){
-			pathfinder.moveObjectByChain({
-				id: 'addHero2',
-				path:'addHero2Path',
-				chain: 0,
-				speedValue: 5
-			})
-		}, 1000)
+	function updateSound( p ) {
+
+		var soundObj = globals.objects[p.id];
+
+		if (soundObj.panner) {
+			soundObj.panner.setPosition(soundObj.image.position.x, soundObj.image.position.y, 0);
+		}
+
+		if ( (context) && (p.id == 'hero') ) {
+			context.listener.setPosition(soundObj.image.position.x, soundObj.image.position.y, 0);
+		}
 	}
-});
 
-document.addEventListener('objectAdded', function(p){
+	function startSplashSound() {
 
- if(p.detail.obj =='addHero2') {
- console.log('!!');
+		splashMusic.load({
 
- // Развернуть героя
- //globals.objects.addhero2.image.scale.x *= -1;
-  setTimeout(function(){
-   pathfinder.moveObjectByChain({
-    id: 'addHero2',
-    path:'addHero2Path',
-    chain: 3,
-    speedValue: 5
-   })
-  }, 1000)
- }
-});
-*/
-document.addEventListener('objectAdded', function( p ) {
- if (p.detail.obj == 'hero') {
+			obj: {},
+			url: 'assets/music/splash.ogg',
+			callback: function() {
 
-  // setTimeout, потому что может не успеть проинициализироваться
-  setTimeout(function() {
+				splashMusic.play({
+					loop: true
+				})
 
-     globals.paths.semaphoreToTV.breakpath = false;
-     graph.buildGraph({
-      callback: function() {
+			}
+		})
+	}
 
-      }
-     });
+	function startBackgroundSound() {
 
-  
-  }, 3000)
- }
-});
+		backgroundMusic.load({
 
-document.addEventListener('objectAdded', function(p){
+			obj: globals.objects.hero,
+			url: 'assets/music/background.ogg',
+			callback: function() {
 
- if(p.detail.obj =='addHero2') {
+				backgroundMusic.play({
+					loop: true
+				})
+			}
+		})
+	}
 
-  setTimeout(function(){
-   pathfinder.moveObjectByChain({
-    id: 'addHero2',
-    path:'addHero2Path',
-    chain: 6,
-    speedValue: 2
-   })
-  }, 1000)
- }
-});
+	function updateVolume() {
+		if (context) {
+			var currTime  = audio.getContext().currentTime;
+
+			audio.getGainNode().gain.linearRampToValueAtTime(globals.volume, currTime);
+		}
+	}
+
+	function handleVisibilityChange() {
+
+		if (document.webkitHidden || document.hidden) {
+			audio.fadeOut();
+		} else {
+			audio.fadeIn();
+		}
+	}
+
+	return {
+
+		init: function () {
+
+			//initContext();
+			updateVolume();
+
+			document.addEventListener("visibilitychange", function() {
+				handleVisibilityChange();
+			});
+
+			document.addEventListener("webkitvisibilitychange", function() {
+				handleVisibilityChange();
+			});
+
+			return this;
+		},
+
+		initBackgroundSound: function () {
+			startBackgroundSound();
+
+			return this;
+		},
+
+		initSplashSound: function () {
+			startSplashSound();
+
+			return this;
+		},
+
+		finishSplashSound: function () {
+
+			if (audio.getContext()) {
+
+				var duration = 1,
+					currTime = audio.getContext().currentTime;
+
+				audio.fadeOut();
+
+				setTimeout(function() {
+					splashMusic.stop();
+					splashMusic.play = function() {};
+					audio.fadeIn();
+				}, 1000)
+			}
+
+			return this;
+
+		},
+
+		updateWorldSound: function ( p ) {
+			updateSound( p );
+
+			return this;
+		},
+
+		setVolume: function () {
+			updateVolume();
+
+			return this;
+		},
+
+	 	fadeIn: function () {
+			if (context) {
+				var currTime  = audio.getContext().currentTime;
+
+				audio.getGainNode().gain.linearRampToValueAtTime(0, currTime);
+				audio.getGainNode().gain.linearRampToValueAtTime(globals.volume, currTime + fadeDuration);
+			}
+		},
+
+	 	fadeOut:function () {
+			if (context) {
+				var currTime  = audio.getContext().currentTime;
+
+				audio.getGainNode().gain.linearRampToValueAtTime(globals.volume, currTime);
+				audio.getGainNode().gain.linearRampToValueAtTime(0, currTime + fadeDuration);
+			}
+		},
+
+		getContext: function () {
+			return context;
+		},
+
+		getGainNode: function() {
+			return gainNode;
+		}
+	}
+})()
+var video = (function() {
+
+	var videoPlayer = false;
+
+	return {
+
+		init: function() {
+			videoPlayer = document.querySelector('video');
+
+			if ( (videoPlayer.canPlayType('video/mp4') !== 'maybe') || (navigator.userAgent.toLowerCase().match(/ipad|iphone|ipod/i) !== null) ) {
+				videoPlayer = false;
+			}
+			return this;
+		},
+
+		play: function( callback ) {
+
+			var callback = callback || function () {};
+
+			function finishVideo() {
+				videoPlayer.style.display = 'none';
+				videoPlayer.pause();
+				callback();
+			}
+
+			if (videoPlayer) {
+				videoPlayer.style.display = 'block';
+
+				videoPlayer.onended = videoPlayer.onclick = function () {
+					finishVideo();
+				}
+
+				videoPlayer.play();
+			} else {
+				callback();
+			}
+			return this;
+		}
+	}
+
+})();
+var translations = {
+	villainFirstHintText: {
+		'ru': 'Этот сиккарах выглядит рассерженным. Вряд ли он пропустит меня.'
+	},
+	stairHintText: {
+		'ru': 'Высоко тут...',
+		'en': 'I feel dizzy'
+	},
+	bucketHintText: {
+		'ru': 'Додумался же кто-то повесить ведро на дерево!',
+		'en': 'Bucket on tree looks very strange'
+	},
+	semaphoreHintText: {
+		'ru': 'Наверное, светофор должен быть зеленым...',
+		'en': 'It would be nice turn semaphore on...'
+	},
+	garbageHintText: {
+		'ru': 'Кажется, в баке кто-то есть...',
+		'en': 'I think I saw something...'
+	},
+	villainHintText: {
+		'ru': 'Вот бы скинуть Кривоноса с забора!',
+		'en': 'The villain of the way.'
+	},
+	finalGarbageHintText: {
+		'ru': 'Кто знает, что может быть в этой куче мусора?',
+		'en': 'Some surprise in this garbage heap?'
+	},
+	endPathFailText: {
+		'ru': 'Глухой забор.',
+		'en': 'Closed.'
+	}
+
+}
+var hint = (function() {
+
+	var hint,
+		currentTimeout,
+		messageStack = [],
+		showDuration = 5000,
+		isActive = false;
 
 
-document.addEventListener('stop', function(p){
+	function show( text ) {
 
- if(p.detail.obj =='addHero2' && p.detail.graphId =='27') {
+		showMessage();
+	}
 
-  setTimeout(function(){
-   pathfinder.moveObjectByChain({
-    id: 'addHero2',
-    path:'addHero2Path',
-    chain: 6,
-    speedValue: 2
-   })
-  }, 1000)
- }
+	function check() {
+		if (!messageStack.length) {
+			hint.className = hint.className.replace(/\shint_active/ig, '');
+			hint.innerHTML = '';
+			isActive = false;
+			return;
+		}
 
- if(p.detail.obj =='addHero2' && p.detail.graphId =='28') {
-  setTimeout(function(){
-   pathfinder.moveObjectByChain({
-    id: 'addHero2',
-    path:'addHero2Path',
-    chain: 0,
-    speedValue: 2
-   })
-  }, 1000)
- }
-});
+		if (isActive) {
+			return;
+		}
+
+		hint.className += ' hint_active';
+		hint.innerHTML = messageStack.shift();
+
+		isActive = true;
+		currentTimeout = setTimeout(function() {
+			isActive = false;
+			check();
+		}, showDuration)
+	}
+
+	return {
+		init: function () {
+
+			hint = document.querySelector('.hint');
+			hint.onclick = function () {
+
+				clearTimeout(currentTimeout);
+				isActive = false;
+				check();
+			}
+
+			globals.locale = window.navigator.userLanguage || window.navigator.language || globals.locale;
+			globals.locale = globals.locale.split('-')[0].toLowerCase();
+
+			return this;
+
+		},
+
+		message: function ( text ) {
+
+			if (translations[text] && translations[text][globals.locale]) {
+				messageStack.push( translations[text][globals.locale] );
+				check();
+			}
+
+			return this;
+		},
+
+		clearQueue: function () {
+
+			messageStack = [];
+			clearTimeout(currentTimeout);
+			isActive = false;
+
+			return this;
+		}
+	}
+
+})();
 var loader = (function() {
 
 	// Предзагрузка ресурсов
-	function init( p ) {
+	function initResources( p ) {
 		var assetsLoader = new PIXI.AssetLoader(p.resources),
 			callback = p.callback || function() {};
 
-		assetsLoader.onComplete = function() { console.log('Ресурсы загружены');
+		assetsLoader.onComplete = function () {
 			callback();
 		}
 
 		assetsLoader.load();
 	}
 
-	// Извлечение сохраненных путей из файла
-	function readTraectFromFile ( p ) {
-		var readTraect = new XMLHttpRequest,
-			callback = p.callback || function() {};
+	// Извлечение путей
+	function buildPaths ( p ) {
+		var callback = p.callback || function() {};
 
-		readTraect.open("GET", '/tools/traect.json?' + new Date().getTime());
-		readTraect.onreadystatechange = function() {
+		// Построить траектории
+		utils.processPaths({
+			callback: function() {
 
-			if (readTraect.readyState==4) { console.log('Траектории загружены')
-				globals.paths = JSON.parse(readTraect.responseText);
-
-				// Построить траектории
-				utils.processPaths({
+				// Построить граф
+				graph.buildGraph({
 					callback: function() {
-
-						// Построить граф
-						graph.buildGraph({
-							callback: function() { console.log('Граф построен');
-								callback();
-								pathfinder.start();
-							}
-						});
-
+						callback();
+						pathfinder.start();
 					}
 				});
 
 			}
-		};
-
-		readTraect.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-		readTraect.send(null);
+		})
 	}
 
 	return {
 
 		init: function( p ) {
-			var callback = p.callback || function() {};
+			var callback = p.callback || function () {};
 
 			// предзагрузить ресурсы
-			init({
+			initResources({
 				resources: p.resources,
-				callback: function() {
+				callback: function () {
 
-					if (!debug) {
-						document.body.classList.add('_noscroll');
-					}
+					globals.sceneWidth = 3828;
+					globals.sceneHeight = 800;
 
-					globals.scale = 800 / document.body.clientHeight;
+					globals.scale = globals.sceneHeight / document.body.clientHeight;
 
-					// загрузить траектории
-					readTraectFromFile({
+					buildPaths({
 						callback: callback
-					})
+					});
 				}
 			})
 		}
@@ -12854,7 +15902,16 @@ var loader = (function() {
 
 })();
 
-document.addEventListener("DOMContentLoaded", function() {
+function init() {
+
+	localforage.config({
+		name: 'gameOfDemiurges',
+		version: 1.0,
+		size: 20*1024*1024,
+		storeName: 'keyvaluepairs',
+		description: 'Offline Storage'
+	});
+
 	loader.init({
 		resources: [
 			"assets/models/ready/hero/hero.json",
@@ -12872,6 +15929,12 @@ document.addEventListener("DOMContentLoaded", function() {
 			"assets/models/ready/bucket/bucket.json",
 			"assets/models/ready/bucket/bucket.anim",
 
+			"assets/models/ready/garbageBucket/garbageBucket.json",
+			"assets/models/ready/garbageBucket/garbageBucket.anim",
+
+			"assets/models/ready/stone/stone.json",
+			"assets/models/ready/stone/stone.anim",
+
 			"assets/models/ready/semaphore/semaphore.json",
 			"assets/models/ready/semaphore/semaphore.anim",
 
@@ -12880,36 +15943,52 @@ document.addEventListener("DOMContentLoaded", function() {
 
 			"assets/models/ready/tv/tv.json",
 			"assets/models/ready/tv/tv.anim",
-			
+
+			"assets/models/ready/additionalHero1/addHero1.json",
+			"assets/models/ready/additionalHero1/addHero1.anim",
+
 			"assets/models/ready/additionalHero2/additionalHero2.json",
 			"assets/models/ready/additionalHero2/additionalHero2.anim",
-			
-			/*"assets/models/ready/elephant/elephant.json",
-			"assets/models/ready/elephant/elephant.anim",*/
 
-			"assets/background/background.png",
-			"assets/background/backgroundVillainPatch.png"
+			"assets/models/ready/elephant/elephant.json",
+			"assets/models/ready/elephant/elephant.anim",
+
+			"assets/models/ready/doorToTheNextLavel/doorToTheNextLavel.json",
+			"assets/models/ready/doorToTheNextLavel/doorToTheNextLavel.anim",
+
+			"assets/models/ready/barrier/barrier.json",
+			"assets/models/ready/barrier/barrier.anim",
+
+			"assets/models/ready/roadSing/roadSing.json",
+			"assets/models/ready/roadSing/roadSing.anim",
+
+			"assets/background/background.jpg",
+			"assets/background/backgroundVillainPatch.png",
+
+			"assets/models/ready/snow/snow.json",
+			"assets/models/ready/snow/snow.anim",
+
+			"assets/models/ready/tree/tree.json",
+			"assets/models/ready/tree/tree.anim"
 		],
-		callback: function() {
-
-			relay
-				/*.listen('breakpoint')
-				.listen('start')
-				.listen('stop')
-				.listen('startAnimation')
-				.listen('endAnimation')*/
-				.listen('objectClick')
-				.listen('objectAdded');
+		callback: function () {
 
 			var currentPath = 'stair2',
 				birdPath = 'birdTreePath',
 				groundPath = 'groundTreeToLeft',
 				semaphoreVillainPath = 'semaphoreVillainPath',
 				butterflyPath = 'butterflyPath',
-				addHero2Path = 'addHero2Path';
+				stoneToHand = 'stoneToHand',
+				addHero2Path = 'addHero2Path',
+				elephantPath = 'elephantPath',
+				elephantPathEnd = 'elephantPathEnd',
+				pathToMonitors = 'pathToMonitors',
+				pathToRoadSing = 'pathToRoadSing',
+				endPath = 'endPath',
+				endPath1 = 'endPath1';
 
 			var background = obj().create({
-				src: 'assets/background/background.png',
+				src: 'assets/background/background.jpg',
 				name: 'background',
 				x: 0,
 				y: 0,
@@ -12922,6 +16001,25 @@ document.addEventListener("DOMContentLoaded", function() {
 				x: 1582,
 				y: 600,
 				z: 10
+			});
+
+			var tree = obj().create({
+				name: 'tree',
+				src: 'assets/models/ready/tree/tree.anim',
+				z: 10,
+				pz: 10,
+				scale: 1.15,
+				step: 275,
+				path: groundPath
+			});
+
+			var snow = obj().create({
+				name: 'snow',
+				src: 'assets/models/ready/snow/snow.anim',
+				x: 950,
+				y: 800,
+				z: 20,
+				pz: 10
 			});
 
 			var hero = obj().create({
@@ -12942,7 +16040,15 @@ document.addEventListener("DOMContentLoaded", function() {
 				scale: 0.4,
 				step: 440,
 				path: groundPath,
-				interactive: true
+				interactive: true,
+				ai: {
+					stayAnimation: 'animation'
+				},
+				animation: {
+					animation: {
+						soundSrc: 'assets/models/ready/villain/villain_sound.ogg'
+					}
+				}
 			});
 
 			var villain2 = obj().create({
@@ -12953,7 +16059,15 @@ document.addEventListener("DOMContentLoaded", function() {
 				scale: 1,
 				step: 0,
 				path: semaphoreVillainPath,
-				interactive: true
+				interactive: true,
+				ai: {
+					stayAnimation: 'animation'
+				},
+				animation: {
+					animation: {
+						soundSrc: 'assets/models/ready/villain2/villain2_sound.ogg'
+					}
+				}
 			});
 
 			var bird = obj().create({
@@ -12963,7 +16077,15 @@ document.addEventListener("DOMContentLoaded", function() {
 				pz: 5,
 				step: 0,
 				path: birdPath,
-				interactive: true
+				interactive: true,
+				ai: {
+					stayAnimation: 'bird'
+				},
+				animation: {
+					bird: {
+						soundSrc: 'assets/models/ready/bird/bird_sound.ogg'
+					}
+				}
 			});
 
 			var bucket = obj().create({
@@ -12975,25 +16097,57 @@ document.addEventListener("DOMContentLoaded", function() {
 				pz: 5
 			});
 
+			var garbageBucket = obj().create({
+				name: 'garbageBucket',
+				src: 'assets/models/ready/garbageBucket/garbageBucket.anim',
+				x: 1193,
+				y: 647,
+				z: 10,
+				interactive: true
+			});
+
 			var semaphore = obj().create({
 				name: 'semaphore',
 				src: 'assets/models/ready/semaphore/semaphore.anim',
 				x: 1500,
 				y: 730,
 				z: 10,
+				interactive: true,
+				animation: {
+					trafficLight: {
+						soundSrc: 'assets/models/ready/semaphore/semaphore_sound.ogg'
+					}
+				}
+			});
+
+			var stone = obj().create({
+				name:'stone',
+				src: 'assets/models/ready/stone/stone.anim',
+				path: stoneToHand,
+				step: 20,
+				z: 10,
+				pz:  15,
 				interactive: true
+			});
+
+			var barrier = obj().create({
+				name: 'barrier',
+				src: 'assets/models/ready/barrier/barrier.anim',
+				x:1750,
+				y: 610,
+				z: 10
 			});
 
 			var butterfly = obj().create({
 				name: 'butterfly',
 				src: 'assets/models/ready/butterfly/butterfly.anim',
 				scale: 0.35,
-				z: 15,
+				z: 0,
 				pz: 5,
 				step: 0,
 				path: butterflyPath,
 				interactive: true
-			})
+			});
 
 			var tv = obj().create({
 				name: 'tv',
@@ -13002,33 +16156,94 @@ document.addEventListener("DOMContentLoaded", function() {
 				pz: 5,
 				x: 2370,
 				y: 840,
-				interactive: true
-			})
-			
+				interactive: true,
+				animation: {
+					'TV run': {
+						soundSrc: 'assets/models/ready/tv/tv_sound.ogg'
+					},
+					'TV stop': {
+						soundSrc: 'assets/models/ready/tv/tv_sound.ogg'
+					}
+				}
+			});
+
+			var addHero1 = obj().create({
+				name: 'addHero1',
+				src: 'assets/models/ready/additionalHero1/addHero1.anim',
+				z:15,
+				pz: 10,
+				step:110,
+				path: endPath1,
+				ai: {
+					moveAnimation: 'addHero1',
+					availablesPaths: endPath1
+				}
+			});
+
 			var addHero2 = obj().create({
 				name: 'addHero2',
 				src: 'assets/models/ready/additionalHero2/additionalHero2.anim',
-				z:15,
+				z:10,
 				pz: 10,
-				step:0,
-				path: addHero2Path,
-				interactive: true
-			})
-			/*var elephant = obj().create({
+				step:240,
+				path: elephantPathEnd,
+				ai: {
+					stayAnimation: 'animation',
+					stayTime: 5000
+				},
+				animation: {
+					animation: {
+						soundSrc: 'assets/models/ready/additionalHero2/additionalHero2_sound.ogg'
+					}
+				}
+			});
+
+			var elephant = obj().create({
 				name: 'elephant',
 				src: 'assets/models/ready/elephant/elephant.anim',
-				z:15,
+				z:10,
 				pz: 10,
+				scale: 0.8,
 				step:0,
-				path: elephantPath,
-				interactive: true
-			})*/
+				path: addHero2Path,
+				interactive: false,
+				ai: {
+					moveAnimation: 'Elefant',
+					availablesPaths: addHero2Path,
+					stayTime: 6000
+				}
+			});
 
+			var doorToTheNextLavel = obj().create({
+				name:'doorToTheNextLavel',
+				src: 'assets/models/ready/doorToTheNextLavel/doorToTheNextLavel.anim',
+				x: 3700,
+				y: 550,
+				z: 10,
+				animation: {
+					door: {
+						soundSrc: 'assets/models/ready/doorToTheNextLavel/door_sound.ogg'
+					}
+				}
+			});
+
+			var roadSing = obj().create({
+				name:'roadSing',
+				src: 'assets/models/ready/roadSing/roadSing.anim',
+				x: 3485,
+				y: 285,
+				z: 10,
+				interactive: true
+			});
 
 			// Переходы между анимациями
+
+
 			globals.objects.hero.image.stateData.setMixByName("new", "stairCaseWalk", 0);
 			globals.objects.hero.image.stateData.setMixByName("new", "stop", 0.3);
 			globals.objects.semaphore.image.stateData.setMixByName("trafficLight", "trafficLight_stop", 0.5);
+
+			audio.initBackgroundSound();
 
 			scene
 				.init({
@@ -13036,22 +16251,28 @@ document.addEventListener("DOMContentLoaded", function() {
 				})
 				.addObj(background)
 				.addObj(backgroundVillainPatch)
+				.addObj(tree)
+				.addObj(snow)
 				.addObj(hero)
 				.addObj(villain)
 				.addObj(villain2)
 				.addObj(bird)
 				.addObj(bucket)
+				.addObj(garbageBucket)
 				.addObj(semaphore)
 				.addObj(butterfly)
 				.addObj(tv)
-				.addObj(addHero2);
-				/*.addObj(elephant);*/
+				.addObj(addHero1)
+				.addObj(addHero2)
+				.addObj(elephant)
+				.addObj(stone)
+				.addObj(doorToTheNextLavel)
+				.addObj(barrier)
+				.addObj(roadSing);
 
 			viewport.init();
 
 			queue.startQueue();
-
-			console.log('Загрузка завершена');
 
 			if (debug) {
 				document.querySelector('.debug__wrap' ).style.display = "block";
@@ -13060,5 +16281,56 @@ document.addEventListener("DOMContentLoaded", function() {
 
 		}
 	})
+}
 
+document.addEventListener("DOMContentLoaded", function () {
+
+	function fullScreen() {
+		var html = document.body;
+
+		if (html.requestFullScreen) {
+			html.requestFullScreen();
+		} else if (html.mozRequestFullScreen) {
+			html.mozRequestFullScreen();
+		} else if (html.webkitRequestFullScreen) {
+			html.webkitRequestFullScreen();
+		}
+
+	}
+
+	audio
+		.init()
+		.initSplashSound();
+
+	video.init();
+	hint.init();
+
+	if (!debug) {
+		document.body.className += ' _noscroll';
+
+		document.querySelector('.start__volume').onmousemove = document.querySelector('.start__volume').onchange = function () {
+			globals.volume = this.value;
+			audio.setVolume();
+		}
+
+		document.querySelector('.start__language option[value="' + globals.locale + '"]').selected = true;
+
+		document.querySelector('.start__language').onchange = function () {
+			globals.locale = this.value;
+		}
+
+		document.querySelector('.start__run').onclick = function () {
+			document.body.removeChild( document.querySelector('.start') );
+			fullScreen();
+
+			audio.finishSplashSound();
+
+			video.play(function() {
+				init();
+			});
+
+		}
+	} else {
+		init();
+	}
 })

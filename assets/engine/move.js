@@ -19,9 +19,17 @@ var move = (function() {
 			? stepDirection = stepDirection / Math.abs(stepDirection)
 			: 0;
 
+		audio.updateWorldSound({
+			id: p.id
+		})
+
 		// Анимация запукается циклически
 		if (globals.objects[p.id].image.state.isComplete()) {
 			globals.objects[p.id].image.state.setAnimationByName( p.animation , false);
+
+			if (globals.objects[p.id].animation && globals.objects[p.id].animation[p.animation]) {
+				globals.objects[p.id].animation[p.animation].track.play();
+			}
 		}
 
 		globals.objects[p.id].step = globals.objects[p.id].step + stepDirection * p.speed;

@@ -3,9 +3,11 @@ html
 	head
 		title= pageTitle
 		meta(http-equiv='Content-Type', content='text/html; charset=utf-8')
-		meta(name='viewport', content='width=device-width, user-scalable=no')
+		meta(name='viewport', content='width=device-width, initial-scale=1, user-scalable=no')
 		link(rel='stylesheet', type='text/css', href='css/style.css')
 		script(type='text/javascript', src='js/index.js')
+		script(type='text/javascript') globals.paths =
+			include ../tools/traect.json
 
 		if debug
 			script(type='text/javascript', src='js/debug.js')
@@ -16,6 +18,24 @@ html
 				var debug = false;
 	body
 		canvas#view
+
+		.start
+			.start__splash
+				img.start__img(src='assets/background/SignatureTune.png')
+
+				label.start__label.start__label_volume Уровень громкости
+					input.start__volume(type='range', min='0', max='1', step='0.05', value='0.5')
+
+				label.start__label Язык
+					select.start__language
+						option(value='ru') Русский
+						option(value='en') English
+
+				button.start__run Начать
+
+		video(src='assets/video/intro2.mp4')
+		.hint
+		.black-fade
 
 		if debug
 			.debug__wrap
