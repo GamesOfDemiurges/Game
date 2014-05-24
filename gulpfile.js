@@ -126,7 +126,7 @@ gulp.task('buildImages', function() {
 
 gulp.task('buildModels', function() {
 
-    gulp.src(['./assets/models/ready/**/*.anim', './assets/models/ready/**/*.json'])
+    gulp.src(['./assets/models/ready/**/*.anim', './assets/models/ready/**/*.json', './assets/models/ready/**/*.ogg'])
         .pipe(gulp.dest('./' + path[pathSwitcher] + '/assets/models/ready/'))
 
 });
@@ -140,12 +140,8 @@ gulp.task('run-default', function() {
     gulp.start('buildCSS', 'buildHTML', 'buildPrimaryJS', 'buildModels', 'buildImages');
 })
 
-gulp.task('run-dev-full', function() {
-    gulp.start('buildCSS', 'buildHTML', 'buildPrimaryJS', 'buildModels', 'buildImages');
-})
-
 gulp.task('run-debug', function() {
-    gulp.start('buildCSS', 'buildHTML', 'buildPrimaryJS', 'buildDebugJS', 'buildModels');
+    gulp.start('buildCSS', 'buildHTML', 'buildPrimaryJS', 'buildDebugJS', 'buildModels', 'buildImages');
 })
 
 gulp.task('run-build', function() {
@@ -166,14 +162,6 @@ gulp.task('default', function() {
 
 });
 
-gulp.task('dev-full', function() {
-	debug = false;
-	minify = false;
-	pathSwitcher = 'dev';
-
-	gulp.start('run-dev-full');
-});
-
 gulp.task('debug', function() {
 	debug = true;
 	minify = false;
@@ -182,20 +170,20 @@ gulp.task('debug', function() {
 	gulp.start('run-debug');
 });
 
-gulp.task('clean-dev', function() {
-	debug = false;
-	minify = false;
-	pathSwitcher = 'dev';
-
-	gulp.start('clean');
-});
-
 gulp.task('build', function() {
 	debug = false;
 	minify = true;
 	pathSwitcher = 'build';
 
 	gulp.start('run-build');
+});
+
+gulp.task('clean-dev', function() {
+	debug = false;
+	minify = false;
+	pathSwitcher = 'dev';
+
+	gulp.start('clean');
 });
 
 gulp.task('clean-build', function() {

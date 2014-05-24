@@ -15440,43 +15440,72 @@ function track() {
 		load: function ( p ) {
 
 			var _this = this,
-				callback = p.callback || function() {};
+				callback = p.callback || function() {},
+				buffer;
+
+			function useSound(arrayBuffer, callback) {
+				var callback = callback || function () {};
+
+				audio.getContext().decodeAudioData(
+					arrayBuffer,
+					function (decodedArrayBuffer) {
+
+						sound = decodedArrayBuffer;
+
+						parentObject.panner = audio.getContext().createPanner();
+						parentObject.panner.rolloffFactor = 0.01;
+						parentObject.panner.connect( audio.getGainNode() );
+
+						if (Object.keys(p.obj).length !== 1) {
+
+							audio.updateWorldSound({
+								id: p.obj.id
+							})
+						}
+
+						callback();
+
+						return;
+
+					});
+
+				callback();
+			}
+
+			function makeRequest(callback) {
+				var callback = callback || function () {},
+					xhr = new XMLHttpRequest();
+
+				xhr.open('GET', p.url, true);
+				xhr.responseType = 'arraybuffer';
+				xhr.onload = function(e) {
+
+					if (localforage._driver !== 'localStorageWrapper') {
+						localforage.setItem(p.url, xhr.response, function() {
+							useSound(xhr.response, callback);
+						})
+					} else {
+						useSound(xhr.response, callback);
+					}
+				};
+				xhr.send();
+
+			}
 
 			if ( audio.getContext() ) {
 
 				parentObject = p.obj;
 
-				var xhr = new XMLHttpRequest();
-				xhr.open('GET', p.url, true);
-				xhr.responseType = 'arraybuffer';
-				xhr.onload = function(e) {
+				localforage.getItem(p.url, function(audiobuffer) {
+					if (audiobuffer) {
+						console.log(p.url + ' was loaded from cache.');
+						useSound(audiobuffer, callback);
+					} else {
+						console.log(p.url + ' was loaded from network.');
+						makeRequest(callback);
+					}
 
-					audio.getContext().decodeAudioData(
-						this.response,
-						function (decodedArrayBuffer) {
-							sound = decodedArrayBuffer;
-
-							parentObject.panner = audio.getContext().createPanner();
-							parentObject.panner.rolloffFactor = 0.01;
-							parentObject.panner.connect( audio.getGainNode() );
-
-							if (Object.keys(p.obj).length !== 1) {
-
-								audio.updateWorldSound({
-									id: p.obj.id
-								})
-							}
-
-							callback();
-							return _this;
-
-						}, function (e) {
-							// fail
-						});
-
-					callback();
-				};
-				xhr.send();
+				})
 
 			} else {
 				callback();
@@ -15608,7 +15637,7 @@ var audio = (function() {
 
 		init: function () {
 
-			//initContext();
+			initContext();
 			updateVolume();
 
 			document.addEventListener("visibilitychange", function() {
@@ -15805,7 +15834,8 @@ var hint = (function() {
 	}
 
 	return {
-		init: function () {
+		init: function ( callback ) {
+			var callback = callback || function() {};
 
 			hint = document.querySelector('.hint');
 			hint.onclick = function () {
@@ -15815,8 +15845,17 @@ var hint = (function() {
 				check();
 			}
 
-			globals.locale = window.navigator.userLanguage || window.navigator.language || globals.locale;
-			globals.locale = globals.locale.split('-')[0].toLowerCase();
+			localforage.getItem('locale', function(locale) {
+				if (locale) {
+					globals.locale = locale;
+				} else {
+					globals.locale = window.navigator.userLanguage || window.navigator.language || globals.locale;
+					globals.locale = globals.locale.split('-')[0].toLowerCase();
+				}
+
+				callback();
+			})
+
 
 			return this;
 
@@ -16243,7 +16282,9 @@ function init() {
 			globals.objects.hero.image.stateData.setMixByName("new", "stop", 0.3);
 			globals.objects.semaphore.image.stateData.setMixByName("trafficLight", "trafficLight_stop", 0.5);
 
-			audio.initBackgroundSound();
+			if (!debug) {
+				audio.initBackgroundSound();
+			}
 
 			scene
 				.init({
@@ -16298,25 +16339,43 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	}
 
-	audio
-		.init()
-		.initSplashSound();
-
+	audio.init();
 	video.init();
-	hint.init();
+	hint.init(function() {
+		document.querySelector('.start__language option[value="' + globals.locale + '"]').selected = true;
+	});
 
 	if (!debug) {
 		document.body.className += ' _noscroll';
 
-		document.querySelector('.start__volume').onmousemove = document.querySelector('.start__volume').onchange = function () {
-			globals.volume = this.value;
-			audio.setVolume();
-		}
+		localforage.getItem('volume', function(volume) {
+			if (volume) {
 
-		document.querySelector('.start__language option[value="' + globals.locale + '"]').selected = true;
+				document.querySelector('.start__volume').value = volume;
+				globals.volume = volume;
+
+				audio
+					.setVolume()
+					.initSplashSound();
+
+			} else {
+				audio.initSplashSound();
+			}
+		})
+
+		document.querySelector('.start__volume').onmousemove = document.querySelector('.start__volume').onchange = function () {
+
+			globals.volume = this.value;
+
+			localforage.setItem('volume', globals.volume, function() {
+				audio.setVolume();
+			})
+
+		}
 
 		document.querySelector('.start__language').onchange = function () {
 			globals.locale = this.value;
+			localforage.setItem('locale', globals.locale);
 		}
 
 		document.querySelector('.start__run').onclick = function () {

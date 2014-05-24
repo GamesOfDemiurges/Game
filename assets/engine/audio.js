@@ -10,43 +10,72 @@ function track() {
 		load: function ( p ) {
 
 			var _this = this,
-				callback = p.callback || function() {};
+				callback = p.callback || function() {},
+				buffer;
+
+			function useSound(arrayBuffer, callback) {
+				var callback = callback || function () {};
+
+				audio.getContext().decodeAudioData(
+					arrayBuffer,
+					function (decodedArrayBuffer) {
+
+						sound = decodedArrayBuffer;
+
+						parentObject.panner = audio.getContext().createPanner();
+						parentObject.panner.rolloffFactor = 0.01;
+						parentObject.panner.connect( audio.getGainNode() );
+
+						if (Object.keys(p.obj).length !== 1) {
+
+							audio.updateWorldSound({
+								id: p.obj.id
+							})
+						}
+
+						callback();
+
+						return;
+
+					});
+
+				callback();
+			}
+
+			function makeRequest(callback) {
+				var callback = callback || function () {},
+					xhr = new XMLHttpRequest();
+
+				xhr.open('GET', p.url, true);
+				xhr.responseType = 'arraybuffer';
+				xhr.onload = function(e) {
+
+					if (localforage._driver !== 'localStorageWrapper') {
+						localforage.setItem(p.url, xhr.response, function() {
+							useSound(xhr.response, callback);
+						})
+					} else {
+						useSound(xhr.response, callback);
+					}
+				};
+				xhr.send();
+
+			}
 
 			if ( audio.getContext() ) {
 
 				parentObject = p.obj;
 
-				var xhr = new XMLHttpRequest();
-				xhr.open('GET', p.url, true);
-				xhr.responseType = 'arraybuffer';
-				xhr.onload = function(e) {
+				localforage.getItem(p.url, function(audiobuffer) {
+					if (audiobuffer) {
+						console.log(p.url + ' was loaded from cache.');
+						useSound(audiobuffer, callback);
+					} else {
+						console.log(p.url + ' was loaded from network.');
+						makeRequest(callback);
+					}
 
-					audio.getContext().decodeAudioData(
-						this.response,
-						function (decodedArrayBuffer) {
-							sound = decodedArrayBuffer;
-
-							parentObject.panner = audio.getContext().createPanner();
-							parentObject.panner.rolloffFactor = 0.01;
-							parentObject.panner.connect( audio.getGainNode() );
-
-							if (Object.keys(p.obj).length !== 1) {
-
-								audio.updateWorldSound({
-									id: p.obj.id
-								})
-							}
-
-							callback();
-							return _this;
-
-						}, function (e) {
-							// fail
-						});
-
-					callback();
-				};
-				xhr.send();
+				})
 
 			} else {
 				callback();
@@ -178,7 +207,7 @@ var audio = (function() {
 
 		init: function () {
 
-			//initContext();
+			initContext();
 			updateVolume();
 
 			document.addEventListener("visibilitychange", function() {

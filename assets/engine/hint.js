@@ -35,7 +35,8 @@ var hint = (function() {
 	}
 
 	return {
-		init: function () {
+		init: function ( callback ) {
+			var callback = callback || function() {};
 
 			hint = document.querySelector('.hint');
 			hint.onclick = function () {
@@ -45,8 +46,17 @@ var hint = (function() {
 				check();
 			}
 
-			globals.locale = window.navigator.userLanguage || window.navigator.language || globals.locale;
-			globals.locale = globals.locale.split('-')[0].toLowerCase();
+			localforage.getItem('locale', function(locale) {
+				if (locale) {
+					globals.locale = locale;
+				} else {
+					globals.locale = window.navigator.userLanguage || window.navigator.language || globals.locale;
+					globals.locale = globals.locale.split('-')[0].toLowerCase();
+				}
+
+				callback();
+			})
+
 
 			return this;
 
