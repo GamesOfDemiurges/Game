@@ -456,12 +456,15 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	audio.init();
-	video.init();
-	hint.init(function() {
-		document.querySelector('.start__language option[value="' + globals.locale + '"]').selected = true;
-	});
+		video.init();
+		hint.init(function() {
+			if (!debug) {
+				document.querySelector('.start__language option[value="' + globals.locale + '"]').selected = true;
+			}
+		});
 
 	if (!debug) {
+
 		document.body.className += ' _noscroll';
 
 		localforage.getItem('volume', function(volume) {
@@ -506,6 +509,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		}
 	} else {
+		document.body.removeChild( document.querySelector('.start') );
 		init();
 	}
 })
