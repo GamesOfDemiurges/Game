@@ -39,6 +39,11 @@ gulp.task('buildHTML', function() {
             pretty: !minify,
             data: {
 				pageTitle: 'Игры Демиургов',
+				volumeLabel: 'Уровень громкости',
+				languageLabel: 'Язык подсказок',
+				russianLanguage: 'Русский',
+				englishLanguage: 'English',
+				startGame: 'Начать',
 				debug: debug,
 				appendPath: 'Добавить траекторию',
 				removePath: 'Удалить траекторию',

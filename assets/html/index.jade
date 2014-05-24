@@ -1,5 +1,5 @@
 doctype html
-html
+html(manifest='game.appcache')
 	head
 		title= pageTitle
 		meta(http-equiv='Content-Type', content='text/html; charset=utf-8')
@@ -23,15 +23,15 @@ html
 			.start__splash
 				img.start__img(src='assets/background/SignatureTune.png')
 
-				label.start__label.start__label_volume Уровень громкости
+				label.start__label.start__label_volume= volumeLabel
 					input.start__volume(type='range', min='0', max='1', step='0.05', value='0.5')
 
-				label.start__label Язык
+				label.start__label= languageLabel
 					select.start__language
-						option(value='ru') Русский
-						option(value='en') English
+						option(value='ru')= russianLanguage
+						option(value='en')= englishLanguage
 
-				button.start__run Начать
+				button.start__run= startGame
 
 		video(src='assets/video/intro2.mp4')
 		.hint

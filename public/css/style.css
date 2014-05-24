@@ -121,15 +121,19 @@ body._nomusic .start__label_volume {
 	color: #fff;
 	font-size: 14px;
 	font-size: 3vw;
-	font-family: serif;
+	font-family: Tahoma, Helvetica, sans-serif;
 	line-height: 1.3;
 	padding: 20px;
 	border-radius: 20px;
 	opacity: 0;
-	font-style: italic;
 
-	/*transition: opacity 0.3s;*/
 	pointer-events: none;
+}
+
+@media only screen and (min-width: 1000px) {
+	.hint {
+		font-size: 30px;
+	}
 }
 
 .hint_active {
@@ -225,7 +229,7 @@ video {
 	position: fixed;
 	z-index: 10;
 	top: 100px;
-	right: 700px;
+	right: 50px;
 	background-color: rgba(255, 255, 255, 0.5);
 	border: 1px black solid;
 	text-align: center;

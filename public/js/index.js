@@ -9075,7 +9075,7 @@ PIXI.BaseTexture = function(source)
 		scope.source.src = imageURI;
 	}
 
-	if (!!window.openDatabase || !!window.indexedDB || !!window.webkitIndexedDB || !!window.mozIndexedDB || !!window.oIndexedDB || !!window.msIndexedDB) {
+	if ( (!!window.openDatabase || !!window.indexedDB || !!window.webkitIndexedDB || !!window.mozIndexedDB || !!window.oIndexedDB || !!window.msIndexedDB) && (!window.opera)) {
 		localforage.getItem(source, function(imageArrayBuffer) {
 
 			if (imageArrayBuffer) {
