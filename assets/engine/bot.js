@@ -1,7 +1,22 @@
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс ИИ
+ *
+ * @class ai
+ */
 function ai() {
 
+	// Матрица вероятностей перехода из одного состояния в другое.
+	// Суммарная вероятность отнормирована по 10
+	// yes — факт нахождения героя в поле зрения ИИ
+	// no — ИИ не видит героя
+	// Состояния:
+	// 1 — стоит на месте
+	// 2 — разворачивается на месте
+	// 3 — перемещается в точку
+	// 4 — анимируется на месте
+	// 5 — оценивает расстояние до героя
 	var probMatrix = [
 		[
 			{yes: 1, no: 1},
@@ -39,16 +54,22 @@ function ai() {
 			{yes: 0, no: 0}
 		]
 	],
-	obj,
-	moveAnimation,
-	stayAnimation,
-	availablesPaths,
-	lookDistance,
-	stayTime,
-	currentState,
-	heroIsVisible = false,
-	stop = false;
+	obj, // Объект-родитель экземпляра класса
+	moveAnimation, // Поле для значения анимации, проигрываемой при движении
+	stayAnimation, // Поле для значения анимации, проигрываемой при стоянии на месте
+	availablesPaths, // Путь, доступный для перемещения ИИ
+	lookDistance, // Расстояние, на котором ИИ замечает героя
+	stayTime, // Максимальное время, в течение которого ИИ может неподвижно стоять на месте
+	currentState, // Текущее состояние ИИ
+	heroIsVisible = false, // Факт видимости героя
+	stop = false; // Факт прекращения работы ИИ
 
+	/**
+	 * Состояние нахождения на месте
+	 *
+	 * @method stayOnPlace
+	 * @private
+	 */
 	function stayOnPlace() {
 		currentState = 0;
 
@@ -57,6 +78,12 @@ function ai() {
 		}, utils.getRandomValue(stayTime) );
 	}
 
+	/**
+	 * Состояние разворота на месте
+	 *
+	 * @method rotateObject
+	 * @private
+	 */
 	function rotateObject() {
 		currentState = 1;
 
@@ -65,6 +92,12 @@ function ai() {
 		processAction();
 	}
 
+	/**
+	 * Состояние перемещения в точку
+	 *
+	 * @method moveToPoint
+	 * @private
+	 */
 	function moveToPoint() {
 		currentState = 2;
 
@@ -86,6 +119,12 @@ function ai() {
 		}
 	}
 
+	/**
+	 * Состояние воспроизведения анимации на месте
+	 *
+	 * @method playAnimation
+	 * @private
+	 */
 	function playAnimation() {
 		currentState = 3;
 
@@ -101,6 +140,12 @@ function ai() {
 		}
 	}
 
+	/**
+	 * Состояние оценки расстояния до героя
+	 *
+	 * @method lookAround
+	 * @private
+	 */
 	function lookAround() {
 
 		currentState = 4;
@@ -119,6 +164,12 @@ function ai() {
 		processAction();
 	}
 
+	/**
+	 * Менеджер состояний
+	 *
+	 * @method processAction
+	 * @private
+	 */
 	function processAction() {
 		if (stop) { return; }
 
@@ -159,6 +210,20 @@ function ai() {
 
 	}
 
+	/**
+	 * Инициализирует экземпляр
+	 *
+	 * @method initParams
+	 * @private
+	 * @param p {Object}
+	 * @param p.probMatrix {Object} матрица вероятностей состояний
+	 * @param p.moveAnimation {String} название анимации, проигрываемой при движении
+	 * @param p.stayAnimaton {String} название анимации, проигрываемой при нахождении на месте
+	 * @param p.availablesPaths {String} доступная для движения траектория
+	 * @param p.lookDistance {Integer} расстояние, на котором ИИ видит героя
+	 * @param p.stayTime {Integer} максимальное время, которое ИИ может стоять на месте без движения
+	 * @param p.obj {Object} объкт, к которому принадлежит ИИ
+	 */
 	function initParams( p ) {
 
 		probMatrix = p.probMatrix || probMatrix;
@@ -172,6 +237,21 @@ function ai() {
 
 	return {
 
+		/**
+		 * Конструктор экземпляра ИИ
+		 *
+		 * @method init
+		 * @public
+		 * @param p {Object}
+		 * @param p.probMatrix {Object} матрица вероятностей состояний
+		 * @param p.moveAnimation {String} название анимации, проигрываемой при движении
+		 * @param p.stayAnimaton {String} название анимации, проигрываемой при нахождении на месте
+		 * @param p.availablesPaths {String} доступная для движения траектория
+		 * @param p.lookDistance {Integer} расстояние, на котором ИИ видит героя
+		 * @param p.stayTime {Integer} максимальное время, которое ИИ может стоять на месте без движения
+		 * @param p.obj {Object} объкт, к которому принадлежит ИИ
+		 * @returns ai
+		 */
 		init: function ( p ) {
 
 			initParams( p );
@@ -179,14 +259,32 @@ function ai() {
 			return this;
 		},
 
+		/**
+		 * Запуск работы ИИ
+		 *
+		 * @method play
+		 * @public
+		 * @returns ai
+		 */
 		start: function () {
 			stop = false;
 			currentState = 4;
 			processAction();
+
+			return this;
 		},
 
+		/**
+		 * Остановка работы ИИ
+		 *
+		 * @method stop
+		 * @public
+		 * @returns ai
+		 */
 		stop: function () {
 			stop = true;
+
+			return this;
 		}
 	};
 }
