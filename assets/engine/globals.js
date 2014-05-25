@@ -12,4 +12,4 @@ var globals = {
 	scale: 1,
 	volume: 0.5,
 	locale: 'ru'
-}
+};

@@ -1,4 +1,6 @@
-var graph = (function() {
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var graph = (function () {
 
 	var serviceGraph,
 		adjacencyMatrix;
@@ -42,7 +44,7 @@ var graph = (function() {
 			serviceGraph[point1][point2] = {
 				distance: distance,
 				path: pathName
-			}
+			};
 		}
 
 		// В обратную сторону путь тоже идет
@@ -50,17 +52,18 @@ var graph = (function() {
 			serviceGraph[point2][point1] = {
 				distance: distance,
 				path: pathName
-			}
+			};
 		}
 	}
 
 	// Вычисление кратчайшей дистанции
 	function calculateShortestDistance() {
-		var n = adjacencyMatrix[0].length;
+		var n = adjacencyMatrix[0].length,
+			k, i, j, e1, e2;
 
-		for (var k = 0; k < n; k++) {
-			for (var i = 0; i < n; i++) {
-				for (var j = 0; j < n; j++) {
+		for (k = 0; k < n; k++) {
+			for (i = 0; i < n; i++) {
+				for (j = 0; j < n; j++) {
 
 					// Если суммарное расстояние кандидатов при разбиении меньше, чем текущий путь,
 					// значение дистанции текущего пути перезаписывается суммой расстояний,
@@ -71,12 +74,12 @@ var graph = (function() {
 						adjacencyMatrix[i][j].path = [];
 
 						// для текущего поля матрицы записывается массив кратчайших путей
-						for (var e1 = 0; e1 < adjacencyMatrix[i][k].path.length; e1++) {
+						for (e1 = 0; e1 < adjacencyMatrix[i][k].path.length; e1++) {
 							adjacencyMatrix[i][j].path.push( adjacencyMatrix[i][k].path[e1] );
 						}
 
 						// с единицы — чтобы не дублировать точку пересечения
-						for (var e2 = 1; e2 < adjacencyMatrix[k][j].path.length; e2++) {
+						for (e2 = 1; e2 < adjacencyMatrix[k][j].path.length; e2++) {
 							adjacencyMatrix[i][j].path.push( adjacencyMatrix[k][j].path[e2] );
 						}
 					}
@@ -89,32 +92,40 @@ var graph = (function() {
 	// Построение матрицы достижимости
 	function buildAdjacencyMatrix( p ) {
 		var reference = [],
-			callback = (p && p.callback) || function() {};
+			callback = (p && p.callback) || function () {},
+			point,
+			distance,
+			path,
+			linkId,
+			otherId,
+			pathName,
+			graphPath,
+			i, j;
 
 		// Пересобираем объект в массив, потому что нам важен порядок их следования для построения матрицы достижимости
-		for (var point in serviceGraph) {
+		for (point in serviceGraph) {
 			reference.push(point);
 		}
 
 		// Матрица двумерна, создаем
 		adjacencyMatrix = new Array(reference.length);
 
-		for (var i = 0; i < reference.length; i++) {
+		for (i = 0; i < reference.length; i++) {
 			adjacencyMatrix[i] = new Array(reference.length);
 
-			for (var j = 0; j < reference.length; j++) {
+			for (j = 0; j < reference.length; j++) {
 
 				// Если расстояние между вершинами существует и не равно 0, берем его
 				// Если расстояние равно нулю (одна и та же вершина), это нужно записать отдельно
 				// Если расстояние неизвестно, приравниваем его к бесконечности
-				var distance = (serviceGraph[ reference[i] ][ reference[j] ])
+				distance = (serviceGraph[ reference[i] ][ reference[j] ])
 					? serviceGraph[ reference[i] ][ reference[j] ].distance
-					: (i == j)
+					: (i === j)
 						? 0
 						: Number.POSITIVE_INFINITY;
 
 				// Если вершина не одна и та же, запишем путь как пару вершин
-				var path = (distance)
+				path = distance
 					? [i, j]
 					: [];
 
@@ -122,7 +133,7 @@ var graph = (function() {
 				adjacencyMatrix[i][j] = {
 					path: path,
 					distance: distance
-				}
+				};
 			}
 		}
 
@@ -131,22 +142,22 @@ var graph = (function() {
 
 		// Записываем результат работы в граф так, чтобы каждая вершина имела информацию о том,
 		// с кем она связана, на каком расстоянии и как достичь одну вершину из другой
-		for (var point = 0; point < reference.length; point++) {
+		for (point = 0; point < reference.length; point++) {
 
 			globals.graph[point] = {
 				targets: {},
 				links: {}
-			}
+			};
 
-			for (var linkId in serviceGraph[ reference[point] ].link) {
+			for (linkId in serviceGraph[ reference[point] ].link) {
 
 				serviceGraph[ reference[point] ].link[linkId].graphId = point;
 
 				globals.graph[point].links[linkId] = serviceGraph[ reference[point] ].link[linkId];
 
-				for (var otherId = 0; otherId < reference.length; otherId++) {
+				for (otherId = 0; otherId < reference.length; otherId++) {
 					//console.log(reference[point], reference[otherId]);
-					var pathName = (serviceGraph[ reference[point] ][ reference[otherId] ] !== undefined)
+					pathName = (serviceGraph[ reference[point] ][ reference[otherId] ] !== undefined)
 						? serviceGraph[ reference[point] ][ reference[otherId] ].path
 						: false;
 
@@ -154,9 +165,9 @@ var graph = (function() {
 						distance: adjacencyMatrix[point][otherId].distance,
 						path: [],
 						pathName: pathName
-					}
+					};
 
-					for (var graphPath = 0; graphPath < adjacencyMatrix[point][otherId].path.length; graphPath++) {
+					for (graphPath = 0; graphPath < adjacencyMatrix[point][otherId].path.length; graphPath++) {
 						globals.graph[point].targets[otherId].path.push( adjacencyMatrix[point][otherId].path[graphPath] );
 					}
 				}
@@ -171,16 +182,21 @@ var graph = (function() {
 
 	return {
 		// Строит граф
-		buildGraph: function( p ) {
+		buildGraph: function ( p ) {
 
-			globals.graph = {},
-			serviceGraph = {},
+			var path,
+				point1,
+				point2,
+				distance;
+
+			globals.graph = {};
+			serviceGraph = {};
 			adjacencyMatrix = {};
 
-			for (var path in globals.paths) {
-				var point1 = globals.paths[path].dots[0].mainHandle;
-				var point2 = globals.paths[path].dots[ globals.paths[path].dots.length-1 ].mainHandle;
-				var distance = (globals.paths[path].breakpath)
+			for (path in globals.paths) {
+				point1 = globals.paths[path].dots[0].mainHandle;
+				point2 = globals.paths[path].dots[ globals.paths[path].dots.length-1 ].mainHandle;
+				distance = (globals.paths[path].breakpath)
 					? Number.POSITIVE_INFINITY
 					: globals.paths[path].steps.length;
 
@@ -191,21 +207,23 @@ var graph = (function() {
 		},
 
 		// Просто выводит матрицу достижимости
-		getAdjacencyMatrix: function() {
+		getAdjacencyMatrix: function () {
 
 			return adjacencyMatrix;
 		},
 
 		// Отдает вершину графа, если совпадает с заданным шагом
-		getGraphIdByStep: function( p ) {
+		getGraphIdByStep: function ( p ) {
+			var result;
 
 			if (p.step < 10) {
-				return globals.paths[p.path].dots[ 0 ].graphId;
+
+				result = globals.paths[p.path].dots[ 0 ].graphId;
 			} else if ( (globals.paths[p.path].steps.length-1) - p.step < 10  ) {
-				return globals.paths[p.path].dots[ globals.paths[p.path].dots.length-1 ].graphId;
-			} else {
-				return undefined;
+				result = globals.paths[p.path].dots[ globals.paths[p.path].dots.length-1 ].graphId;
 			}
+
+			return result;
 		}
-	}
-})();
+	};
+}());

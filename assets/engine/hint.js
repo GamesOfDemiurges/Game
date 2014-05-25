@@ -1,16 +1,12 @@
-var hint = (function() {
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var hint = (function () {
 
 	var hint,
 		currentTimeout,
 		messageStack = [],
 		showDuration = 5000,
 		isActive = false;
-
-
-	function show( text ) {
-
-		showMessage();
-	}
 
 	function check() {
 		if (!messageStack.length) {
@@ -28,15 +24,15 @@ var hint = (function() {
 		hint.innerHTML = messageStack.shift();
 
 		isActive = true;
-		currentTimeout = setTimeout(function() {
+		currentTimeout = setTimeout(function () {
 			isActive = false;
 			check();
-		}, showDuration)
+		}, showDuration);
 	}
 
 	return {
-		init: function ( callback ) {
-			var callback = callback || function() {};
+		init: function ( cb ) {
+			var callback = cb || function () {};
 
 			hint = document.querySelector('.hint');
 			hint.onclick = function () {
@@ -44,9 +40,9 @@ var hint = (function() {
 				clearTimeout(currentTimeout);
 				isActive = false;
 				check();
-			}
+			};
 
-			localforage.getItem('locale', function(locale) {
+			localforage.getItem('locale', function (locale) {
 				if (locale) {
 					globals.locale = locale;
 				} else {
@@ -55,7 +51,7 @@ var hint = (function() {
 				}
 
 				callback();
-			})
+			});
 
 
 			return this;
@@ -80,6 +76,6 @@ var hint = (function() {
 
 			return this;
 		}
-	}
+	};
 
-})();
+}());

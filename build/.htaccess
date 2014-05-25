@@ -1,0 +1,8 @@
+AddType text/cache-manifest .appcache
+AddType application/json .anim
+AddDefaultCharset UTF-8
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/cache-manifest "access plus 0 seconds"
+</IfModule>

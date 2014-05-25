@@ -3,12 +3,12 @@ CACHE MANIFEST
 # This is a comment
 
 CACHE:
-/index.html
-/css/style.css
-/js/index.js
+index.html
+css/style.css
+js/index.js
 
-/assets/background/SignatureTune.png
-/assets/video/intro2.mp4
+# assets/video/intro2.mp4
+assets/background/SignatureTune.png
 
 FALLBACK:
 

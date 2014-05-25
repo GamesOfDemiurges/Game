@@ -77,6 +77,11 @@ body._cursor #view {
 
 .start__volume {
 	vertical-align: middle;
+	margin-left: 10px;
+}
+
+.start__language {
+	margin-left: 10px;
 }
 
 .start__label {

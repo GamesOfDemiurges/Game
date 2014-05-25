@@ -1,10 +1,13 @@
-var move = (function() {
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var move = (function () {
 
 	function move( p ) {
 		var modelStep = globals.objects[p.id].step,
 			currentPath = globals.paths[ p.path ],
 			targetStep = currentPath.controlPath[ p.chain ].step,
-			callback = p.callback || function() {};
+			callback = p.callback || function () {},
+			stepDirection;
 
 		globals.objects[p.id].path = p.path;
 
@@ -14,14 +17,14 @@ var move = (function() {
 		}
 
 		// Направление движения
-		var stepDirection = currentPath.controlPath[ p.chain ].step - globals.objects[p.id].step;
-		stepDirection != 0
-			? stepDirection = stepDirection / Math.abs(stepDirection)
-			: 0;
+		stepDirection = currentPath.controlPath[ p.chain ].step - globals.objects[p.id].step;
+		if (stepDirection !== 0) {
+			stepDirection = stepDirection / Math.abs(stepDirection);
+		}
 
 		audio.updateWorldSound({
 			id: p.id
-		})
+		});
 
 		// Анимация запукается циклически
 		if (globals.objects[p.id].image.state.isComplete()) {
@@ -41,16 +44,15 @@ var move = (function() {
 
 		globals.objects[p.id].move({
 			x: currentPath.steps[ globals.objects[p.id].step ].x,
-			y: currentPath.steps[ globals.objects[p.id].step ].y,
-		})
+			y: currentPath.steps[ globals.objects[p.id].step ].y
+		});
 
 	}
-
 
 	return {
-		setMovement: function( p ) {
+		setMovement: function ( p ) {
 			move( p );
 		}
-	}
+	};
 
-})();
+}());

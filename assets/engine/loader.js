@@ -1,40 +1,42 @@
-var loader = (function() {
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var loader = (function () {
 
 	// Предзагрузка ресурсов
 	function initResources( p ) {
 		var assetsLoader = new PIXI.AssetLoader(p.resources),
-			callback = p.callback || function() {};
+			callback = p.callback || function () {};
 
 		assetsLoader.onComplete = function () {
 			callback();
-		}
+		};
 
 		assetsLoader.load();
 	}
 
 	// Извлечение путей
 	function buildPaths ( p ) {
-		var callback = p.callback || function() {};
+		var callback = p.callback || function () {};
 
 		// Построить траектории
 		utils.processPaths({
-			callback: function() {
+			callback: function () {
 
 				// Построить граф
 				graph.buildGraph({
-					callback: function() {
+					callback: function () {
 						callback();
 						pathfinder.start();
 					}
 				});
 
 			}
-		})
+		});
 	}
 
 	return {
 
-		init: function( p ) {
+		init: function ( p ) {
 			var callback = p.callback || function () {};
 
 			// предзагрузить ресурсы
@@ -51,11 +53,11 @@ var loader = (function() {
 						callback: callback
 					});
 				}
-			})
+			});
 		}
-	}
+	};
 
-})();
+}());
 
 function init() {
 
@@ -135,30 +137,26 @@ function init() {
 				butterflyPath = 'butterflyPath',
 				stoneToHand = 'stoneToHand',
 				addHero2Path = 'addHero2Path',
-				elephantPath = 'elephantPath',
 				elephantPathEnd = 'elephantPathEnd',
-				pathToMonitors = 'pathToMonitors',
-				pathToRoadSing = 'pathToRoadSing',
-				endPath = 'endPath',
-				endPath1 = 'endPath1';
+				endPath1 = 'endPath1',
 
-			var background = obj().create({
+			background = obj().create({
 				src: 'assets/background/background.jpg',
 				name: 'background',
 				x: 0,
 				y: 0,
 				z: 5
-			});
+			}),
 
-			var backgroundVillainPatch = obj().create({
+			backgroundVillainPatch = obj().create({
 				src: 'assets/background/backgroundVillainPatch.png',
 				name: 'backgroundVillainPatch',
 				x: 1582,
 				y: 600,
 				z: 10
-			});
+			}),
 
-			var tree = obj().create({
+			tree = obj().create({
 				name: 'tree',
 				src: 'assets/models/ready/tree/tree.anim',
 				z: 10,
@@ -166,18 +164,18 @@ function init() {
 				scale: 1.15,
 				step: 275,
 				path: groundPath
-			});
+			}),
 
-			var snow = obj().create({
+			snow = obj().create({
 				name: 'snow',
 				src: 'assets/models/ready/snow/snow.anim',
 				x: 300,
 				y: 400,
 				z: 20,
 				pz: 10
-			});
+			}),
 
-			var hero = obj().create({
+			hero = obj().create({
 				name: 'hero',
 				src: 'assets/models/ready/hero/hero.anim',
 				z: 15,
@@ -185,9 +183,9 @@ function init() {
 				scale: 0.4,
 				step: 0,
 				path: currentPath
-			});
+			}),
 
-			var villain = obj().create({
+			villain = obj().create({
 				name: 'villain',
 				src: 'assets/models/ready/villain/villain.anim',
 				z: 15,
@@ -204,9 +202,9 @@ function init() {
 						soundSrc: 'assets/models/ready/villain/villain_sound.ogg'
 					}
 				}
-			});
+			}),
 
-			var villain2 = obj().create({
+			villain2 = obj().create({
 				name: 'villain2',
 				src: 'assets/models/ready/villain2/villain2.anim',
 				z: 7,
@@ -223,9 +221,9 @@ function init() {
 						soundSrc: 'assets/models/ready/villain2/villain2_sound.ogg'
 					}
 				}
-			});
+			}),
 
-			var bird = obj().create({
+			bird = obj().create({
 				name: 'bird',
 				src: 'assets/models/ready/bird/bird.anim',
 				z: 15,
@@ -241,27 +239,27 @@ function init() {
 						soundSrc: 'assets/models/ready/bird/bird_sound.ogg'
 					}
 				}
-			});
+			}),
 
-			var bucket = obj().create({
+			bucket = obj().create({
 				name: 'bucket',
 				src: 'assets/models/ready/bucket/bucket.anim',
 				x: 530,
 				y: 293,
 				z: 13,
 				pz: 5
-			});
+			}),
 
-			var garbageBucket = obj().create({
+			garbageBucket = obj().create({
 				name: 'garbageBucket',
 				src: 'assets/models/ready/garbageBucket/garbageBucket.anim',
 				x: 1193,
 				y: 647,
 				z: 10,
 				interactive: true
-			});
+			}),
 
-			var semaphore = obj().create({
+			semaphore = obj().create({
 				name: 'semaphore',
 				src: 'assets/models/ready/semaphore/semaphore.anim',
 				x: 1500,
@@ -273,9 +271,9 @@ function init() {
 						soundSrc: 'assets/models/ready/semaphore/semaphore_sound.ogg'
 					}
 				}
-			});
+			}),
 
-			var stone = obj().create({
+			stone = obj().create({
 				name:'stone',
 				src: 'assets/models/ready/stone/stone.anim',
 				path: stoneToHand,
@@ -283,17 +281,17 @@ function init() {
 				z: 10,
 				pz:  15,
 				interactive: true
-			});
+			}),
 
-			var barrier = obj().create({
+			barrier = obj().create({
 				name: 'barrier',
 				src: 'assets/models/ready/barrier/barrier.anim',
 				x:1750,
 				y: 610,
 				z: 10
-			});
+			}),
 
-			var butterfly = obj().create({
+			butterfly = obj().create({
 				name: 'butterfly',
 				src: 'assets/models/ready/butterfly/butterfly.anim',
 				scale: 0.35,
@@ -302,9 +300,9 @@ function init() {
 				step: 0,
 				path: butterflyPath,
 				interactive: true
-			});
+			}),
 
-			var tv = obj().create({
+			tv = obj().create({
 				name: 'tv',
 				src: 'assets/models/ready/tv/tv.anim',
 				z: 20,
@@ -320,9 +318,9 @@ function init() {
 						soundSrc: 'assets/models/ready/tv/tv_sound.ogg'
 					}
 				}
-			});
+			}),
 
-			var addHero1 = obj().create({
+			addHero1 = obj().create({
 				name: 'addHero1',
 				src: 'assets/models/ready/additionalHero1/addHero1.anim',
 				z:15,
@@ -333,9 +331,9 @@ function init() {
 					moveAnimation: 'addHero1',
 					availablesPaths: endPath1
 				}
-			});
+			}),
 
-			var addHero2 = obj().create({
+			addHero2 = obj().create({
 				name: 'addHero2',
 				src: 'assets/models/ready/additionalHero2/additionalHero2.anim',
 				z:10,
@@ -351,9 +349,9 @@ function init() {
 						soundSrc: 'assets/models/ready/additionalHero2/additionalHero2_sound.ogg'
 					}
 				}
-			});
+			}),
 
-			var elephant = obj().create({
+			elephant = obj().create({
 				name: 'elephant',
 				src: 'assets/models/ready/elephant/elephant.anim',
 				z:10,
@@ -367,9 +365,9 @@ function init() {
 					availablesPaths: addHero2Path,
 					stayTime: 6000
 				}
-			});
+			}),
 
-			var doorToTheNextLavel = obj().create({
+			doorToTheNextLavel = obj().create({
 				name:'doorToTheNextLavel',
 				src: 'assets/models/ready/doorToTheNextLavel/doorToTheNextLavel.anim',
 				x: 3700,
@@ -380,9 +378,9 @@ function init() {
 						soundSrc: 'assets/models/ready/doorToTheNextLavel/door_sound.ogg'
 					}
 				}
-			});
+			}),
 
-			var roadSing = obj().create({
+			roadSing = obj().create({
 				name:'roadSing',
 				src: 'assets/models/ready/roadSing/roadSing.anim',
 				x: 3485,
@@ -437,7 +435,7 @@ function init() {
 			}
 
 		}
-	})
+	});
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -457,7 +455,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	audio.init();
 		video.init();
-		hint.init(function() {
+		hint.init(function () {
 			if (!debug) {
 				document.querySelector('.start__language option[value="' + globals.locale + '"]').selected = true;
 			}
@@ -467,7 +465,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		document.body.className += ' _noscroll';
 
-		localforage.getItem('volume', function(volume) {
+		localforage.getItem('volume', function (volume) {
 			if (volume) {
 
 				document.querySelector('.start__volume').value = volume;
@@ -480,22 +478,22 @@ document.addEventListener("DOMContentLoaded", function () {
 			} else {
 				audio.initSplashSound();
 			}
-		})
+		});
 
 		document.querySelector('.start__volume').onmousemove = document.querySelector('.start__volume').onchange = function () {
 
 			globals.volume = this.value;
 
-			localforage.setItem('volume', globals.volume, function() {
+			localforage.setItem('volume', globals.volume, function () {
 				audio.setVolume();
-			})
+			});
 
-		}
+		};
 
 		document.querySelector('.start__language').onchange = function () {
 			globals.locale = this.value;
 			localforage.setItem('locale', globals.locale);
-		}
+		};
 
 		document.querySelector('.start__run').onclick = function () {
 			document.body.removeChild( document.querySelector('.start') );
@@ -503,13 +501,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
 			audio.finishSplashSound();
 
-			video.play(function() {
+			video.play(function () {
 				init();
 			});
 
-		}
+		};
 	} else {
 		document.body.removeChild( document.querySelector('.start') );
 		init();
 	}
-})
+});

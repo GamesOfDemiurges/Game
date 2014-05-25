@@ -1,8 +1,10 @@
-var relay = (function() {
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var relay = (function () {
 
 	return {
 
-		drop: function( p ) {
+		drop: function ( p ) {
 			var _this = this,
 				evt, objEvt,
 				inGraphId = p.graphId
@@ -27,14 +29,14 @@ var relay = (function() {
 
 		},
 
-		listen: function( eventName ) {
+		listen: function ( eventName ) {
 			var _this = this;
 
-			document.addEventListener(eventName, function( p ) {
+			document.addEventListener(eventName, function ( p ) {
 				console.log( p.detail );
-			})
+			});
 
 			return _this;
 		}
-	}
-})();
+	};
+}());

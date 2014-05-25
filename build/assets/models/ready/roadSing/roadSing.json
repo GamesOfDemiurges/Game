@@ -1,0 +1,28 @@
+{"frames": {
+
+"roadSing.png":
+{
+	"frame": {"x":2,"y":2,"w":51,"h":72},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":51,"h":72},
+	"sourceSize": {"w":51,"h":72}
+},
+"roadSing_2.png":
+{
+	"frame": {"x":2,"y":76,"w":51,"h":72},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":51,"h":72},
+	"sourceSize": {"w":51,"h":72}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker ",
+	"version": "1.0",
+	"image": "roadSing.png",
+	"format": "RGBA8888",
+	"size": {"w":55,"h":150},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:c453c32b23a60ea2df48ebce1ec5bcf3:51ca21faee06025b4a6d9e9551c4d124:9ca3a9e7a4932140a1aa12192cb4fa50$"
+}
+}

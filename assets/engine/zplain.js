@@ -1,4 +1,6 @@
-var Z = function() {
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var Z = (function () {
 
 	var zindex = {
 			'base': {
@@ -6,7 +8,7 @@ var Z = function() {
 				'next': null,
 				'children': null
 			}
-		}
+		};
 
 	return {
 		getZindex: function () {
@@ -20,7 +22,7 @@ var Z = function() {
 					'index': p.pz,
 					'data': p,
 					'next': next
-				}
+				};
 
 				p.priorityZindex = child; // отражает индекс приоритета в дереве Z-плоскостей
 
@@ -41,16 +43,18 @@ var Z = function() {
 							'next': null
 						}
 					}
-				}
+				};
 
 				// Добавляем целевой приоритет в конец списка
-				zindex[p.z].children['base'].next = addChild(null);
+				zindex[p.z].children.base.next = addChild(null);
 			}
 
 			// добавляем в индекс
-			var currentPlain = zindex['base'],
-				previousPlain = zindex['base'],
-				stackIndex = 0;
+			var currentPlain = zindex.base,
+				previousPlain = zindex.base,
+				stackIndex = 0,
+				currentPriorityPlain,
+				previousPriorityPlain;
 
 			while(currentPlain !== null) {
 
@@ -81,8 +85,8 @@ var Z = function() {
 
 							// В списке уже сушествует плоскость с таким индексом
 							// Всё, что нужно сделать — проставить нужный приоритет вывода
-							var currentPriorityPlain = currentPlain.children.base,
-								previousPriorityPlain = currentPlain.children.base
+							currentPriorityPlain = currentPlain.children.base;
+							previousPriorityPlain = currentPlain.children.base;
 
 							while (currentPriorityPlain !== null) {
 
@@ -102,7 +106,7 @@ var Z = function() {
 										}
 									} else {
 										// Нашли первый приоритет, который больше целевого. Вставляем перед ним
-										previousPriorityPlain.next = addChild(previousPriorityPlain.next)
+										previousPriorityPlain.next = addChild(previousPriorityPlain.next);
 										// Выходим
 										break;
 									}
@@ -126,7 +130,7 @@ var Z = function() {
 				} else {
 
 					// Плоскость — корневая
-					if (currentPlain.next == null) {
+					if (currentPlain.next === null) {
 
 						// Кроме корневой плоскости в списке ничего нет.
 						currentPlain.next = zindex[p.z]; // добавили новую плоскость следующей за корневой
@@ -147,10 +151,8 @@ var Z = function() {
 			// плоскость можно не трогать — вдруг понадобится?
 
 			// Затем измение значение плоскости в объекте
-			var currentStackIndex = p.obj.stackZindex,
-				currentZindex = p.obj.z,
+			var currentZindex = p.obj.z,
 				currentPriorityZIndex = p.obj.priorityZindex,
-				objectPriorityIndex = p.obj.pz,
 				currentPriorityPlain = zindex[currentZindex].children.base;
 
 			while (currentPriorityPlain.next !== zindex[currentZindex].children[currentPriorityZIndex]) {
@@ -163,8 +165,9 @@ var Z = function() {
 
 			Z.addZindex(p.obj);
 		},
-		drawZindex: function (playGround) {
-			var currentPlain = zindex.base.next;
+		drawZindex: function () {
+			var currentPlain = zindex.base.next,
+				currentPriorityPlain;
 
 			// Оч. грубо — удалим все элементы и нарисуем из списка всё заново
 			while (scene.playGround.children.length) {
@@ -172,7 +175,7 @@ var Z = function() {
 			}
 
 			while (currentPlain !== null) {
-				var currentPriorityPlain = currentPlain.children.base.next;
+				currentPriorityPlain = currentPlain.children.base.next;
 
 				while (currentPriorityPlain !== null) {
 					scene.playGround.addChild( currentPriorityPlain.data.image );
@@ -182,6 +185,6 @@ var Z = function() {
 				currentPlain = currentPlain.next;
 			}
 		}
-	}
+	};
 
-}();
+}());

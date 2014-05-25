@@ -1,4 +1,6 @@
-var viewport = (function() {
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var viewport = (function () {
 	var magicYHeroShift = 0;
 
 
@@ -12,7 +14,8 @@ var viewport = (function() {
 
 	function viewportProcessScale( p ) {
 		var newDistance = Math.sqrt( ( p.x1 - p.x2 )*( p.x1 - p.x2 ) + ( p.y1 - p.y2 )*( p.y1 - p.y2 ) ),
-			k = globals.viewport.scale * (newDistance / globals.viewport.distance);
+			k = globals.viewport.scale * (newDistance / globals.viewport.distance),
+			x, y, rx, ry, maxYShift, maxXShift;
 
 		// не обрабатывать, если масштаб меньше 1
 		if (k < 1) {
@@ -25,12 +28,12 @@ var viewport = (function() {
 			return false;
 		}
 
-		var x = (globals.objects.hero.image.position.x) * (1-k),
-			y = (globals.objects.hero.image.position.y + magicYHeroShift) * (1-k),
-			rx = globals.viewport.sceneX + x,
-			ry = globals.viewport.sceneY + y,
-			maxYShift = (scene.height / globals.scale - (scene.height / globals.scale ) * (k) ) * globals.scale,
-			maxXShift = (scene.width / globals.scale - (globals.sceneWidth / globals.scale ) * (k) ) * globals.scale;
+		x = (globals.objects.hero.image.position.x) * (1-k);
+		y = (globals.objects.hero.image.position.y + magicYHeroShift) * (1-k);
+		rx = globals.viewport.sceneX + x;
+		ry = globals.viewport.sceneY + y;
+		maxYShift = (scene.height / globals.scale - (scene.height / globals.scale) * k ) * globals.scale;
+		maxXShift = (scene.width / globals.scale - (globals.sceneWidth / globals.scale) * k ) * globals.scale;
 
 		rx = rx < maxXShift
 			? maxXShift
@@ -61,18 +64,18 @@ var viewport = (function() {
 	}
 
 	function viewportSaveScale() {
-		setTimeout(function() {
+		setTimeout(function () {
 			globals.viewport.resize = false;
-		}, 100)
+		}, 100);
 
 		globals.viewport.scale = scene.playGround.scale.x;
 	}
 
 	function attachEvents() {
 
-		if ('ontouchend' in document) {
+		if (document.ontouchend !== undefined) {
 
-			window.addEventListener('touchstart', function(e) {
+			window.addEventListener('touchstart', function (e) {
 				e.preventDefault();
 
 				if (e.touches.length > 1) {
@@ -81,65 +84,65 @@ var viewport = (function() {
 						x2: e.touches[1].pageX,
 						y1: e.touches[0].pageY,
 						y2: e.touches[1].pageY
-					})
+					});
 				}
-			})
+			});
 
-			window.addEventListener('touchmove', function(e) {
+			window.addEventListener('touchmove', function (e) {
 				if ( (globals.viewport.resize) && (e.touches.length > 1) ) {
 					viewportProcessScale({
 						x1: e.touches[0].pageX,
 						x2: e.touches[1].pageX,
 						y1: e.touches[0].pageY,
 						y2: e.touches[1].pageY
-					})
+					});
 				}
-			})
+			});
 
-			window.addEventListener('touchend', function(e) {
+			window.addEventListener('touchend', function () {
 				if ( globals.viewport.resize ) {
 					viewportSaveScale();
 				}
-			})
+			});
 
 		} else {
 
-			window.addEventListener('mousedown', function(e) {
+			window.addEventListener('mousedown', function (e) {
 				if (e.altKey) {
 					viewportInitScale({
 						x1: e.pageX,
 						x2: 0,
 						y1: e.pageY,
 						y2: 0
-					})
+					});
 				}
-			})
+			});
 
-			window.addEventListener('mousemove', function(e) {
+			window.addEventListener('mousemove', function (e) {
 				if (globals.viewport.resize) {
 					viewportProcessScale({
 						x1: e.pageX,
 						x2: 0,
 						y1: e.pageY,
 						y2: 0
-					})
+					});
 				}
-			})
+			});
 
-			window.addEventListener('mouseup', function(e) {
+			window.addEventListener('mouseup', function () {
 				if (globals.viewport.resize) {
-				 viewportSaveScale()
+					viewportSaveScale();
 				}
-			})
+			});
 
 		}
 	}
 
 	return {
 
-		init: function() {
+		init: function () {
 			attachEvents();
 		}
-	}
+	};
 
-})()
+}());

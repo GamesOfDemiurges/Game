@@ -1,3 +1,5 @@
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
 function ai() {
 
 	var probMatrix = [
@@ -50,7 +52,7 @@ function ai() {
 	function stayOnPlace() {
 		currentState = 0;
 
-		setTimeout(function() {
+		setTimeout(function () {
 			processAction();
 		}, utils.getRandomValue(stayTime) );
 	}
@@ -77,7 +79,7 @@ function ai() {
 				callback: function () {
 					processAction();
 				}
-			})
+			});
 
 		} else {
 			processAction();
@@ -93,7 +95,7 @@ function ai() {
 				callback: function () {
 					processAction();
 				}
-			})
+			});
 		} else {
 			processAction();
 		}
@@ -118,18 +120,19 @@ function ai() {
 	}
 
 	function processAction() {
-		if (stop) return;
+		if (stop) { return; }
 
 		var prob = utils.getRandomValue(10),
 			sum = 0,
 			isVisible = heroIsVisible
 				? 'yes'
-				: 'no';
+				: 'no',
+			i;
 
-		for (var i = 0; i < 4; i++)	 {
+		for (i = 0; i < 4; i++) {
 			sum += probMatrix[currentState][i][isVisible];
 
-			if (sum >= prob) break;
+			if (sum >= prob) { break; }
 		}
 
 		switch (i) {
@@ -176,14 +179,14 @@ function ai() {
 			return this;
 		},
 
-		start: function() {
+		start: function () {
 			stop = false;
 			currentState = 4;
 			processAction();
 		},
 
-		stop: function() {
+		stop: function () {
 			stop = true;
 		}
-	}
+	};
 }

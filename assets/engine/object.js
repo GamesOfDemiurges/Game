@@ -1,8 +1,9 @@
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
 function obj() {
 
 	/* Private */
-	var animations = {},
-		x = -9999,
+	var x = -9999,
 		y = -9999,
 		z = 1,
 		pz = 1,
@@ -22,8 +23,10 @@ function obj() {
 		// p.z
 		// p.animation
 		create: function ( p ) {
-			var _this = this;
-			if (p.src === undefined) return false;
+			var _this = this,
+				id;
+
+			if (p.src === undefined) { return false; }
 
 			function setObjectPosition() {
 				_this.image.position.x = (p.x !== undefined) ? p.x : x;
@@ -44,30 +47,34 @@ function obj() {
 			}
 
 			function setObjectScale() {
-				_this.image.scale.x = _this.image.scale.y = (p.scale !== undefined) ? p.scale : 1
+				_this.image.scale.x = _this.image.scale.y = (p.scale !== undefined)
+					? p.scale
+					: 1;
 			}
 
 			function setReverse() {
 				if (p.reverse) {
 					_this.image.scale.x *= -1;
-					//_this.image.position.x = centerX - _this.image.scale.x * containerWidth / 2;
 				}
 			}
 
 			function generateRandomObjectId() {
 				var objectId = Math.random().toString();
+
 				if ( globals.objects[objectId] !== undefined) {
-					return generateRandomObjectId();
-				} else {
-					return objectId;
+					objectId = generateRandomObjectId();
 				}
+
+				return objectId;
 			}
 
 			function setAnimation() {
+				var animationName;
+
 				if (p.animation) {
 					_this.animation = {};
 
-					for (var animationName in p.animation) {
+					for (animationName in p.animation) {
 						_this.animation[animationName] = {};
 
 						if (p.animation[animationName].soundSrc) {
@@ -75,7 +82,7 @@ function obj() {
 							_this.animation[animationName].track = track().load({
 								obj: _this,
 								url: p.animation[animationName].soundSrc
-							})
+							});
 						}
 					}
 				}
@@ -85,8 +92,8 @@ function obj() {
 				if (p.interactive) {
 					_this.image.setInteractive(true);
 
-					_this.image.click = _this.image.tap = function (data) {
-						if (globals.viewport.resize) return false;
+					_this.image.click = _this.image.tap = function () {
+						if (globals.viewport.resize) { return false; }
 
 						globals.objectClicked = true;
 
@@ -94,16 +101,16 @@ function obj() {
 							obj: _this.id,
 							type: 'objectClick'
 						});
-					}
+					};
 
 					_this.image.mouseover = function () {
 
 						document.body.className += ' _cursor';
-					}
+					};
 
 					_this.image.mouseout = function () {
 						document.body.className = document.body.className.replace(/\s_cursor/ig, '');
-					}
+					};
 				}
 			}
 
@@ -125,9 +132,7 @@ function obj() {
 
 			if (p.src.indexOf('.anim') !== -1) {
 
-				var id = p.name
-					? p.name
-					: generateRandomObjectId();
+				id = p.name || generateRandomObjectId();
 
 				_this.type = 'spine';
 				_this.src = p.src;
@@ -169,14 +174,18 @@ function obj() {
 		// p.y
 		// p.z
 		move: function ( p ) {
-			var _this = this;
+			var _this = this,
+				dx,
+				screenHalfWidth,
+				screenHalfHeight,
+				dx1, dy1;
 
 			if (p.y !== undefined) {
 				_this.image.position.y = p.y;
 			}
 
 			if (p.x !== undefined) {
-				var dx = p.x - _this.image.position.x;
+				dx = p.x - _this.image.position.x;
 
 				// Идем назад
 				if ( dx < 0 ) {
@@ -191,24 +200,24 @@ function obj() {
 				if ( dx > 0 ) {
 
 					// Автоматический разворот модели в зависимости от направления движения
-					if ( (_this.image.state.current.name != 'stairCaseWalk') && (_this.image.scale.x < 0) )  {
+					if ( (_this.image.state.current.name !== 'stairCaseWalk') && (_this.image.scale.x < 0) )  {
 						_this.image.scale.x *= -1;
 					}
 				}
 
 				_this.image.position.x = p.x;
 
-				if ( _this.id == 'hero' ) {
+				if ( _this.id === 'hero' ) {
 
-					var screenHalfWidth = scene.width / 2 / globals.viewport.scale,
-						screenHalfHeight = scene.height / 2 / globals.viewport.scale,
-						dx1 = (_this.image.position.x - screenHalfWidth ) * globals.viewport.scale,
-						dy1 = (_this.image.position.y - (50/globals.scale) - screenHalfHeight ) * globals.viewport.scale;
+					screenHalfWidth = scene.width / 2 / globals.viewport.scale;
+					screenHalfHeight = scene.height / 2 / globals.viewport.scale;
+					dx1 = (_this.image.position.x - screenHalfWidth ) * globals.viewport.scale;
+					dy1 = (_this.image.position.y - (50/globals.scale) - screenHalfHeight ) * globals.viewport.scale;
 
 					scene.move({
-						dx: (0-dx1),
-						dy: (0-dy1)
-					})
+						dx: (-dx1),
+						dy: (-dy1)
+					});
 
 				}
 
@@ -224,7 +233,7 @@ function obj() {
 			return _this;
 		},
 
-		moveTo: function( p ) {
+		moveTo: function ( p ) {
 			var _this = this;
 
 			pathfinder.moveObjectByChain({
@@ -240,9 +249,11 @@ function obj() {
 		},
 
 		//p.animation
-		animate: function( p ) {
+		animate: function ( p ) {
 			var _this = this,
-				callback = p.callback || function() {};
+				callback = p.callback || function () {},
+				duration,
+				animationId;
 
 			_this.image.state.setAnimationByName( p.animation , false);
 
@@ -250,10 +261,10 @@ function obj() {
 				_this.animation[p.animation].track.play();
 			}
 
-			var duration = _this.image.state.current.duration * 1000,
-				animationId = Math.random();
+			duration = _this.image.state.current.duration * 1000;
+			animationId = Math.random();
 
-			setTimeout(function() {
+			setTimeout(function () {
 				callback();
 
 				relay.drop({
@@ -262,7 +273,7 @@ function obj() {
 					animation: p.animation,
 					id: animationId
 				});
-			}, duration)
+			}, duration);
 
 			relay.drop({
 				obj: _this,
@@ -274,15 +285,16 @@ function obj() {
 			return _this;
 		},
 
-		getPosition: function() {
+		getPosition: function () {
 
 			var _this = this,
 				path = _this.path,
 				chain,
 				graphId,
-				orientation = Math.abs(_this.image.scale.x)/_this.image.scale.x;
+				orientation = Math.abs(_this.image.scale.x)/_this.image.scale.x,
+				i;
 
-			for (var i = 0; i < globals.paths[ _this.path ].controlPath.length; i++) {
+			for (i = 0; i < globals.paths[ _this.path ].controlPath.length; i++) {
 
 				if ( Math.abs(globals.paths[ _this.path ].controlPath[i].step - _this.step) < 10 ) {
 
@@ -305,8 +317,8 @@ function obj() {
 				chain: chain,
 				graphId: graphId,
 				orientation: orientation
-			}
+			};
 
 		}
-	}
+	};
 }

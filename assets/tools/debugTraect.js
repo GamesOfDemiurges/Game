@@ -11,7 +11,7 @@ var debugTraect = function debugTraect() {
 	function render() {
 		if (repaint) {
 			utils.processPaths({
-				callback: function() {
+				callback: function () {
 					paint();
 					repaint = false;
 				}
@@ -449,11 +449,11 @@ var debugTraect = function debugTraect() {
 
 		// Построить траектории
 		utils.processPaths({
-			callback: function() {
+			callback: function () {
 
 				// Построить граф
 				graph.buildGraph({
-					callback: function() {
+					callback: function () {
 
 						// нужна перерисовка сцены
 						repaint = true;
@@ -488,7 +488,7 @@ var debugTraect = function debugTraect() {
 				y: 0
 			}
 
-		debugPanel.addEventListener("mousedown", function(e) {
+		debugPanel.addEventListener("mousedown", function (e) {
 			e.stopPropagation();
 
 			// Событие начала перетаскивания
@@ -526,7 +526,7 @@ var debugTraect = function debugTraect() {
 
 		})
 
-		debugPanel.addEventListener("mouseup", function(e) {
+		debugPanel.addEventListener("mouseup", function (e) {
 			e.stopPropagation();
 
 			// Событие завершение перетаскивания
@@ -543,7 +543,7 @@ var debugTraect = function debugTraect() {
 			}
 		})
 
-		debugPanel.addEventListener("mousemove", function(e) {
+		debugPanel.addEventListener("mousemove", function (e) {
 
 			// Событие факта перетаскивания
 			if (currentTarget !== undefined) {
@@ -580,11 +580,11 @@ var debugTraect = function debugTraect() {
 
 				// Построить траектории
 				utils.processPaths({
-					callback: function() {
+					callback: function () {
 
 						// Построить граф
 						graph.buildGraph({
-							callback: function() {
+							callback: function () {
 
 								// нужна перерисовка сцены
 								repaint = true;
@@ -601,7 +601,7 @@ var debugTraect = function debugTraect() {
 			}
 		})
 
-		debugPanel.addEventListener("dblclick", function(e) {
+		debugPanel.addEventListener("dblclick", function (e) {
 			if (e.target.classList.contains('debug__point') ) {
 				e.stopPropagation();
 
@@ -645,11 +645,11 @@ var debugTraect = function debugTraect() {
 
 				// Перестроить траектории
 				utils.processPaths({
-					callback: function() {
+					callback: function () {
 
 						// Построить граф
 						graph.buildGraph({
-							callback: function() {
+							callback: function () {
 								//callback();
 								pathfinder.start();
 							}
@@ -660,7 +660,7 @@ var debugTraect = function debugTraect() {
 			}
 		})
 
-		debugPanel.addEventListener("click", function(e) {
+		debugPanel.addEventListener("click", function (e) {
 
 			if (e.target.classList.contains('debug__control-traects-label') || e.target.classList.contains('debug__control-traects-break')) {
 				e.stopPropagation();
@@ -675,11 +675,11 @@ var debugTraect = function debugTraect() {
 
 					// Построить траектории
 					utils.processPaths({
-						callback: function() {
+						callback: function () {
 
 							// Построить граф
 							graph.buildGraph({
-								callback: function() {
+								callback: function () {
 
 									// нужна перерисовка сцены
 									repaint = true;
@@ -848,7 +848,7 @@ var debugTraect = function debugTraect() {
 				var req = new XMLHttpRequest;
 				var param = 'data=' + JSON.stringify(smallPaths);
 				req.open("POST", '/tools/writeTraectToFile.php');
-				req.onreadystatechange = function() {
+				req.onreadystatechange = function () {
 
 					if ((req.status == 200) && (req.readyState==4)) {
 						console.log(req.responseText)
@@ -907,7 +907,7 @@ var debugTraect = function debugTraect() {
 
 		})
 
-		debugWrap.onscroll = function(e) {
+		debugWrap.onscroll = function (e) {
 			scene.playGround.position.x = (-1) * globals.scale * debugWrap.scrollLeft;
 		}
 
@@ -959,13 +959,13 @@ var debugTraect = function debugTraect() {
 		var attrWidth = document.getElementById('view').getAttribute('width');
 
 		if (attrWidth == null) {
-			setTimeout(function() {
+			setTimeout(function () {
 				startDebugger();
 			}, 1000)
 			return false;
 		}
 
-		window.addEventListener('resize', function() {
+		window.addEventListener('resize', function () {
 			resizeViewPort();
 		})
 		resizeViewPort();
@@ -979,24 +979,24 @@ var debugTraect = function debugTraect() {
 	/* /Init */
 
 	return {
-		init: function() {
+		init: function () {
 			startDebugger();
 			return this;
 		},
 
-		addPath: function(p) {
+		addPath: function (p) {
 			addPath(p);
 
 			return this;
 		},
 
-		addPoint: function(p) {
+		addPoint: function (p) {
 			addPoint(p);
 
 			return this;
 		},
 
-		paint: function() {
+		paint: function () {
 			paint();
 
 			return this;

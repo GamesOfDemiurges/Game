@@ -12552,14 +12552,15 @@ var globals = {
 	scale: 1,
 	volume: 0.5,
 	locale: 'ru'
-}
-var scene = function scene() {
+};
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var scene = (function () {
 
 	/* Private */
 	var stage, // сцена
 		renderer, // оператор рендеринга
 		masterCanvas, // Физический канвас на вьюпорте
-		playGround,
 		x = 0, y = 0; // точки отсчета для сцены
 
 	function repaintCanvas() {
@@ -12576,7 +12577,8 @@ var scene = function scene() {
 
 		// p.canvasSelector
 		init: function ( p ) {
-			var _this = this;
+			var _this = this,
+				playGround;
 
 			// Обертка над оператором рендера PIXI
 			masterCanvas = document.getElementById(p.canvasId); // указатель на DOM
@@ -12588,7 +12590,7 @@ var scene = function scene() {
 
 			renderer = new PIXI.CanvasRenderer(_this.width, globals.sceneHeight, masterCanvas, false);
 
-			window.addEventListener('resize', function() {
+			window.addEventListener('resize', function () {
 				_this.scale = globals.sceneHeight/masterCanvas.clientHeight;
 				_this.width = _this.scale * masterCanvas.clientWidth;
 				_this.height = _this.scale * masterCanvas.clientHeight;
@@ -12601,17 +12603,17 @@ var scene = function scene() {
 					globals.objects.hero.move({
 						x: globals.objects.hero.image.position.x,
 						y: globals.objects.hero.image.position.y
-					})
+					});
 				}
 
 				if (!!graph) {
 					graph.buildGraph({});
 				}
-			})
+			});
 
 			// Контейнер сцены
 			// его будем двигать для смещения сцены относительно вьюпорта
-			var playGround = new PIXI.DisplayObjectContainer();
+			playGround = new PIXI.DisplayObjectContainer();
 			playGround.position.x = x;
 			playGround.position.y = y;
 
@@ -12675,10 +12677,12 @@ var scene = function scene() {
 
 			return _this;
 		}
-	}
-}();
+	};
+}());
 
-var Z = function() {
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var Z = (function () {
 
 	var zindex = {
 			'base': {
@@ -12686,7 +12690,7 @@ var Z = function() {
 				'next': null,
 				'children': null
 			}
-		}
+		};
 
 	return {
 		getZindex: function () {
@@ -12700,7 +12704,7 @@ var Z = function() {
 					'index': p.pz,
 					'data': p,
 					'next': next
-				}
+				};
 
 				p.priorityZindex = child; // отражает индекс приоритета в дереве Z-плоскостей
 
@@ -12721,16 +12725,18 @@ var Z = function() {
 							'next': null
 						}
 					}
-				}
+				};
 
 				// Добавляем целевой приоритет в конец списка
-				zindex[p.z].children['base'].next = addChild(null);
+				zindex[p.z].children.base.next = addChild(null);
 			}
 
 			// добавляем в индекс
-			var currentPlain = zindex['base'],
-				previousPlain = zindex['base'],
-				stackIndex = 0;
+			var currentPlain = zindex.base,
+				previousPlain = zindex.base,
+				stackIndex = 0,
+				currentPriorityPlain,
+				previousPriorityPlain;
 
 			while(currentPlain !== null) {
 
@@ -12761,8 +12767,8 @@ var Z = function() {
 
 							// В списке уже сушествует плоскость с таким индексом
 							// Всё, что нужно сделать — проставить нужный приоритет вывода
-							var currentPriorityPlain = currentPlain.children.base,
-								previousPriorityPlain = currentPlain.children.base
+							currentPriorityPlain = currentPlain.children.base;
+							previousPriorityPlain = currentPlain.children.base;
 
 							while (currentPriorityPlain !== null) {
 
@@ -12782,7 +12788,7 @@ var Z = function() {
 										}
 									} else {
 										// Нашли первый приоритет, который больше целевого. Вставляем перед ним
-										previousPriorityPlain.next = addChild(previousPriorityPlain.next)
+										previousPriorityPlain.next = addChild(previousPriorityPlain.next);
 										// Выходим
 										break;
 									}
@@ -12806,7 +12812,7 @@ var Z = function() {
 				} else {
 
 					// Плоскость — корневая
-					if (currentPlain.next == null) {
+					if (currentPlain.next === null) {
 
 						// Кроме корневой плоскости в списке ничего нет.
 						currentPlain.next = zindex[p.z]; // добавили новую плоскость следующей за корневой
@@ -12827,10 +12833,8 @@ var Z = function() {
 			// плоскость можно не трогать — вдруг понадобится?
 
 			// Затем измение значение плоскости в объекте
-			var currentStackIndex = p.obj.stackZindex,
-				currentZindex = p.obj.z,
+			var currentZindex = p.obj.z,
 				currentPriorityZIndex = p.obj.priorityZindex,
-				objectPriorityIndex = p.obj.pz,
 				currentPriorityPlain = zindex[currentZindex].children.base;
 
 			while (currentPriorityPlain.next !== zindex[currentZindex].children[currentPriorityZIndex]) {
@@ -12843,8 +12847,9 @@ var Z = function() {
 
 			Z.addZindex(p.obj);
 		},
-		drawZindex: function (playGround) {
-			var currentPlain = zindex.base.next;
+		drawZindex: function () {
+			var currentPlain = zindex.base.next,
+				currentPriorityPlain;
 
 			// Оч. грубо — удалим все элементы и нарисуем из списка всё заново
 			while (scene.playGround.children.length) {
@@ -12852,7 +12857,7 @@ var Z = function() {
 			}
 
 			while (currentPlain !== null) {
-				var currentPriorityPlain = currentPlain.children.base.next;
+				currentPriorityPlain = currentPlain.children.base.next;
 
 				while (currentPriorityPlain !== null) {
 					scene.playGround.addChild( currentPriorityPlain.data.image );
@@ -12862,10 +12867,12 @@ var Z = function() {
 				currentPlain = currentPlain.next;
 			}
 		}
-	}
+	};
 
-}();
-var viewport = (function() {
+}());
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var viewport = (function () {
 	var magicYHeroShift = 0;
 
 
@@ -12879,7 +12886,8 @@ var viewport = (function() {
 
 	function viewportProcessScale( p ) {
 		var newDistance = Math.sqrt( ( p.x1 - p.x2 )*( p.x1 - p.x2 ) + ( p.y1 - p.y2 )*( p.y1 - p.y2 ) ),
-			k = globals.viewport.scale * (newDistance / globals.viewport.distance);
+			k = globals.viewport.scale * (newDistance / globals.viewport.distance),
+			x, y, rx, ry, maxYShift, maxXShift;
 
 		// не обрабатывать, если масштаб меньше 1
 		if (k < 1) {
@@ -12892,12 +12900,12 @@ var viewport = (function() {
 			return false;
 		}
 
-		var x = (globals.objects.hero.image.position.x) * (1-k),
-			y = (globals.objects.hero.image.position.y + magicYHeroShift) * (1-k),
-			rx = globals.viewport.sceneX + x,
-			ry = globals.viewport.sceneY + y,
-			maxYShift = (scene.height / globals.scale - (scene.height / globals.scale ) * (k) ) * globals.scale,
-			maxXShift = (scene.width / globals.scale - (globals.sceneWidth / globals.scale ) * (k) ) * globals.scale;
+		x = (globals.objects.hero.image.position.x) * (1-k);
+		y = (globals.objects.hero.image.position.y + magicYHeroShift) * (1-k);
+		rx = globals.viewport.sceneX + x;
+		ry = globals.viewport.sceneY + y;
+		maxYShift = (scene.height / globals.scale - (scene.height / globals.scale) * k ) * globals.scale;
+		maxXShift = (scene.width / globals.scale - (globals.sceneWidth / globals.scale) * k ) * globals.scale;
 
 		rx = rx < maxXShift
 			? maxXShift
@@ -12928,18 +12936,18 @@ var viewport = (function() {
 	}
 
 	function viewportSaveScale() {
-		setTimeout(function() {
+		setTimeout(function () {
 			globals.viewport.resize = false;
-		}, 100)
+		}, 100);
 
 		globals.viewport.scale = scene.playGround.scale.x;
 	}
 
 	function attachEvents() {
 
-		if ('ontouchend' in document) {
+		if (document.ontouchend !== undefined) {
 
-			window.addEventListener('touchstart', function(e) {
+			window.addEventListener('touchstart', function (e) {
 				e.preventDefault();
 
 				if (e.touches.length > 1) {
@@ -12948,69 +12956,71 @@ var viewport = (function() {
 						x2: e.touches[1].pageX,
 						y1: e.touches[0].pageY,
 						y2: e.touches[1].pageY
-					})
+					});
 				}
-			})
+			});
 
-			window.addEventListener('touchmove', function(e) {
+			window.addEventListener('touchmove', function (e) {
 				if ( (globals.viewport.resize) && (e.touches.length > 1) ) {
 					viewportProcessScale({
 						x1: e.touches[0].pageX,
 						x2: e.touches[1].pageX,
 						y1: e.touches[0].pageY,
 						y2: e.touches[1].pageY
-					})
+					});
 				}
-			})
+			});
 
-			window.addEventListener('touchend', function(e) {
+			window.addEventListener('touchend', function () {
 				if ( globals.viewport.resize ) {
 					viewportSaveScale();
 				}
-			})
+			});
 
 		} else {
 
-			window.addEventListener('mousedown', function(e) {
+			window.addEventListener('mousedown', function (e) {
 				if (e.altKey) {
 					viewportInitScale({
 						x1: e.pageX,
 						x2: 0,
 						y1: e.pageY,
 						y2: 0
-					})
+					});
 				}
-			})
+			});
 
-			window.addEventListener('mousemove', function(e) {
+			window.addEventListener('mousemove', function (e) {
 				if (globals.viewport.resize) {
 					viewportProcessScale({
 						x1: e.pageX,
 						x2: 0,
 						y1: e.pageY,
 						y2: 0
-					})
+					});
 				}
-			})
+			});
 
-			window.addEventListener('mouseup', function(e) {
+			window.addEventListener('mouseup', function () {
 				if (globals.viewport.resize) {
-				 viewportSaveScale()
+					viewportSaveScale();
 				}
-			})
+			});
 
 		}
 	}
 
 	return {
 
-		init: function() {
+		init: function () {
 			attachEvents();
 		}
-	}
+	};
 
-})()
-var pathfinder = (function() {
+}());
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var pathfinder = (function () {
 
 	// Прохождение по массиву путей
 	// У промежуточных путей targetChain считается конечной точкой,
@@ -13018,13 +13028,16 @@ var pathfinder = (function() {
 	function processPaths( p ) {
 		var servicePoints,
 			step = p.currentObject.step,
-			resultPath = [];
+			resultPath = [],
+			pathId,
+			objectAnimation,
+			i;
 
 		function getAnimation( p ) {
 			var resultAnimation = {
 				animation: p.animation,
 				speed: p.speed
-			}
+			};
 
 			// Приоритет анимаций —
 			// 1. Задана явно
@@ -13040,44 +13053,44 @@ var pathfinder = (function() {
 		// возникающий после достижения этого targetChain
 		function getServicePoint(path0, path1) {
 			var serviceChain,
-				serviceStep;
+				serviceStep,
 
-			var path0point1 = {
+			path0point1 = {
 				x: globals.paths[ path0 ].dots[0].mainHandle.x,
 				y: globals.paths[ path0 ].dots[0].mainHandle.y
-			}
+			},
 
-			var path0point2 = {
+			path0point2 = {
 				x: globals.paths[ path0 ].dots[ globals.paths[ path0 ].dots.length-1 ].mainHandle.x,
 				y: globals.paths[ path0 ].dots[ globals.paths[ path0 ].dots.length-1 ].mainHandle.y
-			}
+			},
 
-			var path1point1 = {
+			path1point1 = {
 				x: globals.paths[ path1 ].dots[0].mainHandle.x,
-				y: globals.paths[ path1 ].dots[0].mainHandle.y,
-			}
+				y: globals.paths[ path1 ].dots[0].mainHandle.y
+			},
 
-			var path1point2 = {
+			path1point2 = {
 				x: globals.paths[ path1 ].dots[ globals.paths[ path1 ].dots.length-1 ].mainHandle.x,
 				y: globals.paths[ path1 ].dots[ globals.paths[ path1 ].dots.length-1 ].mainHandle.y
-			}
+			};
 
-			if ( (path0point1.x == path1point1.x) && (path0point1.y == path1point1.y) ) {
+			if ( (path0point1.x === path1point1.x) && (path0point1.y === path1point1.y) ) {
 				serviceChain = 0;
 				serviceStep = 0;
 			}
 
-			if ( (path0point1.x == path1point2.x) && (path0point1.y == path1point2.y) ) {
+			if ( (path0point1.x === path1point2.x) && (path0point1.y === path1point2.y) ) {
 				serviceChain = 0;
 				serviceStep = globals.paths[ path1 ].steps.length;
 			}
 
-			if ( (path0point2.x == path1point1.x) && (path0point2.y == path1point1.y) ) {
+			if ( (path0point2.x === path1point1.x) && (path0point2.y === path1point1.y) ) {
 				serviceChain = globals.paths[ path0 ].controlPath.length-1;
 				serviceStep = 0;
 			}
 
-			if ( (path0point2.x == path1point2.x) && (path0point2.y == path1point2.y) ) {
+			if ( (path0point2.x === path1point2.x) && (path0point2.y === path1point2.y) ) {
 				serviceChain = globals.paths[ path0 ].controlPath.length-1;
 				serviceStep = globals.paths[ path1 ].steps.length;
 			}
@@ -13085,18 +13098,18 @@ var pathfinder = (function() {
 			return {
 				serviceChain: serviceChain,
 				serviceStep: serviceStep
-			}
+			};
 		}
 
 		if (p.pathArray.length > 1) {
-			for (var i = 1; i < p.pathArray.length; i++) {
-				var pathId = p.pathArray[i-1],
-					objectAnimation = getAnimation({
-						obj: p.currentObject.id,
-						pathId: pathId,
-						animation: p.animationName,
-						speed: p.speedValue
-					});
+			for (i = 1; i < p.pathArray.length; i++) {
+				pathId = p.pathArray[i-1];
+				objectAnimation = getAnimation({
+					obj: p.currentObject.id,
+					pathId: pathId,
+					animation: p.animationName,
+					speed: p.speedValue
+				});
 
 				servicePoints = getServicePoint( p.pathArray[i-1], p.pathArray[i] );
 
@@ -13106,19 +13119,19 @@ var pathfinder = (function() {
 					animation: objectAnimation.animation,
 					speed: objectAnimation.speed,
 					step: step
-				})
+				});
 
 				step = servicePoints.serviceStep;
 			}
 		}
 
-		var pathId = p.pathArray[ p.pathArray.length-1 ],
-			objectAnimation = getAnimation({
-				obj: p.currentObject.id,
-				pathId: pathId,
-				animation: p.animationName,
-				speed: p.speedValue
-			});
+		pathId = p.pathArray[ p.pathArray.length-1 ];
+		objectAnimation = getAnimation({
+			obj: p.currentObject.id,
+			pathId: pathId,
+			animation: p.animationName,
+			speed: p.speedValue
+		});
 
 		resultPath.push({
 			pathId: pathId,
@@ -13132,16 +13145,17 @@ var pathfinder = (function() {
 			objectId: p.currentObject.id,
 			paths: resultPath,
 			callback: p.callback
-		})
+		});
 	}
 
 	function buildPathArray( p ) {
 		// Построение списка путей, необходимых для достижения конечной вершины графа
-		if ( p.resultPath.graphIdEnd == null) return false;
+		if ( p.resultPath.graphIdEnd === null || !globals.graph[ p.resultPath.graphIdStart]) { return false; }
 		var targetPath = globals.graph[ p.resultPath.graphIdStart].targets[ p.resultPath.graphIdEnd],
-			pathArray = [];
+			pathArray = [],
+			pathSteps;
 
-		for (var pathSteps = 1; pathSteps < targetPath.path.length; pathSteps++ ) {
+		for (pathSteps = 1; pathSteps < targetPath.path.length; pathSteps++ ) {
 			pathArray.push(globals.graph[ targetPath.path[pathSteps-1] ].targets[ targetPath.path[pathSteps] ].pathName );
 		}
 
@@ -13162,7 +13176,7 @@ var pathfinder = (function() {
 	}
 
 	function findPathToChain( p ) {
-		if (!p.currentObject || !globals.paths[p.path] || !globals.paths[ p.currentObject.path ]) return false;
+		if (!p.currentObject || !globals.paths[p.path] || !globals.paths[ p.currentObject.path ]) { return false; }
 
 		var path = p.path,
 			chain = p.chain,
@@ -13199,23 +13213,27 @@ var pathfinder = (function() {
 					steps: globals.paths[ currentObject.path ].steps.length - currentObject.step,
 					graphId: globals.paths[ currentObject.path ].dots[ globals.paths[ currentObject.path ].dots.length-1 ].graphId
 				}
-			];
+			],
+
+			currentPathVar,
+			candidatePathVar,
+			tDistance;
 
 		// Пары кратчайших путей (2*2)
-		for (var currentPathVar = 0 ; currentPathVar < 2; currentPathVar++) {
-			for (var candidatePathVar = 0 ; candidatePathVar < 2; candidatePathVar++) {
+		for (currentPathVar = 0 ; currentPathVar < 2; currentPathVar++) {
+			for (candidatePathVar = 0 ; candidatePathVar < 2; candidatePathVar++) {
 
-				var tDistance = currentPath[currentPathVar].steps +
+				tDistance = currentPath[currentPathVar].steps +
 					candidatePath[candidatePathVar].steps +
 					globals.graph[ currentPath[currentPathVar].graphId ].targets[ candidatePath[candidatePathVar].graphId ].distance;
 
-				if ( (tDistance) < minPath.steps ) {
+				if ( tDistance < minPath.steps ) {
 
 					minPath = {
 						steps: tDistance,
 						graphIdStart: currentPath[currentPathVar].graphId,
 						graphIdEnd: candidatePath[candidatePathVar].graphId
-					}
+					};
 				}
 
 			}
@@ -13230,44 +13248,38 @@ var pathfinder = (function() {
 				graphIdEnd: minPath.graphIdEnd,
 				path: path,
 				chain: chain
-			}
-		} else {
-			return resultPath;
+			};
 		}
+
+		return resultPath;
 	}
 
 	/**
 	* Перемещает объект точку, заданную координатами клика
-	* @param
 	*/
 	function moveObjectByCoords( p ) {
-		var currentObject = globals.objects[p.id];
-		if (!currentObject) return false;
+		var currentObject = globals.objects[p.id],
+			resultPath = {},
+			path,
+			chain;
 
-		// Анимации для перемещения
-		/* var animations = globals.hero.image.state.data.skeletonData.animations,
-			animationName = 'new';*/
-
-		// Скорость перехода между анимациями
-		//globals.hero.image.stateData.setMixByName("new", "stop", 0.8);
+		if (!currentObject) { return false; }
 
 		// Поиск шага, сопоставленного с областью клика
-
-		var resultPath = {};
-
 		// перебрать все траектории, понять, на которых из них может лежать целевая точка
 		for (path in globals.paths) {
-			if ( !globals.paths[path].controlPath || globals.paths[path].breakpath ) continue;
+			if ( globals.paths[path].controlPath && !globals.paths[path].breakpath ) {
 
-			for (var chain = 0; chain < globals.paths[path].controlPath.length; chain++) {
-				if (globals.paths[path].controlPath[chain].rect.contains( p.x * globals.scale, p.y * globals.scale )) {
+				for (chain = 0; chain < globals.paths[path].controlPath.length; chain++) {
+					if (globals.paths[path].controlPath[chain].rect.contains( p.x * globals.scale, p.y * globals.scale )) {
 
-					// Поиск ближайшей вершины графа из попадающих в область клика
-					resultPath = JSON.parse(JSON.stringify(findPathToChain( {
-						currentObject: currentObject,
-						path: path,
-						chain: chain
-					})));
+						// Поиск ближайшей вершины графа из попадающих в область клика
+						resultPath = JSON.parse(JSON.stringify(findPathToChain( {
+							currentObject: currentObject,
+							path: path,
+							chain: chain
+						})));
+					}
 				}
 			}
 		}
@@ -13275,14 +13287,16 @@ var pathfinder = (function() {
 		buildPathArray( {
 			resultPath: resultPath,
 			currentObject: currentObject
-		} )
+		} );
 	}
 
 	function moveObjectByChain( p ) {
-		var currentObject = globals.objects[p.id];
-		if (!currentObject) return false;
+		var currentObject = globals.objects[p.id],
+			resultPath;
 
-		var resultPath = findPathToChain( {
+		if (!currentObject) { return false; }
+
+		resultPath = findPathToChain( {
 				currentObject: currentObject,
 				path: p.path,
 				chain: p.chain
@@ -13294,14 +13308,14 @@ var pathfinder = (function() {
 			animationName: p.animationName,
 			speedValue: p.speedValue,
 			callback: p.callback
-		} )
+		} );
 	}
 
 	function attachPathFinderListeners() {
 
-		if ('ontouchend' in document) {
+		if (document.ontouchend !== undefined) {
 
-			window.addEventListener('touchend', function(e) {
+			window.addEventListener('touchend', function (e) {
 				if (globals.objectClicked || globals.viewport.resize) {
 					globals.objectClicked = false;
 					globals.viewport.resize = false;
@@ -13316,12 +13330,12 @@ var pathfinder = (function() {
 					id: 'hero',
 					x: (e.changedTouches[0].pageX - (scene.playGround.position.x / globals.scale)) / globals.viewport.scale ,
 					y: (e.changedTouches[0].pageY - (scene.playGround.position.y / globals.scale)) / globals.viewport.scale
-				})
-			})
+				});
+			});
 
 		} else {
 
-			window.addEventListener('click', function(e) {
+			window.addEventListener('click', function (e) {
 				if (globals.objectClicked || globals.viewport.resize) {
 					globals.objectClicked = false;
 					globals.viewport.resize = false;
@@ -13336,31 +13350,33 @@ var pathfinder = (function() {
 					id: 'hero',
 					x: (e.pageX - (scene.playGround.position.x / globals.scale)) / globals.viewport.scale,
 					y: (e.pageY - (scene.playGround.position.y / globals.scale)) / globals.viewport.scale
-				})
+				});
 
 
-			})
+			});
 
 		}
 
 	}
 
 	return {
-		start: function() {
+		start: function () {
 			attachPathFinderListeners();
 		},
 
 		// p.id
 		// p.path
 		// p.chain
-		moveObjectByChain: function( p ) {
+		moveObjectByChain: function ( p ) {
 			moveObjectByChain( p );
 		}
-	}
+	};
 
-})();
+}());
 
 
+
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
 function ai() {
 
@@ -13414,7 +13430,7 @@ function ai() {
 	function stayOnPlace() {
 		currentState = 0;
 
-		setTimeout(function() {
+		setTimeout(function () {
 			processAction();
 		}, utils.getRandomValue(stayTime) );
 	}
@@ -13441,7 +13457,7 @@ function ai() {
 				callback: function () {
 					processAction();
 				}
-			})
+			});
 
 		} else {
 			processAction();
@@ -13457,7 +13473,7 @@ function ai() {
 				callback: function () {
 					processAction();
 				}
-			})
+			});
 		} else {
 			processAction();
 		}
@@ -13482,18 +13498,19 @@ function ai() {
 	}
 
 	function processAction() {
-		if (stop) return;
+		if (stop) { return; }
 
 		var prob = utils.getRandomValue(10),
 			sum = 0,
 			isVisible = heroIsVisible
 				? 'yes'
-				: 'no';
+				: 'no',
+			i;
 
-		for (var i = 0; i < 4; i++)	 {
+		for (i = 0; i < 4; i++) {
 			sum += probMatrix[currentState][i][isVisible];
 
-			if (sum >= prob) break;
+			if (sum >= prob) { break; }
 		}
 
 		switch (i) {
@@ -13540,22 +13557,23 @@ function ai() {
 			return this;
 		},
 
-		start: function() {
+		start: function () {
 			stop = false;
 			currentState = 4;
 			processAction();
 		},
 
-		stop: function() {
+		stop: function () {
 			stop = true;
 		}
-	}
+	};
 }
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
 function obj() {
 
 	/* Private */
-	var animations = {},
-		x = -9999,
+	var x = -9999,
 		y = -9999,
 		z = 1,
 		pz = 1,
@@ -13575,8 +13593,10 @@ function obj() {
 		// p.z
 		// p.animation
 		create: function ( p ) {
-			var _this = this;
-			if (p.src === undefined) return false;
+			var _this = this,
+				id;
+
+			if (p.src === undefined) { return false; }
 
 			function setObjectPosition() {
 				_this.image.position.x = (p.x !== undefined) ? p.x : x;
@@ -13597,30 +13617,34 @@ function obj() {
 			}
 
 			function setObjectScale() {
-				_this.image.scale.x = _this.image.scale.y = (p.scale !== undefined) ? p.scale : 1
+				_this.image.scale.x = _this.image.scale.y = (p.scale !== undefined)
+					? p.scale
+					: 1;
 			}
 
 			function setReverse() {
 				if (p.reverse) {
 					_this.image.scale.x *= -1;
-					//_this.image.position.x = centerX - _this.image.scale.x * containerWidth / 2;
 				}
 			}
 
 			function generateRandomObjectId() {
 				var objectId = Math.random().toString();
+
 				if ( globals.objects[objectId] !== undefined) {
-					return generateRandomObjectId();
-				} else {
-					return objectId;
+					objectId = generateRandomObjectId();
 				}
+
+				return objectId;
 			}
 
 			function setAnimation() {
+				var animationName;
+
 				if (p.animation) {
 					_this.animation = {};
 
-					for (var animationName in p.animation) {
+					for (animationName in p.animation) {
 						_this.animation[animationName] = {};
 
 						if (p.animation[animationName].soundSrc) {
@@ -13628,7 +13652,7 @@ function obj() {
 							_this.animation[animationName].track = track().load({
 								obj: _this,
 								url: p.animation[animationName].soundSrc
-							})
+							});
 						}
 					}
 				}
@@ -13638,8 +13662,8 @@ function obj() {
 				if (p.interactive) {
 					_this.image.setInteractive(true);
 
-					_this.image.click = _this.image.tap = function (data) {
-						if (globals.viewport.resize) return false;
+					_this.image.click = _this.image.tap = function () {
+						if (globals.viewport.resize) { return false; }
 
 						globals.objectClicked = true;
 
@@ -13647,16 +13671,16 @@ function obj() {
 							obj: _this.id,
 							type: 'objectClick'
 						});
-					}
+					};
 
 					_this.image.mouseover = function () {
 
 						document.body.className += ' _cursor';
-					}
+					};
 
 					_this.image.mouseout = function () {
 						document.body.className = document.body.className.replace(/\s_cursor/ig, '');
-					}
+					};
 				}
 			}
 
@@ -13678,9 +13702,7 @@ function obj() {
 
 			if (p.src.indexOf('.anim') !== -1) {
 
-				var id = p.name
-					? p.name
-					: generateRandomObjectId();
+				id = p.name || generateRandomObjectId();
 
 				_this.type = 'spine';
 				_this.src = p.src;
@@ -13722,14 +13744,18 @@ function obj() {
 		// p.y
 		// p.z
 		move: function ( p ) {
-			var _this = this;
+			var _this = this,
+				dx,
+				screenHalfWidth,
+				screenHalfHeight,
+				dx1, dy1;
 
 			if (p.y !== undefined) {
 				_this.image.position.y = p.y;
 			}
 
 			if (p.x !== undefined) {
-				var dx = p.x - _this.image.position.x;
+				dx = p.x - _this.image.position.x;
 
 				// Идем назад
 				if ( dx < 0 ) {
@@ -13744,24 +13770,24 @@ function obj() {
 				if ( dx > 0 ) {
 
 					// Автоматический разворот модели в зависимости от направления движения
-					if ( (_this.image.state.current.name != 'stairCaseWalk') && (_this.image.scale.x < 0) )  {
+					if ( (_this.image.state.current.name !== 'stairCaseWalk') && (_this.image.scale.x < 0) )  {
 						_this.image.scale.x *= -1;
 					}
 				}
 
 				_this.image.position.x = p.x;
 
-				if ( _this.id == 'hero' ) {
+				if ( _this.id === 'hero' ) {
 
-					var screenHalfWidth = scene.width / 2 / globals.viewport.scale,
-						screenHalfHeight = scene.height / 2 / globals.viewport.scale,
-						dx1 = (_this.image.position.x - screenHalfWidth ) * globals.viewport.scale,
-						dy1 = (_this.image.position.y - (50/globals.scale) - screenHalfHeight ) * globals.viewport.scale;
+					screenHalfWidth = scene.width / 2 / globals.viewport.scale;
+					screenHalfHeight = scene.height / 2 / globals.viewport.scale;
+					dx1 = (_this.image.position.x - screenHalfWidth ) * globals.viewport.scale;
+					dy1 = (_this.image.position.y - (50/globals.scale) - screenHalfHeight ) * globals.viewport.scale;
 
 					scene.move({
-						dx: (0-dx1),
-						dy: (0-dy1)
-					})
+						dx: (-dx1),
+						dy: (-dy1)
+					});
 
 				}
 
@@ -13777,7 +13803,7 @@ function obj() {
 			return _this;
 		},
 
-		moveTo: function( p ) {
+		moveTo: function ( p ) {
 			var _this = this;
 
 			pathfinder.moveObjectByChain({
@@ -13793,9 +13819,11 @@ function obj() {
 		},
 
 		//p.animation
-		animate: function( p ) {
+		animate: function ( p ) {
 			var _this = this,
-				callback = p.callback || function() {};
+				callback = p.callback || function () {},
+				duration,
+				animationId;
 
 			_this.image.state.setAnimationByName( p.animation , false);
 
@@ -13803,10 +13831,10 @@ function obj() {
 				_this.animation[p.animation].track.play();
 			}
 
-			var duration = _this.image.state.current.duration * 1000,
-				animationId = Math.random();
+			duration = _this.image.state.current.duration * 1000;
+			animationId = Math.random();
 
-			setTimeout(function() {
+			setTimeout(function () {
 				callback();
 
 				relay.drop({
@@ -13815,7 +13843,7 @@ function obj() {
 					animation: p.animation,
 					id: animationId
 				});
-			}, duration)
+			}, duration);
 
 			relay.drop({
 				obj: _this,
@@ -13827,15 +13855,16 @@ function obj() {
 			return _this;
 		},
 
-		getPosition: function() {
+		getPosition: function () {
 
 			var _this = this,
 				path = _this.path,
 				chain,
 				graphId,
-				orientation = Math.abs(_this.image.scale.x)/_this.image.scale.x;
+				orientation = Math.abs(_this.image.scale.x)/_this.image.scale.x,
+				i;
 
-			for (var i = 0; i < globals.paths[ _this.path ].controlPath.length; i++) {
+			for (i = 0; i < globals.paths[ _this.path ].controlPath.length; i++) {
 
 				if ( Math.abs(globals.paths[ _this.path ].controlPath[i].step - _this.step) < 10 ) {
 
@@ -13858,12 +13887,14 @@ function obj() {
 				chain: chain,
 				graphId: graphId,
 				orientation: orientation
-			}
+			};
 
 		}
-	}
+	};
 }
-var utils = (function() {
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var utils = (function () {
 
 	return {
 
@@ -13871,9 +13902,7 @@ var utils = (function() {
 			var innerLow = high
 					? low
 					: 0,
-				innerHigh = high
-					? high
-					: low;
+				innerHigh = high || low;
 
 			return innerLow + Math.round( Math.random()*(innerHigh-innerLow) );
 		},
@@ -13883,7 +13912,7 @@ var utils = (function() {
 		//p.y1
 		//p.x2
 		//p.y2
-		getDistance: function( p ) {
+		getDistance: function ( p ) {
 			var xDistance = p.x2 - p.x1,
 				yDistance = p.y2 - p.y1;
 
@@ -13896,11 +13925,11 @@ var utils = (function() {
 		//p.x2
 		//p.y2
 		//p.t
-		getLinePointCoords: function( p ) {
+		getLinePointCoords: function ( p ) {
 			return {
 				x: (p.x2 - p.x1) * p.t + p.x1,
-				y: (p.y2 - p.y1) *  p.t + p.y1,
-			}
+				y: (p.y2 - p.y1) *  p.t + p.y1
+			};
 		},
 
 		// Возвращает координаты точки в кривой Безье
@@ -13913,7 +13942,7 @@ var utils = (function() {
 		//p.x2
 		//p.y2
 		//p.t
-		getBezierPointCoords: function( p ) {
+		getBezierPointCoords: function ( p ) {
 			function polynom(z) {
 				var at = (1 - p.t);
 
@@ -13923,7 +13952,7 @@ var utils = (function() {
 			return {
 				x: polynom( { p0: p.x1, p1: p.ax1, p2: p.ax2, p3: p.x2 } ),
 				y: polynom( { p0: p.y1, p1: p.ay1, p2: p.ay2, p3: p.y2 } )
-			}
+			};
 		},
 
 		// Возвращает позицию управляющих точек на кривой Безье
@@ -13931,29 +13960,29 @@ var utils = (function() {
 		//p.y1
 		//p.x2
 		//p.y2
-		getAdditionalBezierPointsCoords: function( p ) {
+		getAdditionalBezierPointsCoords: function ( p ) {
 			var a1 = utils.getLinePointCoords({
-				x1: p.x1,
-				y1: p.y1,
-				x2: p.x2,
-				y2: p.y2,
-				t: 0.3
-			})
+					x1: p.x1,
+					y1: p.y1,
+					x2: p.x2,
+					y2: p.y2,
+					t: 0.3
+				}),
 
-			var a2 = utils.getLinePointCoords({
-				x1: p.x1,
-				y1: p.y1,
-				x2: p.x2,
-				y2: p.y2,
-				t: 0.7
-			})
+				a2 = utils.getLinePointCoords({
+					x1: p.x1,
+					y1: p.y1,
+					x2: p.x2,
+					y2: p.y2,
+					t: 0.7
+				});
 
 			return {
 				ax1: a1.x,
 				ay1: a1.y,
 				ax2: a2.x,
 				ay2: a2.y
-			}
+			};
 		},
 
 		// Строит рекурсивно атомарные шаги по заданной кривой Безье длиной не более допустимого расстояния
@@ -13967,64 +13996,65 @@ var utils = (function() {
 		//p.y2
 		//p.t1,
 		//p.t2
-		buildCurveSteps: function( p ) {
+		buildCurveSteps: function ( p ) {
 			// максимально допустимое расстояние в пикселах
-			var maxDistance = 1.4
+			var maxDistance = 1.4,
+				path = {},
 
-			var path = {};
+				// считаем среднюю точку в заданном интервале [t1, t2]
+				middleT = p.t1 + (p.t2 - p.t1)/ 2,
 
-			// считаем среднюю точку в заданном интервале [t1, t2]
-			var middleT = p.t1 + (p.t2 - p.t1)/2;
+				// получаем координаты точек при t = t1, middleT, t2
+				pointInT = utils.getBezierPointCoords({
+					x1: p.x1,
+					y1: p.y1,
+					ax1: p.ax1,
+					ay1: p.ay1,
+					ax2: p.ax2,
+					ay2: p.ay2,
+					x2: p.x2,
+					y2: p.y2,
+					t: middleT
+				}),
 
-			// получаем координаты точек при t = t1, middleT, t2
-			var pointInT = utils.getBezierPointCoords({
-				x1: p.x1,
-				y1: p.y1,
-				ax1: p.ax1,
-				ay1: p.ay1,
-				ax2: p.ax2,
-				ay2: p.ay2,
-				x2: p.x2,
-				y2: p.y2,
-				t: middleT
-			});
+				pointInT1 = utils.getBezierPointCoords({
+					x1: p.x1,
+					y1: p.y1,
+					ax1: p.ax1,
+					ay1: p.ay1,
+					ax2: p.ax2,
+					ay2: p.ay2,
+					x2: p.x2,
+					y2: p.y2,
+					t: p.t1
+				}),
 
-			var pointInT1 = utils.getBezierPointCoords({
-				x1: p.x1,
-				y1: p.y1,
-				ax1: p.ax1,
-				ay1: p.ay1,
-				ax2: p.ax2,
-				ay2: p.ay2,
-				x2: p.x2,
-				y2: p.y2,
-				t: p.t1
-			});
+				pointInT2 = utils.getBezierPointCoords({
+					x1: p.x1,
+					y1: p.y1,
+					ax1: p.ax1,
+					ay1: p.ay1,
+					ax2: p.ax2,
+					ay2: p.ay2,
+					x2: p.x2,
+					y2: p.y2,
+					t: p.t2
+				}),
 
-			var pointInT2 = utils.getBezierPointCoords({
-				x1: p.x1,
-				y1: p.y1,
-				ax1: p.ax1,
-				ay1: p.ay1,
-				ax2: p.ax2,
-				ay2: p.ay2,
-				x2: p.x2,
-				y2: p.y2,
-				t: p.t2
-			});
+				// обход дерева слева
+				leftDistance = utils.getDistance({
+					x1: pointInT1.x,
+					y1: pointInT1.y,
+					x2: pointInT.x,
+					y2: pointInT.y
+				}),
 
-			// обход дерева слева
-			var leftDistance = utils.getDistance({
-				x1: pointInT1.x,
-				y1: pointInT1.y,
-				x2: pointInT.x,
-				y2: pointInT.y
-			})
+				innerLeftSteps, rightDistance, innerRightSteps, keyArr, result, i;
 
 			if ( leftDistance > maxDistance ) {
 
 				// Если можно разбить ветвь дальше, рекурсивно разбиваем
-				var innerLeftSteps = utils.buildCurveSteps({
+				innerLeftSteps = utils.buildCurveSteps({
 					x1: p.x1,
 					y1: p.y1,
 					ax1: p.ax1,
@@ -14038,7 +14068,7 @@ var utils = (function() {
 				});
 
 				// добавляем полученные точки в текущий путь
-				for (var i in innerLeftSteps) {
+				for (i in innerLeftSteps) {
 					path[i] = innerLeftSteps[i];
 				}
 
@@ -14051,17 +14081,17 @@ var utils = (function() {
 			}
 
 			// обход дерева справа
-			var rightDistance = utils.getDistance({
+			rightDistance = utils.getDistance({
 				x1: pointInT.x,
 				y1: pointInT.y,
 				x2: pointInT2.x,
 				y2: pointInT2.y
-			})
+			});
 
 			if ( rightDistance >= maxDistance ) {
 
 				// Рекурсивно строим ветку (фактически работает только левый обход)
-				var innerRightSteps = utils.buildCurveSteps({
+				innerRightSteps = utils.buildCurveSteps({
 					x1: p.x1,
 					y1: p.y1,
 					ax1: p.ax1,
@@ -14075,7 +14105,7 @@ var utils = (function() {
 				});
 
 				// Если ветвь можно разбить, добавляем полученные точки к текущему пути
-				for (var i in innerRightSteps) {
+				for (i in innerRightSteps) {
 					path[i] = innerRightSteps[i];
 				}
 			}
@@ -14084,33 +14114,33 @@ var utils = (function() {
 			path[middleT] = {
 				x: pointInT.x,
 				y: pointInT.y
-			}
+			};
 
 			// Случай, когда весь путь уже построен
-			if ((p.t1 == 0) && (p.t2 == 1)) {
+			if ((p.t1 === 0) && (p.t2 === 1)) {
 
 				// Добавляем граничные точки
 				path[0] = {
 					x: p.x1,
 					y: p.y1
-				}
+				};
 
 				path[1] = {
 					x: p.x2,
 					y: p.y2
-				}
+				};
 
 				// Разворачиваем объект в сортированный массив
-				var keyArr = [],
-					result = [];
+				keyArr = [];
+				result = [];
 
-				for (var i in path) {
+				for (i in path) {
 					keyArr.push(i);
 				}
 
 				keyArr = keyArr.sort();
 
-				for (var i = 0; i < keyArr.length; i++) {
+				for (i = 0; i < keyArr.length; i++) {
 					result.push(path[keyArr[i]]);
 				}
 
@@ -14124,79 +14154,67 @@ var utils = (function() {
 
 		// Генерирует управляющий контур для траектории
 		// p.pathId
-		buildControlPoligon: function( p ) {
+		buildControlPoligon: function ( p ) {
 
-			var touchRadiusDistance = 100;
-			var currentPath = globals.paths[p.pathId];
+			var touchRadiusDistance = 100,
+				currentPath = globals.paths[p.pathId],
+				controlPath = [],
+				lastPoint = 0,
+				distance, startTouchPoint, i;
 
-			var controlPath = [];
+			for (i = 0; i < currentPath.steps.length; i++) {
 
-			/*var touchPointCount = Math.round( currentPath.steps.length / touchRadiusDistance );
-
-			for (var touchPoint = 0; touchPoint < touchPointCount; touchPoint++) {
-				var startTouchPoint = {
-					x: currentPath.steps[touchPoint*touchRadiusDistance].x - (touchRadiusDistance/2),
-					y: currentPath.steps[touchPoint*touchRadiusDistance].y - (touchRadiusDistance/2)
-				}
-				console.log(touchPoint*touchRadiusDistance);
-				ctx.rect( startTouchPoint.x, startTouchPoint.y, touchRadiusDistance, touchRadiusDistance );
-
-			}*/
-
-			var lastPoint = 0;
-
-			for (var i = 0; i < currentPath.steps.length; i++) {
-
-				var distance = utils.getDistance({
+				distance = utils.getDistance({
 					x1: currentPath.steps[lastPoint].x,
 					y1: currentPath.steps[lastPoint].y,
 					x2: currentPath.steps[i].x,
-					y2: currentPath.steps[i].y,
-				})
+					y2: currentPath.steps[i].y
+				});
 
 				if (distance > touchRadiusDistance) {
 
 					// создание
-					var startTouchPoint = {
+					startTouchPoint = {
 						x: currentPath.steps[lastPoint].x - (touchRadiusDistance/2),
 						y: currentPath.steps[lastPoint].y - (touchRadiusDistance/2)
-					}
+					};
 
 					controlPath.push({
 						rect: new PIXI.Rectangle(startTouchPoint.x, startTouchPoint.y, touchRadiusDistance, touchRadiusDistance),
 						step: lastPoint
-					})
+					});
 
 					lastPoint = i;
 				}
 			}
 
-			var startTouchPoint = {
+			startTouchPoint = {
 				x: currentPath.steps[lastPoint].x - (touchRadiusDistance/2),
 				y: currentPath.steps[lastPoint].y - (touchRadiusDistance/2)
-			}
+			};
 
 			// создание
 			controlPath.push({
 				rect: new PIXI.Rectangle(startTouchPoint.x, startTouchPoint.y, currentPath.steps[currentPath.steps.length-1].x - startTouchPoint.x+ (touchRadiusDistance/2), currentPath.steps[currentPath.steps.length-1].y - startTouchPoint.y + (touchRadiusDistance/2)),
 				step: (currentPath.steps.length-1)
-			})
+			});
 
 			currentPath.controlPath = controlPath;
 		},
 
-		processPaths: function( p ) {
+		processPaths: function ( p ) {
 			var callback = p
-				? p.callback || function() {}
-				: function() {};
+					? p.callback || function () {}
+					: function () {},
+				path, stepsArray, i, j;
 
 			for (path in globals.paths) {
 				if (globals.paths[path].dots.length) {
 
 					globals.paths[path].steps = [];
-					for (var i = 1; i < globals.paths[path].dots.length; i++) {
+					for (i = 1; i < globals.paths[path].dots.length; i++) {
 
-						var stepsArray = utils.buildCurveSteps({
+						stepsArray = utils.buildCurveSteps({
 							x1: globals.paths[path].dots[i-1].mainHandle.x,
 							y1: globals.paths[path].dots[i-1].mainHandle.y,
 							ax1: globals.paths[path].dots[i-1].nextHandle.x,
@@ -14207,13 +14225,13 @@ var utils = (function() {
 							y2: globals.paths[path].dots[i].mainHandle.y,
 							t1: 0,
 							t2: 1
-						})
+						});
 
-						for (var j = 0; j < stepsArray.length; j++) {
+						for (j = 0; j < stepsArray.length; j++) {
 							globals.paths[path].steps.push({
 								x: stepsArray[j].x,
 								y: stepsArray[j].y
-							})
+							});
 						}
 					}
 
@@ -14221,7 +14239,7 @@ var utils = (function() {
 					if (globals.paths[path].steps.length) {
 						utils.buildControlPoligon({
 							pathId: path
-						})
+						});
 					}
 
 				}
@@ -14232,23 +14250,25 @@ var utils = (function() {
 
 		},
 
-		fadeIn: function() {
+		fadeIn: function () {
 			document.querySelector('.black-fade').className += ' black-fade_active';
 		},
 
-		fadeOut: function() {
+		fadeOut: function () {
 			document.querySelector('.black-fade').className = document.querySelector('.black-fade').className.replace(/\sblack-fade_active/ig, '');
 		}
-	}
+	};
 
-})();
-
-
+}());
 
 
 
 
-var graph = (function() {
+
+
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var graph = (function () {
 
 	var serviceGraph,
 		adjacencyMatrix;
@@ -14292,7 +14312,7 @@ var graph = (function() {
 			serviceGraph[point1][point2] = {
 				distance: distance,
 				path: pathName
-			}
+			};
 		}
 
 		// В обратную сторону путь тоже идет
@@ -14300,17 +14320,18 @@ var graph = (function() {
 			serviceGraph[point2][point1] = {
 				distance: distance,
 				path: pathName
-			}
+			};
 		}
 	}
 
 	// Вычисление кратчайшей дистанции
 	function calculateShortestDistance() {
-		var n = adjacencyMatrix[0].length;
+		var n = adjacencyMatrix[0].length,
+			k, i, j, e1, e2;
 
-		for (var k = 0; k < n; k++) {
-			for (var i = 0; i < n; i++) {
-				for (var j = 0; j < n; j++) {
+		for (k = 0; k < n; k++) {
+			for (i = 0; i < n; i++) {
+				for (j = 0; j < n; j++) {
 
 					// Если суммарное расстояние кандидатов при разбиении меньше, чем текущий путь,
 					// значение дистанции текущего пути перезаписывается суммой расстояний,
@@ -14321,12 +14342,12 @@ var graph = (function() {
 						adjacencyMatrix[i][j].path = [];
 
 						// для текущего поля матрицы записывается массив кратчайших путей
-						for (var e1 = 0; e1 < adjacencyMatrix[i][k].path.length; e1++) {
+						for (e1 = 0; e1 < adjacencyMatrix[i][k].path.length; e1++) {
 							adjacencyMatrix[i][j].path.push( adjacencyMatrix[i][k].path[e1] );
 						}
 
 						// с единицы — чтобы не дублировать точку пересечения
-						for (var e2 = 1; e2 < adjacencyMatrix[k][j].path.length; e2++) {
+						for (e2 = 1; e2 < adjacencyMatrix[k][j].path.length; e2++) {
 							adjacencyMatrix[i][j].path.push( adjacencyMatrix[k][j].path[e2] );
 						}
 					}
@@ -14339,32 +14360,40 @@ var graph = (function() {
 	// Построение матрицы достижимости
 	function buildAdjacencyMatrix( p ) {
 		var reference = [],
-			callback = (p && p.callback) || function() {};
+			callback = (p && p.callback) || function () {},
+			point,
+			distance,
+			path,
+			linkId,
+			otherId,
+			pathName,
+			graphPath,
+			i, j;
 
 		// Пересобираем объект в массив, потому что нам важен порядок их следования для построения матрицы достижимости
-		for (var point in serviceGraph) {
+		for (point in serviceGraph) {
 			reference.push(point);
 		}
 
 		// Матрица двумерна, создаем
 		adjacencyMatrix = new Array(reference.length);
 
-		for (var i = 0; i < reference.length; i++) {
+		for (i = 0; i < reference.length; i++) {
 			adjacencyMatrix[i] = new Array(reference.length);
 
-			for (var j = 0; j < reference.length; j++) {
+			for (j = 0; j < reference.length; j++) {
 
 				// Если расстояние между вершинами существует и не равно 0, берем его
 				// Если расстояние равно нулю (одна и та же вершина), это нужно записать отдельно
 				// Если расстояние неизвестно, приравниваем его к бесконечности
-				var distance = (serviceGraph[ reference[i] ][ reference[j] ])
+				distance = (serviceGraph[ reference[i] ][ reference[j] ])
 					? serviceGraph[ reference[i] ][ reference[j] ].distance
-					: (i == j)
+					: (i === j)
 						? 0
 						: Number.POSITIVE_INFINITY;
 
 				// Если вершина не одна и та же, запишем путь как пару вершин
-				var path = (distance)
+				path = distance
 					? [i, j]
 					: [];
 
@@ -14372,7 +14401,7 @@ var graph = (function() {
 				adjacencyMatrix[i][j] = {
 					path: path,
 					distance: distance
-				}
+				};
 			}
 		}
 
@@ -14381,22 +14410,22 @@ var graph = (function() {
 
 		// Записываем результат работы в граф так, чтобы каждая вершина имела информацию о том,
 		// с кем она связана, на каком расстоянии и как достичь одну вершину из другой
-		for (var point = 0; point < reference.length; point++) {
+		for (point = 0; point < reference.length; point++) {
 
 			globals.graph[point] = {
 				targets: {},
 				links: {}
-			}
+			};
 
-			for (var linkId in serviceGraph[ reference[point] ].link) {
+			for (linkId in serviceGraph[ reference[point] ].link) {
 
 				serviceGraph[ reference[point] ].link[linkId].graphId = point;
 
 				globals.graph[point].links[linkId] = serviceGraph[ reference[point] ].link[linkId];
 
-				for (var otherId = 0; otherId < reference.length; otherId++) {
+				for (otherId = 0; otherId < reference.length; otherId++) {
 					//console.log(reference[point], reference[otherId]);
-					var pathName = (serviceGraph[ reference[point] ][ reference[otherId] ] !== undefined)
+					pathName = (serviceGraph[ reference[point] ][ reference[otherId] ] !== undefined)
 						? serviceGraph[ reference[point] ][ reference[otherId] ].path
 						: false;
 
@@ -14404,9 +14433,9 @@ var graph = (function() {
 						distance: adjacencyMatrix[point][otherId].distance,
 						path: [],
 						pathName: pathName
-					}
+					};
 
-					for (var graphPath = 0; graphPath < adjacencyMatrix[point][otherId].path.length; graphPath++) {
+					for (graphPath = 0; graphPath < adjacencyMatrix[point][otherId].path.length; graphPath++) {
 						globals.graph[point].targets[otherId].path.push( adjacencyMatrix[point][otherId].path[graphPath] );
 					}
 				}
@@ -14421,16 +14450,21 @@ var graph = (function() {
 
 	return {
 		// Строит граф
-		buildGraph: function( p ) {
+		buildGraph: function ( p ) {
 
-			globals.graph = {},
-			serviceGraph = {},
+			var path,
+				point1,
+				point2,
+				distance;
+
+			globals.graph = {};
+			serviceGraph = {};
 			adjacencyMatrix = {};
 
-			for (var path in globals.paths) {
-				var point1 = globals.paths[path].dots[0].mainHandle;
-				var point2 = globals.paths[path].dots[ globals.paths[path].dots.length-1 ].mainHandle;
-				var distance = (globals.paths[path].breakpath)
+			for (path in globals.paths) {
+				point1 = globals.paths[path].dots[0].mainHandle;
+				point2 = globals.paths[path].dots[ globals.paths[path].dots.length-1 ].mainHandle;
+				distance = (globals.paths[path].breakpath)
 					? Number.POSITIVE_INFINITY
 					: globals.paths[path].steps.length;
 
@@ -14441,31 +14475,36 @@ var graph = (function() {
 		},
 
 		// Просто выводит матрицу достижимости
-		getAdjacencyMatrix: function() {
+		getAdjacencyMatrix: function () {
 
 			return adjacencyMatrix;
 		},
 
 		// Отдает вершину графа, если совпадает с заданным шагом
-		getGraphIdByStep: function( p ) {
+		getGraphIdByStep: function ( p ) {
+			var result;
 
 			if (p.step < 10) {
-				return globals.paths[p.path].dots[ 0 ].graphId;
+
+				result = globals.paths[p.path].dots[ 0 ].graphId;
 			} else if ( (globals.paths[p.path].steps.length-1) - p.step < 10  ) {
-				return globals.paths[p.path].dots[ globals.paths[p.path].dots.length-1 ].graphId;
-			} else {
-				return undefined;
+				result = globals.paths[p.path].dots[ globals.paths[p.path].dots.length-1 ].graphId;
 			}
+
+			return result;
 		}
-	}
-})();
-var move = (function() {
+	};
+}());
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var move = (function () {
 
 	function move( p ) {
 		var modelStep = globals.objects[p.id].step,
 			currentPath = globals.paths[ p.path ],
 			targetStep = currentPath.controlPath[ p.chain ].step,
-			callback = p.callback || function() {};
+			callback = p.callback || function () {},
+			stepDirection;
 
 		globals.objects[p.id].path = p.path;
 
@@ -14475,14 +14514,14 @@ var move = (function() {
 		}
 
 		// Направление движения
-		var stepDirection = currentPath.controlPath[ p.chain ].step - globals.objects[p.id].step;
-		stepDirection != 0
-			? stepDirection = stepDirection / Math.abs(stepDirection)
-			: 0;
+		stepDirection = currentPath.controlPath[ p.chain ].step - globals.objects[p.id].step;
+		if (stepDirection !== 0) {
+			stepDirection = stepDirection / Math.abs(stepDirection);
+		}
 
 		audio.updateWorldSound({
 			id: p.id
-		})
+		});
 
 		// Анимация запукается циклически
 		if (globals.objects[p.id].image.state.isComplete()) {
@@ -14502,36 +14541,39 @@ var move = (function() {
 
 		globals.objects[p.id].move({
 			x: currentPath.steps[ globals.objects[p.id].step ].x,
-			y: currentPath.steps[ globals.objects[p.id].step ].y,
-		})
+			y: currentPath.steps[ globals.objects[p.id].step ].y
+		});
 
 	}
-
 
 	return {
-		setMovement: function( p ) {
+		setMovement: function ( p ) {
 			move( p );
 		}
-	}
+	};
 
-})();
-var queue = (function() {
+}());
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var queue = (function () {
 
 	var objects = {};
 
 	function processQueue() {
-		var removedObjects = [];
+		var removedObjects = [],
+			objectPathsLength,
+			i, obj;
 
 		// Очистка исполненных объектов
 		function removeObjects() {
-			for (var i = 0; i < removedObjects.length; i++) {
+			for (i = 0; i < removedObjects.length; i++) {
 				delete objects[removedObjects[i]];
 			}
 		}
 
 		// Перебираются все анимируемые объекты (всё, что есть в очереди)
-		for (var obj in objects) {
-			var objectPathsLength = objects[obj].length;
+		for (obj in objects) {
+			objectPathsLength = objects[obj].length;
 
 			// Если у текущего объекта в очереди есть цепочки анимаций на исполнение,
 			// обрабатывается текущая первая из них
@@ -14552,7 +14594,7 @@ var queue = (function() {
 					if (!objects[obj][0].playingNow) {
 						globals.objects[obj].animate({
 							animation: objects[obj][0].animation,
-							callback: function() {
+							callback: function () {
 								// Сохраняем путь
 								globals.objects[obj].path = objects[obj][0].pathId;
 
@@ -14577,10 +14619,8 @@ var queue = (function() {
 									type: 'stop'
 								});
 							}
-						})
+						});
 						objects[obj][0].playingNow = true;
-					} else {
-						continue;
 					}
 
 				} else {
@@ -14592,7 +14632,7 @@ var queue = (function() {
 						chain: objects[obj][0].targetChain,
 						animation: objects[obj][0].animation,
 						speed: objects[obj][0].speed,
-						callback: function() {
+						callback: function () {
 							// Если только что завершенная анимация объекта не последняя в его цепочке,
 							// значение текущего шага устанавливается на первое из следующей анимации в цепочке
 							globals.objects[obj].step = objects[obj][1]
@@ -14600,13 +14640,13 @@ var queue = (function() {
 								: globals.objects[obj].step;
 
 							// После завершения исполнения анимации выкинуть её из цепочки объекта
-							var objectCallback = objects[obj].callback || function() {},
+							var objectCallback = objects[obj].callback || function () {},
 								oldPath = objects[obj].shift();
 
 							if (!objects[obj].length) {
 								// Цепочка анимаций закончилась, нужно остановиться
 
-								if (obj == 'hero') {
+								if (obj === 'hero') {
 									globals.objects[ obj ].image.state.setAnimationByName("stop", false); // STOP
 								}
 
@@ -14634,7 +14674,7 @@ var queue = (function() {
 								});
 							}
 						}
-					})
+					});
 
 				}
 
@@ -14650,7 +14690,7 @@ var queue = (function() {
 		removeObjects();
 
 		// Запустить цикл очереди заново
-		requestAnimationFrame( function() {
+		requestAnimationFrame( function () {
 			processQueue();
 		} );
 	}
@@ -14665,7 +14705,7 @@ var queue = (function() {
 		//
 		// p.objectId
 		// p.paths
-		addToObjPaths: function( p ) {
+		addToObjPaths: function ( p ) {
 			objects[p.objectId] = p.paths;
 			objects[p.objectId].callback = p.callback;
 
@@ -14684,19 +14724,21 @@ var queue = (function() {
 		// Запускает агент очереди;
 		// Агент крутится в фоне и следит за добавлением объектов в очереди
 		// Как только в очередь добавляется объект, начинается исполнение его анимации
-		startQueue: function() {
+		startQueue: function () {
 			processQueue();
 
 			return this;
 		}
-	}
+	};
 
-})()
-var relay = (function() {
+}());
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var relay = (function () {
 
 	return {
 
-		drop: function( p ) {
+		drop: function ( p ) {
 			var _this = this,
 				evt, objEvt,
 				inGraphId = p.graphId
@@ -14721,27 +14763,29 @@ var relay = (function() {
 
 		},
 
-		listen: function( eventName ) {
+		listen: function ( eventName ) {
 			var _this = this;
 
-			document.addEventListener(eventName, function( p ) {
+			document.addEventListener(eventName, function ( p ) {
 				console.log( p.detail );
-			})
+			});
 
 			return _this;
 		}
-	}
-})();
+	};
+}());
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
 // Снег
-document.addEventListener('snow.objectAdded', function( p ) {
+document.addEventListener('snow.objectAdded', function () {
 	(function startSnow() {
 		globals.objects.snow.animate({
 			animation: 'snow',
-			callback: function() {
+			callback: function () {
 				startSnow();
 			}
-		})
-	})();
+		});
+	}());
 });
 
 // Дерево откатывается
@@ -14749,37 +14793,37 @@ function moveTree() {
 	globals.paths.jump2.breakpath = true;
 	globals.paths.tree1.breakpath = true;
 	graph.buildGraph({
-		callback: function() {
+		callback: function () {
 			globals.objects.tree.moveTo({
 				path: 'groundTreeToLeft',
 				chain: 4,
 				animationName: 'animation',
 				speedValue: 2
-			})
+			});
 		}
 	});
 
 }
 
-document.addEventListener('hero.stop.inGraphId.8', function( p ) { moveTree() })
-document.addEventListener('hero.breakpoint.inGraphId.8', function( p ) { moveTree() })
+document.addEventListener('hero.stop.inGraphId.8', function () { moveTree(); });
+document.addEventListener('hero.breakpoint.inGraphId.8', function () { moveTree(); });
 
 // Клик на птицу
-document.addEventListener('bird.objectClick', function( p ) {
+document.addEventListener('bird.objectClick', function () {
 
-	if ( (globals.objects.hero.getPosition().path == 'treeInside') && (globals.objects.hero.getPosition().graphId == 4) ) {
+	if ( (globals.objects.hero.getPosition().path === 'treeInside') && (globals.objects.hero.getPosition().graphId === 4) ) {
 		// Запретить пользователю ходить на время анимации
 		globals.preventClick = true;
 
 		globals.objects.hero.animate({
 			animation: 'slope',
-			callback: function() {
+			callback: function () {
 
 				// Разрешить спуститься
 				globals.paths.treeToBucket.breakpath = false;
 
 				graph.buildGraph({
-					callback: function() {
+					callback: function () {
 
 						// Дойти до ведра
 						globals.objects.hero.moveTo( {
@@ -14787,15 +14831,15 @@ document.addEventListener('bird.objectClick', function( p ) {
 							chain: 0,
 							animationName: 'new',
 							speedValue: 3,
-							callback: function() {
+							callback: function () {
 
 								// Бросить ведро вниз
 								globals.objects.bucket.animate({
 									animation: 'bucket',
-									callback: function() {
+									callback: function () {
 
 										// Развернуть героя для спуска по веревке
-										if (globals.objects.hero.getPosition().orientation == 1) {
+										if (globals.objects.hero.getPosition().orientation === 1) {
 											globals.objects.hero.image.scale.x *= -1;
 										}
 
@@ -14803,61 +14847,61 @@ document.addEventListener('bird.objectClick', function( p ) {
 										globals.objects.hero.moveTo( {
 											path: 'groundTreeToLeft',
 											chain: 1
-										})
+										});
 
 									}
-								})
+								});
 							}
-						})
+						});
 
 					}
 				});
 			}
-		})
+		});
 
 		// Запустить птицу через таймер, потому что улетает в середине анимации
-		setTimeout(function() {
+		setTimeout(function () {
 			globals.objects.bird.moveTo( {
 				path: 'birdTreePath',
 				chain: 3,
 				animationName: 'bird',
 				speedValue: 4
-			})
+			});
 
-		}, 400)
+		}, 400);
 
 	}
 
 	// Если потянуться за птицей с земли
-	if ( (globals.objects.hero.path == 'treeToSemaphore') && (globals.objects.hero.step == 207) &&
-		(globals.objects.bird.path == 'birdTreePath') && (globals.objects.bird.step == 456 ) ) {
+	if ( (globals.objects.hero.path === 'treeToSemaphore') && (globals.objects.hero.step === 207) &&
+		(globals.objects.bird.path === 'birdTreePath') && (globals.objects.bird.step === 456 ) ) {
 
 		globals.objects.hero.animate({
 			animation: 'ReachOut'
-		})
+		});
 
 		// Птица улетает до того, как герой дотянется
-		setTimeout(function() {
+		setTimeout(function () {
 
 			globals.objects.bird.moveTo( {
 				path: 'birdTreePath2',
 				chain: 3,
 				animationName: 'bird',
 				speedValue: 4
-			})
+			});
 
-		}, 300)
+		}, 300);
 	}
 });
 
 // Спуск героя по веревке на землю
-document.addEventListener('hero.breakpoint.inGraphId.5', function( p ) {
+document.addEventListener('hero.breakpoint.inGraphId.5', function () {
 	if ( !globals.triggers.heroOnTheGround) {
 		// Запретить подниматься обратно наверх
 		globals.paths.bucketToGround.breakpath = true;
 
 		graph.buildGraph({
-			callback: function() {
+			callback: function () {
 
 				// Разрешить пользователю ходить
 				globals.triggers.heroOnTheGround = true;
@@ -14870,7 +14914,7 @@ document.addEventListener('hero.breakpoint.inGraphId.5', function( p ) {
 // Крышка мусорного бака шевелится
 function checkGarbageBucket() {
 
-	if (globals.triggers.garbageBucketIsOpen) return;
+	if (globals.triggers.garbageBucketIsOpen) { return; }
 
 	var currentChain = globals.objects.hero.getPosition().chain;
 
@@ -14878,34 +14922,34 @@ function checkGarbageBucket() {
 
 		globals.objects.garbageBucket.animate({
 			animation: 'live'
-		})
+		});
 	}
 
-	setTimeout(function() {
-		if ( globals.objects.hero.getPosition().path !== 'treeToSemaphore' ) return;
+	setTimeout(function () {
+		if ( globals.objects.hero.getPosition().path !== 'treeToSemaphore' ) { return; }
 		checkGarbageBucket();
 	}, 1200);
 }
 
-document.addEventListener('hero.stop.inGraphId.5', function( p ) { checkGarbageBucket() })
-document.addEventListener('hero.breakpoint.inGraphId.5', function( p ) { checkGarbageBucket() })
-document.addEventListener('hero.stop.inGraphId.11', function( p ) { checkGarbageBucket() })
-document.addEventListener('hero.breakpoint.inGraphId.11', function( p ) { checkGarbageBucket() })
+document.addEventListener('hero.stop.inGraphId.5', function () { checkGarbageBucket(); });
+document.addEventListener('hero.breakpoint.inGraphId.5', function () { checkGarbageBucket(); });
+document.addEventListener('hero.stop.inGraphId.11', function () { checkGarbageBucket(); });
+document.addEventListener('hero.breakpoint.inGraphId.11', function () { checkGarbageBucket(); });
 
-document.addEventListener('garbageBucket.objectClick', function( p ) {
-	if ( globals.triggers.garbageBucketIsOpen ) return;
+document.addEventListener('garbageBucket.objectClick', function () {
+	if ( globals.triggers.garbageBucketIsOpen ) { return; }
 
 	var currentChain = globals.objects.hero.getPosition().chain;
-	if ( !((globals.objects.hero.getPosition().path == 'treeToSemaphore') && (currentChain == 6 || currentChain == 7)) ) return;
+	if ( !((globals.objects.hero.getPosition().path === 'treeToSemaphore') && (currentChain === 6 || currentChain === 7)) ) { return; }
 
- 	globals.triggers.garbageBucketIsOpen = true;
+	globals.triggers.garbageBucketIsOpen = true;
 	globals.objects.garbageBucket.animate({
 		animation: 'open',
-		callback: function() {
+		callback: function () {
 
 			globals.objects.butterfly.move({
 				z: 15
-			})
+			});
 
 			globals.triggers.butterflyIsFree = true;
 
@@ -14914,86 +14958,86 @@ document.addEventListener('garbageBucket.objectClick', function( p ) {
 				chain: 0,
 				animationName: 'butterfly',
 				speedValue: 4
-			})
+			});
 
 		}
-	})
-})
+	});
+});
 
 // Клик на злодея под деревом
-document.addEventListener('villain.objectClick', function( p ) {
+document.addEventListener('villain.objectClick', function () {
 
 	// Если герой стоит вплотную к злодею, можно попробовать его поймать
-	if ( (globals.objects.hero.getPosition().path == 'groundTreeToLeft') && (globals.objects.hero.getPosition().chain == 3) ) {
+	if ( (globals.objects.hero.getPosition().path === 'groundTreeToLeft') && (globals.objects.hero.getPosition().chain === 3) ) {
 		globals.objects.hero.animate({
 			animation: 'catch',
-			callback: function() {
+			callback: function () {
 				globals.objects.villain.animate({
 					animation: 'animation'
-				})
+				});
 			}
-		})
+		});
 	} else {
 		globals.objects.villain.animate({
 			animation: 'animation'
-		})
+		});
 	}
 
 	hint.message('villainFirstHintText');
 });
 
 // Светофор качается
-document.addEventListener('semaphore.objectAdded', function( p ) {
+document.addEventListener('semaphore.objectAdded', function () {
 
 	(function startSemaphore() {
 		if (!globals.triggers.stopSemaphore) {
 			globals.objects.semaphore.animate({
 				animation: 'trafficLight',
-				callback: function() {
+				callback: function () {
 					startSemaphore();
 				}
-			})
+			});
 		}
-	})();
+	}());
 
 });
 
 // Положить птицу в Светофор
-document.addEventListener('semaphore.objectClick', function( p ) {
+document.addEventListener('semaphore.objectClick', function () {
 	if ( globals.triggers.semaphoreIsClickable ) {
 
-		if ( globals.objects.hero.getPosition().graphId == 17 ) {
+		if ( globals.objects.hero.getPosition().graphId === 17 ) {
 
 			globals.triggers.stopSemaphore = true;
 
 			// Остановить качание светофора
 			globals.objects.semaphore.animate({
 				animation: 'trafficLight_stop'
-			})
+			});
 
 			// Герой тянется к светофору
 			globals.objects.hero.animate({
 				animation: 'ReachOut'
-			})
+			});
 
 			// Таймер, потому что до завершения анимации
-			setTimeout(function() {
+			setTimeout(function () {
 				// Показать птицу в светофоре
 				if (globals.triggers.butterflyWasCatched) {
 
 					globals.objects.butterfly.move({
 						z: 15
-					})
+					});
 
 					// Разрешить ходить за шлагбаум
 					globals.paths.semaphoreToTV.breakpath = false;
 					graph.buildGraph({
-						callback: function() {
+						callback: function () {
 
 							//шлагбаум поднимается
 							globals.objects.barrier.animate({
 								animation: 'barrier'
-							})
+							});
 
 							clearTimeout( globals.triggers.centralActionHint );
 						}
@@ -15012,97 +15056,97 @@ document.addEventListener('semaphore.objectClick', function( p ) {
 function catchButterfly() {
 	globals.objects.hero.animate({
 		animation: 'catch',
-		callback: function() {
+		callback: function () {
 			globals.triggers.butterflyWasCatched = true;
 			globals.preventClick = false;
 		}
-	})
+	});
 
 	globals.objects.butterfly.move({
 		z: 0
-	})
+	});
 
 	globals.objects.butterfly.moveTo( {
 		path: 'butterflyStopPath',
 		chain: 1,
 		animationName: 'butterfly',
 		speedValue: 10
-	})
+	});
 }
 
-document.addEventListener('butterfly.stop.inGraphId.18', function( p ) {
+document.addEventListener('butterfly.stop.inGraphId.18', function () {
 	globals.objects.butterfly.moveTo( {
 		path: 'butterflyPath2',
 		chain: 0,
 		animationName: 'butterfly',
 		speedValue: 4
-	})
+	});
 
 	if ( globals.triggers.butterflyCanBeCatched) {
 
-		if (globals.objects.hero.getPosition().path == 'treeToSemaphore' && globals.objects.hero.getPosition().chain == 6) {
+		if (globals.objects.hero.getPosition().path === 'treeToSemaphore' && globals.objects.hero.getPosition().chain === 6) {
 			globals.preventClick = true;
 			catchButterfly();
 		}
 
 	}
-})
+});
 
-document.addEventListener('butterfly.stop.inGraphId.19', function( p ) {
+document.addEventListener('butterfly.stop.inGraphId.19', function () {
 	globals.objects.butterfly.moveTo( {
 		path: 'butterflyPath3',
 		chain: 0,
 		animationName: 'butterfly',
 		speedValue: 4
-	})
+	});
 
 	if ( globals.triggers.butterflyCanBeCatched) {
 
-		if (globals.objects.hero.getPosition().path == 'treeToSemaphore' && globals.objects.hero.getPosition().chain == 5) {
+		if (globals.objects.hero.getPosition().path === 'treeToSemaphore' && globals.objects.hero.getPosition().chain === 5) {
 			globals.preventClick = true;
 			catchButterfly();
 		}
 
 	}
-})
+});
 
-document.addEventListener('butterfly.stop.inGraphId.20', function( p ) {
+document.addEventListener('butterfly.stop.inGraphId.20', function () {
 	globals.objects.butterfly.moveTo( {
 		path: 'butterflyPath4',
 		chain: 0,
 		animationName: 'butterfly',
 		speedValue: 4
-	})
+	});
 
 	if ( (globals.triggers.butterflyCanBeCatched) ) {
 
-		if (globals.objects.hero.getPosition().graphId == 11 ) {
+		if (globals.objects.hero.getPosition().graphId === 11 ) {
 			globals.preventClick = true;
 			catchButterfly();
 		}
 
 	}
-})
+});
 
-document.addEventListener('butterfly.stop.inGraphId.21', function( p ) {
+document.addEventListener('butterfly.stop.inGraphId.21', function () {
 	globals.objects.butterfly.moveTo( {
 		path: 'butterflyPath',
 		chain: 0,
 		animationName: 'butterfly',
 		speedValue: 3
-	})
+	});
 
 	if ( globals.triggers.butterflyCanBeCatched) {
 
-		if (globals.objects.hero.getPosition().path == 'treeToSemaphore' && globals.objects.hero.getPosition().chain == 7) {
+		if (globals.objects.hero.getPosition().path === 'treeToSemaphore' && globals.objects.hero.getPosition().chain === 7) {
 			globals.preventClick = true;
 			catchButterfly();
 		}
 
 	}
-})
+});
 
-document.addEventListener('butterfly.objectClick', function( p ) {
+document.addEventListener('butterfly.objectClick', function () {
 
 	if (globals.triggers.butterflyInerval) {
 		clearInterval(globals.triggers.butterflyInerval);
@@ -15110,39 +15154,39 @@ document.addEventListener('butterfly.objectClick', function( p ) {
 
 	if ( !globals.triggers.butterflyCanBeCatched ) {
 
-		if ( globals.objects.butterfly.getPosition().path == 'butterflyPath' ) {
+		if ( globals.objects.butterfly.getPosition().path === 'butterflyPath' ) {
 			globals.objects.hero.moveTo({
 				path: 'treeToSemaphore',
 				chain: 8
-			})
+			});
 		}
 
-		if ( globals.objects.butterfly.getPosition().path == 'butterflyPath2' ) {
+		if ( globals.objects.butterfly.getPosition().path === 'butterflyPath2' ) {
 			globals.objects.hero.moveTo({
 				path: 'treeToSemaphore',
 				chain: 7
-			})
+			});
 		}
 
-		if ( globals.objects.butterfly.getPosition().path == 'butterflyPath3' ) {
+		if ( globals.objects.butterfly.getPosition().path === 'butterflyPath3' ) {
 			globals.objects.hero.moveTo({
 				path: 'treeToSemaphore',
 				chain: 6
-			})
+			});
 		}
 
-		if ( globals.objects.butterfly.getPosition().path == 'butterflyPath4' ) {
+		if ( globals.objects.butterfly.getPosition().path === 'butterflyPath4' ) {
 			globals.objects.hero.moveTo({
 				path: 'treeToSemaphore',
 				chain: 5
-			})
+			});
 		}
 
 	}
 
 	globals.triggers.butterflyCanBeCatched = true;
 
-	globals.triggers.butterflyInerval = setTimeout(function() {
+	globals.triggers.butterflyInerval = setTimeout(function () {
 		globals.triggers.butterflyCanBeCatched = false;
 	}, 25000);
 
@@ -15152,28 +15196,28 @@ document.addEventListener('butterfly.objectClick', function( p ) {
 
 
 function getTheStone(cb) {
-	var callback = cb || function() {};
+	var callback = cb || function () {};
 
 	if (!globals.triggers.ihavestone) {
 		globals.objects.hero.animate({
 			animation: 'slope',
-			callback: function() {
-				globals.triggers.ihavestone	 = true;
+			callback: function () {
+				globals.triggers.ihavestone	= true;
 				callback();
 			}
-		})
+		});
 
-		setTimeout(function() {
+		setTimeout(function () {
 			globals.objects.stone.move({
 				z: 0
-			})
+			});
 
 			globals.objects.stone.moveTo({
 				path: 'stoneToHand',
 				chain: 1,
 				speedValue: 20
-			})
-		}, 700)
+			});
+		}, 700);
 
 	} else {
 		callback();
@@ -15185,27 +15229,27 @@ function getTheStone(cb) {
 
 function dropToVillain() {
 
-	getTheStone(function() {
+	getTheStone(function () {
 
 		globals.preventClick = false;
 
-		if (globals.objects.hero.getPosition().orientation == -1) {
+		if (globals.objects.hero.getPosition().orientation === -1) {
 			globals.objects.hero.image.scale.x *= -1;
 		}
 
 		globals.objects.stone.move({
 			z: 10
-		})
+		});
 
 		globals.objects.stone.moveTo({
 			path: 'stoneToHand',
 			chain: 3,
 			speedValue: 18,
-			callback: function() {
+			callback: function () {
 
 				globals.objects.stone.move({
 					z: 0
-				})
+				});
 
 				globals.objects.villain2.ai.stop();
 				globals.objects.villain2.moveTo( {
@@ -15217,11 +15261,8 @@ function dropToVillain() {
 
 				globals.paths.semaphoreTurnOnPath.breakpath = false;
 
-/* === */
-//				globals.paths.semaphoreToTV.breakpath = false;
-/* === */
 				graph.buildGraph({
-					callback: function() {
+					callback: function () {
 						globals.triggers.semaphoreIsClickable = true;
 					}
 				});
@@ -15229,28 +15270,28 @@ function dropToVillain() {
 				globals.objects.villain2.image.setInteractive(false);
 
 			}
-		})
-	})
+		});
+	});
 }
 
-document.addEventListener('stone.objectClick', function( p ) {
+document.addEventListener('stone.objectClick', function () {
 
-	if ( globals.objects.hero.getPosition().graphId == 11 ) {
+	if ( globals.objects.hero.getPosition().graphId === 11 ) {
 		getTheStone();
 	}
-})
+});
 
-document.addEventListener('villain2.objectClick', function( p ) {
+document.addEventListener('villain2.objectClick', function () {
 
-	if (globals.objects.hero.getPosition().graphId == 11) {
+	if (globals.objects.hero.getPosition().graphId === 11) {
 		dropToVillain();
-	} else if ( ~['treeToSemaphore', 'semaphoreBreakPath'].indexOf( globals.objects.hero.getPosition().path ) ) {
+	} else if ( ['treeToSemaphore', 'semaphoreBreakPath'].indexOf( globals.objects.hero.getPosition().path ) !== -1 ) {
 		globals.objects.hero.moveTo( {
 			path: 'treeToSemaphore',
 			chain: 8,
 			animationName: 'new',
 			speedValue: 3,
-			callback: function() {
+			callback: function () {
 				dropToVillain();
 			}
 		});
@@ -15258,73 +15299,73 @@ document.addEventListener('villain2.objectClick', function( p ) {
 });
 
 // Телевизор
-function TVPictures() {
+function tvPictures() {
 	globals.objects.tv.animate({
 		animation: 'TV stop',
-		callback: function() {
-			TVPictures();
+		callback: function () {
+			tvPictures();
 		}
-	})
+	});
 }
 
-document.addEventListener('tv.objectClick', function( p ) {
+document.addEventListener('tv.objectClick', function () {
 
-	if ( globals.objects.hero.path == 'TVPath' ) {
+	if ( globals.objects.hero.path === 'TVPath' ) {
 
 		globals.objects.hero.moveTo( {
 			path: 'TVPath',
 			chain: 2,
-			callback: function() {
+			callback: function () {
 
 				globals.objects.tv.animate({
 					animation: 'TV run',
-					callback: function() {
+					callback: function () {
 
 						globals.paths.pathToMonitors.breakpath = false;
 						graph.buildGraph();
 
-						TVPictures();
+						tvPictures();
 					}
-				})
+				});
 			}
 		});
 	}
 });
 
 //второй вариант
-document.addEventListener('roadSing.objectClick', function( p ){
+document.addEventListener('roadSing.objectClick', function () {
 
-   if( (globals.objects.hero.getPosition().path == 'elephantPath') && (globals.objects.hero.getPosition().chain == 1) ){
+   if( (globals.objects.hero.getPosition().path === 'elephantPath') && (globals.objects.hero.getPosition().chain === 1) ) {
 
-	   globals.objects.hero.animate({
-		   animation:'ReachOut',
-		   callback: function(){
+	globals.objects.hero.animate({
+		animation:'ReachOut',
+		callback: function (){
 
-			   //знак меняется на противоположный
-			   globals.objects.roadSing.animate({
-				   animation:'roadSing',
-				   callback: function () {
+			//знак меняется на противоположный
+			globals.objects.roadSing.animate({
+				animation:'roadSing',
+				callback: function () {
 
-					   //дверь открывается
-					   globals.objects.doorToTheNextLavel.animate({
-						   animation:'door',
-						   callback: function () {
-								globals.triggers.exit = true;
+					//дверь открывается
+					globals.objects.doorToTheNextLavel.animate({
+						animation:'door',
+						callback: function () {
+						globals.triggers.exit = true;
 
-								clearTimeout( globals.triggers.levelEndHint );
-						   }
-					   })
+						clearTimeout( globals.triggers.levelEndHint );
+						}
+					});
 
-				   }
-			   });
-		   }
-	   })
+				}
+			});
+		}
+	});
    }
 
-})
+});
 
 // Конец уровня
-document.addEventListener('hero.stop.inGraphId.32', function( p ) {
+document.addEventListener('hero.stop.inGraphId.32', function () {
 
 	if (globals.triggers.exit) {
 		audio.fadeOut();
@@ -15332,7 +15373,7 @@ document.addEventListener('hero.stop.inGraphId.32', function( p ) {
 	} else {
 		hint.message('endPathFailText');
 	}
-})
+});
 
 /* === Подсказки */
 
@@ -15343,34 +15384,23 @@ document.addEventListener('hero.stop.inGraphId.32', function( p ) {
 function stairHint() {
 	var time = utils.getRandomValue(10000, 20000);
 
-	globals.triggers.stairHint = setTimeout(function() {
+	globals.triggers.stairHint = setTimeout(function () {
 		hint.message('stairHintText');
 		stairHint();
 	}, time);
 }
 
-document.addEventListener('hero.objectAdded', function( p ) {
+document.addEventListener('hero.objectAdded', function () {
 	stairHint();
-})
-
-document.addEventListener('hero.stop.inGraphId.2', function( p ) {
-	if (!globals.triggers.bucketHint) bucketHint();
-	clearTimeout( globals.triggers.stairHint );
-})
-
-document.addEventListener('hero.breakpoint.inGraphId.2', function( p ) {
-	if (!globals.triggers.bucketHint) bucketHint();
-	clearTimeout( globals.triggers.stairHint );
-
-})
+});
 
 // Ведро
 function bucketHint() {
 	var time = utils.getRandomValue(10000, 20000);
 
-	globals.triggers.bucketHint = setTimeout(function() {
+	globals.triggers.bucketHint = setTimeout(function () {
 
-		if ( ~['tree1', 'jump2', 'treeInside', 'treeToBucket'].indexOf(globals.objects.hero.getPosition().path)  ) {
+		if ( ['tree1', 'jump2', 'treeInside', 'treeToBucket'].indexOf(globals.objects.hero.getPosition().path) !== -1  ) {
 			hint.message('bucketHintText');
 		}
 		bucketHint();
@@ -15378,27 +15408,28 @@ function bucketHint() {
 	}, time);
 }
 
-document.addEventListener('hero.stop.inGraphId.3', function( p ) {
-	if (!globals.triggers.centralActionHint) centralAction();
-	clearTimeout( globals.triggers.bucketHint );
-})
+document.addEventListener('hero.stop.inGraphId.2', function () {
+	if (!globals.triggers.bucketHint) { bucketHint(); }
+	clearTimeout( globals.triggers.stairHint );
+});
 
-document.addEventListener('hero.breakpoint.inGraphId.3', function( p ) {
-	if (!globals.triggers.centralActionHint) centralAction();
-	clearTimeout( globals.triggers.bucketHint );
-})
+document.addEventListener('hero.breakpoint.inGraphId.2', function () {
+	if (!globals.triggers.bucketHint) { bucketHint(); }
+	clearTimeout( globals.triggers.stairHint );
+
+});
 
 // Центральная сцена
 function centralAction() {
 	var time = utils.getRandomValue(10000, 20000);
 
-	globals.triggers.centralActionHint = setTimeout(function() {
+	globals.triggers.centralActionHint = setTimeout(function () {
 
 		if (globals.triggers.semaphoreIsClickable && (globals.triggers.butterflyWasCatched || globals.triggers.butterflyIsFree)) {
 			hint.message('semaphoreHintText');
-		} else if ( globals.objects.hero.getPosition().path == 'treeToSemaphore' && !globals.triggers.butterflyWasCatched && !globals.triggers.butterflyIsFree ) {
+		} else if ( globals.objects.hero.getPosition().path === 'treeToSemaphore' && !globals.triggers.butterflyWasCatched && !globals.triggers.butterflyIsFree ) {
 			hint.message('garbageHintText');
-		} else if ( globals.objects.hero.getPosition().path == 'semaphoreBreakPath' && !globals.triggers.semaphoreIsClickable ) {
+		} else if ( globals.objects.hero.getPosition().path === 'semaphoreBreakPath' && !globals.triggers.semaphoreIsClickable ) {
 			hint.message('villainHintText');
 		}
 
@@ -15406,150 +15437,45 @@ function centralAction() {
 	}, time);
 }
 
-document.addEventListener('hero.stop.inGraphId.13', function( p ) {
-	if (!globals.triggers.levelEndHint) levelEnd();
-})
+document.addEventListener('hero.stop.inGraphId.3', function () {
+	if (!globals.triggers.centralActionHint) { centralAction(); }
+	clearTimeout( globals.triggers.bucketHint );
+});
 
-document.addEventListener('hero.breakpoint.inGraphId.13', function( p ) {
-	if (!globals.triggers.levelEndHint) levelEnd();
-})
+document.addEventListener('hero.breakpoint.inGraphId.3', function () {
+	if (!globals.triggers.centralActionHint) { centralAction(); }
+	clearTimeout( globals.triggers.bucketHint );
+});
 
 // Переключатель на выход
 function levelEnd() {
 
 	var time = utils.getRandomValue(10000, 20000);
 
-	globals.triggers.levelEndHint = setTimeout(function() {
+	globals.triggers.levelEndHint = setTimeout(function () {
 
-		if ( ~['endPath', 'endPath1', 'elephantPath'].indexOf(globals.objects.hero.getPosition().path)  ) {
+		if ( ['endPath', 'endPath1', 'elephantPath'].indexOf(globals.objects.hero.getPosition().path) !== -1  ) {
 			hint.message('finalGarbageHintText');
 		}
 
 		levelEnd();
 	}, time);
 }
-function track() {
 
-	var sound = false,
-		parentObject;
+document.addEventListener('hero.stop.inGraphId.13', function () {
+	if (!globals.triggers.levelEndHint) { levelEnd(); }
+});
 
-	return {
+document.addEventListener('hero.breakpoint.inGraphId.13', function () {
+	if (!globals.triggers.levelEndHint) { levelEnd(); }
+});
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
-		source: false,
-
-		load: function ( p ) {
-
-			var _this = this,
-				callback = p.callback || function() {},
-				buffer;
-
-			function useSound(arrayBuffer, callback) {
-				var callback = callback || function () {};
-
-				audio.getContext().decodeAudioData(
-					arrayBuffer,
-					function (decodedArrayBuffer) {
-
-						sound = decodedArrayBuffer;
-
-						parentObject.panner = audio.getContext().createPanner();
-						parentObject.panner.rolloffFactor = 0.01;
-						parentObject.panner.connect( audio.getGainNode() );
-
-						if (Object.keys(p.obj).length !== 1) {
-
-							audio.updateWorldSound({
-								id: p.obj.id
-							})
-						}
-
-						callback();
-
-						return;
-
-					});
-
-				callback();
-			}
-
-			function makeRequest(callback) {
-				var callback = callback || function () {},
-					xhr = new XMLHttpRequest();
-
-				xhr.open('GET', p.url, true);
-				xhr.responseType = 'arraybuffer';
-				xhr.onload = function(e) {
-
-					if (localforage._driver !== 'localStorageWrapper') {
-						localforage.setItem(p.url, xhr.response, function() {
-							useSound(xhr.response, callback);
-						})
-					} else {
-						useSound(xhr.response, callback);
-					}
-				};
-				xhr.send();
-
-			}
-
-			if ( audio.getContext() ) {
-
-				parentObject = p.obj;
-
-				localforage.getItem(p.url, function(audiobuffer) {
-					if (audiobuffer) {
-						console.log(p.url + ' was loaded from cache.');
-						useSound(audiobuffer, callback);
-					} else {
-						console.log(p.url + ' was loaded from network.');
-						makeRequest(callback);
-					}
-
-				})
-
-			} else {
-				callback();
-			}
-
-			return _this;
-		},
-
-		play: function ( p ) {
-
-			var _this = this,
-				loop = (p && p.loop) || false,
-				callback = (p && p.callback) || function() {};
-
-			if (sound) {
-				_this.source = audio.getContext().createBufferSource();
-
-				_this.source.buffer = sound;
-				_this.source.connect( parentObject.panner );
-				_this.source.loop = loop;
-
-				_this.source.start(0);
-
-				setTimeout(function() {
-					callback();
-				}, _this.source.buffer.duration * 1000);
-			}
-
-			return _this;
-		},
-
-		stop: function() {
-			this.source && this.source.stop();
-		}
-	}
-}
-
-
-var audio = (function() {
+var audio = (function () {
 
 	var context,
 		gainNode,
 		fadeDuration = 1,
-		fadeOverlay,
 		splashMusic = track(),
 		backgroundMusic = track();
 
@@ -15561,8 +15487,8 @@ var audio = (function() {
 				: context;
 
 			gainNode = (context.createGain)
-						? context.createGain()
-						: context.createGainNode();
+				? context.createGain()
+				: context.createGainNode();
 
 			gainNode.connect(context.destination);
 		} catch(e) {
@@ -15580,7 +15506,7 @@ var audio = (function() {
 			soundObj.panner.setPosition(soundObj.image.position.x, soundObj.image.position.y, 0);
 		}
 
-		if ( (context) && (p.id == 'hero') ) {
+		if ( context && (p.id === 'hero') ) {
 			context.listener.setPosition(soundObj.image.position.x, soundObj.image.position.y, 0);
 		}
 	}
@@ -15591,14 +15517,14 @@ var audio = (function() {
 
 			obj: {},
 			url: 'assets/music/splash.ogg',
-			callback: function() {
+			callback: function () {
 
 				splashMusic.play({
 					loop: true
-				})
+				});
 
 			}
-		})
+		});
 	}
 
 	function startBackgroundSound() {
@@ -15607,13 +15533,13 @@ var audio = (function() {
 
 			obj: globals.objects.hero,
 			url: 'assets/music/background.ogg',
-			callback: function() {
+			callback: function () {
 
 				backgroundMusic.play({
 					loop: true
-				})
+				});
 			}
-		})
+		});
 	}
 
 	function updateVolume() {
@@ -15640,11 +15566,11 @@ var audio = (function() {
 			initContext();
 			updateVolume();
 
-			document.addEventListener("visibilitychange", function() {
+			document.addEventListener("visibilitychange", function () {
 				handleVisibilityChange();
 			});
 
-			document.addEventListener("webkitvisibilitychange", function() {
+			document.addEventListener("webkitvisibilitychange", function () {
 				handleVisibilityChange();
 			});
 
@@ -15667,16 +15593,13 @@ var audio = (function() {
 
 			if (audio.getContext()) {
 
-				var duration = 1,
-					currTime = audio.getContext().currentTime;
-
 				audio.fadeOut();
 
-				setTimeout(function() {
+				setTimeout(function () {
 					splashMusic.stop();
-					splashMusic.play = function() {};
+					splashMusic.play = function () {};
 					audio.fadeIn();
-				}, 1000)
+				}, 1000);
 			}
 
 			return this;
@@ -15695,7 +15618,7 @@ var audio = (function() {
 			return this;
 		},
 
-	 	fadeIn: function () {
+		fadeIn: function () {
 			if (context) {
 				var currTime  = audio.getContext().currentTime;
 
@@ -15704,7 +15627,7 @@ var audio = (function() {
 			}
 		},
 
-	 	fadeOut:function () {
+		fadeOut:function () {
 			if (context) {
 				var currTime  = audio.getContext().currentTime;
 
@@ -15717,18 +15640,139 @@ var audio = (function() {
 			return context;
 		},
 
-		getGainNode: function() {
+		getGainNode: function () {
 			return gainNode;
 		}
-	}
-})()
-var video = (function() {
+	};
+}());
+
+function track() {
+
+	var sound = false,
+		parentObject;
+
+	return {
+
+		source: false,
+
+		load: function ( p ) {
+
+			var _this = this,
+				callback = p.callback || function () {};
+
+			function useSound(arrayBuffer, cb) {
+				var callback = cb || function () {};
+
+				audio.getContext().decodeAudioData(
+					arrayBuffer,
+					function (decodedArrayBuffer) {
+
+						sound = decodedArrayBuffer;
+
+						parentObject.panner = audio.getContext().createPanner();
+						parentObject.panner.rolloffFactor = 0.01;
+						parentObject.panner.connect( audio.getGainNode() );
+
+						if (Object.keys(p.obj).length !== 1) {
+
+							audio.updateWorldSound({
+								id: p.obj.id
+							});
+						}
+
+						callback();
+
+						return;
+
+					}, function () {
+						callback();
+					}
+				);
+			}
+
+			function makeRequest(cb) {
+				var callback = cb || function () {},
+					xhr = new XMLHttpRequest();
+
+				xhr.open('GET', p.url, true);
+				xhr.responseType = 'arraybuffer';
+				xhr.onload = function () {
+
+					if (localforage._driver !== 'localStorageWrapper') {
+						localforage.setItem(p.url, xhr.response, function () {
+							useSound(xhr.response, callback);
+						});
+					} else {
+						useSound(xhr.response, callback);
+					}
+				};
+				xhr.send();
+
+			}
+
+			if ( audio.getContext() ) {
+
+				parentObject = p.obj;
+
+				localforage.getItem(p.url, function (audiobuffer) {
+					if (audiobuffer) {
+						console.log(p.url + ' was loaded from cache.');
+						useSound(audiobuffer, callback);
+					} else {
+						console.log(p.url + ' was loaded from network.');
+						makeRequest(callback);
+					}
+
+				});
+
+			} else {
+				callback();
+			}
+
+			return _this;
+		},
+
+		play: function ( p ) {
+
+			var _this = this,
+				loop = (p && p.loop) || false,
+				callback = (p && p.callback) || function () {};
+
+			if (sound) {
+				_this.source = audio.getContext().createBufferSource();
+
+				_this.source.buffer = sound;
+				_this.source.connect( parentObject.panner );
+				_this.source.loop = loop;
+
+				_this.source.start(0);
+
+				setTimeout(function () {
+					callback();
+				}, _this.source.buffer.duration * 1000);
+			}
+
+			return _this;
+		},
+
+		stop: function () {
+			if (this.source) {
+				this.source.stop();
+			}
+
+			return this;
+		}
+	};
+}
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var video = (function () {
 
 	var videoPlayer = false;
 
 	return {
 
-		init: function() {
+		init: function () {
 			videoPlayer = document.querySelector('video');
 
 			if ( (videoPlayer.canPlayType('video/mp4') !== 'maybe') || (navigator.userAgent.toLowerCase().match(/ipad|iphone|ipod/i) !== null) ) {
@@ -15737,9 +15781,9 @@ var video = (function() {
 			return this;
 		},
 
-		play: function( callback ) {
+		play: function ( cb ) {
 
-			var callback = callback || function () {};
+			var callback = cb || function () {};
 
 			function finishVideo() {
 				videoPlayer.style.display = 'none';
@@ -15747,12 +15791,12 @@ var video = (function() {
 				callback();
 			}
 
-			if (videoPlayer) {
+			if (videoPlayer && (navigator.onLine !== false)) {
 				videoPlayer.style.display = 'block';
 
 				videoPlayer.onended = videoPlayer.onclick = function () {
 					finishVideo();
-				}
+				};
 
 				videoPlayer.play();
 			} else {
@@ -15760,9 +15804,9 @@ var video = (function() {
 			}
 			return this;
 		}
-	}
+	};
 
-})();
+}());
 var translations = {
 	villainFirstHintText: {
 		'ru': 'Этот сиккарах выглядит рассерженным. Вряд ли он пропустит меня.'
@@ -15797,19 +15841,15 @@ var translations = {
 	}
 
 }
-var hint = (function() {
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var hint = (function () {
 
 	var hint,
 		currentTimeout,
 		messageStack = [],
 		showDuration = 5000,
 		isActive = false;
-
-
-	function show( text ) {
-
-		showMessage();
-	}
 
 	function check() {
 		if (!messageStack.length) {
@@ -15827,15 +15867,15 @@ var hint = (function() {
 		hint.innerHTML = messageStack.shift();
 
 		isActive = true;
-		currentTimeout = setTimeout(function() {
+		currentTimeout = setTimeout(function () {
 			isActive = false;
 			check();
-		}, showDuration)
+		}, showDuration);
 	}
 
 	return {
-		init: function ( callback ) {
-			var callback = callback || function() {};
+		init: function ( cb ) {
+			var callback = cb || function () {};
 
 			hint = document.querySelector('.hint');
 			hint.onclick = function () {
@@ -15843,9 +15883,9 @@ var hint = (function() {
 				clearTimeout(currentTimeout);
 				isActive = false;
 				check();
-			}
+			};
 
-			localforage.getItem('locale', function(locale) {
+			localforage.getItem('locale', function (locale) {
 				if (locale) {
 					globals.locale = locale;
 				} else {
@@ -15854,7 +15894,7 @@ var hint = (function() {
 				}
 
 				callback();
-			})
+			});
 
 
 			return this;
@@ -15879,46 +15919,48 @@ var hint = (function() {
 
 			return this;
 		}
-	}
+	};
 
-})();
-var loader = (function() {
+}());
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var loader = (function () {
 
 	// Предзагрузка ресурсов
 	function initResources( p ) {
 		var assetsLoader = new PIXI.AssetLoader(p.resources),
-			callback = p.callback || function() {};
+			callback = p.callback || function () {};
 
 		assetsLoader.onComplete = function () {
 			callback();
-		}
+		};
 
 		assetsLoader.load();
 	}
 
 	// Извлечение путей
 	function buildPaths ( p ) {
-		var callback = p.callback || function() {};
+		var callback = p.callback || function () {};
 
 		// Построить траектории
 		utils.processPaths({
-			callback: function() {
+			callback: function () {
 
 				// Построить граф
 				graph.buildGraph({
-					callback: function() {
+					callback: function () {
 						callback();
 						pathfinder.start();
 					}
 				});
 
 			}
-		})
+		});
 	}
 
 	return {
 
-		init: function( p ) {
+		init: function ( p ) {
 			var callback = p.callback || function () {};
 
 			// предзагрузить ресурсы
@@ -15935,11 +15977,11 @@ var loader = (function() {
 						callback: callback
 					});
 				}
-			})
+			});
 		}
-	}
+	};
 
-})();
+}());
 
 function init() {
 
@@ -16019,30 +16061,26 @@ function init() {
 				butterflyPath = 'butterflyPath',
 				stoneToHand = 'stoneToHand',
 				addHero2Path = 'addHero2Path',
-				elephantPath = 'elephantPath',
 				elephantPathEnd = 'elephantPathEnd',
-				pathToMonitors = 'pathToMonitors',
-				pathToRoadSing = 'pathToRoadSing',
-				endPath = 'endPath',
-				endPath1 = 'endPath1';
+				endPath1 = 'endPath1',
 
-			var background = obj().create({
+			background = obj().create({
 				src: 'assets/background/background.jpg',
 				name: 'background',
 				x: 0,
 				y: 0,
 				z: 5
-			});
+			}),
 
-			var backgroundVillainPatch = obj().create({
+			backgroundVillainPatch = obj().create({
 				src: 'assets/background/backgroundVillainPatch.png',
 				name: 'backgroundVillainPatch',
 				x: 1582,
 				y: 600,
 				z: 10
-			});
+			}),
 
-			var tree = obj().create({
+			tree = obj().create({
 				name: 'tree',
 				src: 'assets/models/ready/tree/tree.anim',
 				z: 10,
@@ -16050,18 +16088,18 @@ function init() {
 				scale: 1.15,
 				step: 275,
 				path: groundPath
-			});
+			}),
 
-			var snow = obj().create({
+			snow = obj().create({
 				name: 'snow',
 				src: 'assets/models/ready/snow/snow.anim',
 				x: 300,
 				y: 400,
 				z: 20,
 				pz: 10
-			});
+			}),
 
-			var hero = obj().create({
+			hero = obj().create({
 				name: 'hero',
 				src: 'assets/models/ready/hero/hero.anim',
 				z: 15,
@@ -16069,9 +16107,9 @@ function init() {
 				scale: 0.4,
 				step: 0,
 				path: currentPath
-			});
+			}),
 
-			var villain = obj().create({
+			villain = obj().create({
 				name: 'villain',
 				src: 'assets/models/ready/villain/villain.anim',
 				z: 15,
@@ -16088,9 +16126,9 @@ function init() {
 						soundSrc: 'assets/models/ready/villain/villain_sound.ogg'
 					}
 				}
-			});
+			}),
 
-			var villain2 = obj().create({
+			villain2 = obj().create({
 				name: 'villain2',
 				src: 'assets/models/ready/villain2/villain2.anim',
 				z: 7,
@@ -16107,9 +16145,9 @@ function init() {
 						soundSrc: 'assets/models/ready/villain2/villain2_sound.ogg'
 					}
 				}
-			});
+			}),
 
-			var bird = obj().create({
+			bird = obj().create({
 				name: 'bird',
 				src: 'assets/models/ready/bird/bird.anim',
 				z: 15,
@@ -16125,27 +16163,27 @@ function init() {
 						soundSrc: 'assets/models/ready/bird/bird_sound.ogg'
 					}
 				}
-			});
+			}),
 
-			var bucket = obj().create({
+			bucket = obj().create({
 				name: 'bucket',
 				src: 'assets/models/ready/bucket/bucket.anim',
 				x: 530,
 				y: 293,
 				z: 13,
 				pz: 5
-			});
+			}),
 
-			var garbageBucket = obj().create({
+			garbageBucket = obj().create({
 				name: 'garbageBucket',
 				src: 'assets/models/ready/garbageBucket/garbageBucket.anim',
 				x: 1193,
 				y: 647,
 				z: 10,
 				interactive: true
-			});
+			}),
 
-			var semaphore = obj().create({
+			semaphore = obj().create({
 				name: 'semaphore',
 				src: 'assets/models/ready/semaphore/semaphore.anim',
 				x: 1500,
@@ -16157,9 +16195,9 @@ function init() {
 						soundSrc: 'assets/models/ready/semaphore/semaphore_sound.ogg'
 					}
 				}
-			});
+			}),
 
-			var stone = obj().create({
+			stone = obj().create({
 				name:'stone',
 				src: 'assets/models/ready/stone/stone.anim',
 				path: stoneToHand,
@@ -16167,17 +16205,17 @@ function init() {
 				z: 10,
 				pz:  15,
 				interactive: true
-			});
+			}),
 
-			var barrier = obj().create({
+			barrier = obj().create({
 				name: 'barrier',
 				src: 'assets/models/ready/barrier/barrier.anim',
 				x:1750,
 				y: 610,
 				z: 10
-			});
+			}),
 
-			var butterfly = obj().create({
+			butterfly = obj().create({
 				name: 'butterfly',
 				src: 'assets/models/ready/butterfly/butterfly.anim',
 				scale: 0.35,
@@ -16186,9 +16224,9 @@ function init() {
 				step: 0,
 				path: butterflyPath,
 				interactive: true
-			});
+			}),
 
-			var tv = obj().create({
+			tv = obj().create({
 				name: 'tv',
 				src: 'assets/models/ready/tv/tv.anim',
 				z: 20,
@@ -16204,9 +16242,9 @@ function init() {
 						soundSrc: 'assets/models/ready/tv/tv_sound.ogg'
 					}
 				}
-			});
+			}),
 
-			var addHero1 = obj().create({
+			addHero1 = obj().create({
 				name: 'addHero1',
 				src: 'assets/models/ready/additionalHero1/addHero1.anim',
 				z:15,
@@ -16217,9 +16255,9 @@ function init() {
 					moveAnimation: 'addHero1',
 					availablesPaths: endPath1
 				}
-			});
+			}),
 
-			var addHero2 = obj().create({
+			addHero2 = obj().create({
 				name: 'addHero2',
 				src: 'assets/models/ready/additionalHero2/additionalHero2.anim',
 				z:10,
@@ -16235,9 +16273,9 @@ function init() {
 						soundSrc: 'assets/models/ready/additionalHero2/additionalHero2_sound.ogg'
 					}
 				}
-			});
+			}),
 
-			var elephant = obj().create({
+			elephant = obj().create({
 				name: 'elephant',
 				src: 'assets/models/ready/elephant/elephant.anim',
 				z:10,
@@ -16251,9 +16289,9 @@ function init() {
 					availablesPaths: addHero2Path,
 					stayTime: 6000
 				}
-			});
+			}),
 
-			var doorToTheNextLavel = obj().create({
+			doorToTheNextLavel = obj().create({
 				name:'doorToTheNextLavel',
 				src: 'assets/models/ready/doorToTheNextLavel/doorToTheNextLavel.anim',
 				x: 3700,
@@ -16264,9 +16302,9 @@ function init() {
 						soundSrc: 'assets/models/ready/doorToTheNextLavel/door_sound.ogg'
 					}
 				}
-			});
+			}),
 
-			var roadSing = obj().create({
+			roadSing = obj().create({
 				name:'roadSing',
 				src: 'assets/models/ready/roadSing/roadSing.anim',
 				x: 3485,
@@ -16321,7 +16359,7 @@ function init() {
 			}
 
 		}
-	})
+	});
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -16341,7 +16379,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	audio.init();
 		video.init();
-		hint.init(function() {
+		hint.init(function () {
 			if (!debug) {
 				document.querySelector('.start__language option[value="' + globals.locale + '"]').selected = true;
 			}
@@ -16351,7 +16389,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		document.body.className += ' _noscroll';
 
-		localforage.getItem('volume', function(volume) {
+		localforage.getItem('volume', function (volume) {
 			if (volume) {
 
 				document.querySelector('.start__volume').value = volume;
@@ -16364,22 +16402,22 @@ document.addEventListener("DOMContentLoaded", function () {
 			} else {
 				audio.initSplashSound();
 			}
-		})
+		});
 
 		document.querySelector('.start__volume').onmousemove = document.querySelector('.start__volume').onchange = function () {
 
 			globals.volume = this.value;
 
-			localforage.setItem('volume', globals.volume, function() {
+			localforage.setItem('volume', globals.volume, function () {
 				audio.setVolume();
-			})
+			});
 
-		}
+		};
 
 		document.querySelector('.start__language').onchange = function () {
 			globals.locale = this.value;
 			localforage.setItem('locale', globals.locale);
-		}
+		};
 
 		document.querySelector('.start__run').onclick = function () {
 			document.body.removeChild( document.querySelector('.start') );
@@ -16387,13 +16425,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
 			audio.finishSplashSound();
 
-			video.play(function() {
+			video.play(function () {
 				init();
 			});
 
-		}
+		};
 	} else {
 		document.body.removeChild( document.querySelector('.start') );
 		init();
 	}
-})
+});

@@ -20,19 +20,14 @@ var gulp = require('gulp'),
 /* Service tasks
 --------------------------------------------------------------------------------------*/
 
-gulp.task('clean', function() {
-    gulp.src('./' + path[pathSwitcher] + '/*')
-        .pipe(clean({force: true}));
-})
-
-gulp.task('buildCSS', function() {
+gulp.task('buildCSS', function () {
     gulp
-    	.src('./assets/css/style.css')
-	    .pipe(gulpif(minify, csso()))
-	    .pipe(gulp.dest('./' + path[pathSwitcher] + '/css/'));
+		.src('./assets/css/style.css')
+		.pipe(gulpif(minify, csso()))
+		.pipe(gulp.dest('./' + path[pathSwitcher] + '/css/'));
 });
 
-gulp.task('buildHTML', function() {
+gulp.task('buildHTML', function () {
 
     gulp.src('./assets/html/index.jade')
         .pipe(jade({
@@ -66,29 +61,29 @@ gulp.task('buildHTML', function() {
 
 });
 
-gulp.task('buildPrimaryJS', function() {
+gulp.task('buildPrimaryJS', function () {
     gulp.src([
-    		'./assets/engine/pixi.dev.js',
-    		'./assets/engine/localforage.js',
-    		'./assets/engine/globals.js',
-    		'./assets/engine/scene.js',
-    		'./assets/engine/zplain.js',
-    		'./assets/engine/viewport.js',
-    		'./assets/engine/pathfinder.js',
-    		'./assets/engine/bot.js',
-    		'./assets/engine/object.js',
-    		'./assets/engine/utils.js',
-    		'./assets/engine/graph.js',
-    		'./assets/engine/move.js',
-    		'./assets/engine/queue.js',
-    		'./assets/engine/relay.js',
-    		'./assets/engine/ai.js',
-    		'./assets/engine/audio.js',
-    		'./assets/engine/video.js',
-    		'./assets/engine/translations.js',
-    		'./assets/engine/hint.js',
-    		'./assets/engine/loader.js'
-    	])
+			'./assets/engine/pixi.dev.js',
+			'./assets/engine/localforage.js',
+			'./assets/engine/globals.js',
+			'./assets/engine/scene.js',
+			'./assets/engine/zplain.js',
+			'./assets/engine/viewport.js',
+			'./assets/engine/pathfinder.js',
+			'./assets/engine/bot.js',
+			'./assets/engine/object.js',
+			'./assets/engine/utils.js',
+			'./assets/engine/graph.js',
+			'./assets/engine/move.js',
+			'./assets/engine/queue.js',
+			'./assets/engine/relay.js',
+			'./assets/engine/ai.js',
+			'./assets/engine/audio.js',
+			'./assets/engine/video.js',
+			'./assets/engine/translations.js',
+			'./assets/engine/hint.js',
+			'./assets/engine/loader.js'
+		])
         .pipe(concat('index.js'))
         .pipe(gulpif(minify, uglify()))
         .pipe(gulp.dest('./' + path[pathSwitcher] + '/js'));
@@ -97,11 +92,11 @@ gulp.task('buildPrimaryJS', function() {
 		.pipe(gulp.dest('./' + path[pathSwitcher] + '/tools/'));
 });
 
-gulp.task('buildDebugJS', function() {
+gulp.task('buildDebugJS', function () {
     gulp.src([
-    		'./assets/engine/classlist.js',
-    		'./assets/tools/debugTraect.js'
-    	])
+			'./assets/engine/classlist.js',
+			'./assets/tools/debugTraect.js'
+		])
         .pipe(concat('debug.js'))
         .pipe(gulpif(minify, uglify()))
         .pipe(gulp.dest('./' + path[pathSwitcher] + '/js'));
@@ -111,28 +106,28 @@ gulp.task('buildDebugJS', function() {
 });
 
 
-gulp.task('buildImages', function() {
+gulp.task('buildImages', function () {
     gulp.src('./assets/background/*')
-	    .pipe(gulpif(minify, imagemin()))
-        .pipe(gulp.dest('./' + path[pathSwitcher] + '/assets/background/'));
+		.pipe(gulpif(minify, imagemin()))
+		.pipe(gulp.dest('./' + path[pathSwitcher] + '/assets/background/'));
 
-    gulp.src('./assets/video/*')
+    gulp.src('./assets/video/intro2.mp4')
         .pipe(gulp.dest('./' + path[pathSwitcher] + '/assets/video/'));
 
-    gulp.src('./assets/music/*')
+    gulp.src('./assets/music/*.ogg')
         .pipe(gulp.dest('./' + path[pathSwitcher] + '/assets/music/'));
 
 
     gulp.src('./assets/models/ready/**/*.png')
-	    .pipe(gulpif(minify, imagemin()))
-        .pipe(gulp.dest('./' + path[pathSwitcher] + '/assets/models/ready/'));
+		.pipe(gulpif(minify, imagemin()))
+		.pipe(gulp.dest('./' + path[pathSwitcher] + '/assets/models/ready/'));
 
 });
 
-gulp.task('buildModels', function() {
+gulp.task('buildModels', function () {
 
     gulp.src(['./assets/models/ready/**/*.anim', './assets/models/ready/**/*.json', './assets/models/ready/**/*.ogg'])
-        .pipe(gulp.dest('./' + path[pathSwitcher] + '/assets/models/ready/'))
+		.pipe(gulp.dest('./' + path[pathSwitcher] + '/assets/models/ready/'));
 
 });
 
@@ -141,33 +136,38 @@ gulp.task('buildModels', function() {
 /* Task helpers
 --------------------------------------------------------------------------------------*/
 
-gulp.task('run-default', function() {
+gulp.task('run-default', function () {
     gulp.start('buildCSS', 'buildHTML', 'buildPrimaryJS', 'buildModels', 'buildImages');
-})
+});
 
-gulp.task('run-debug', function() {
+gulp.task('run-debug', function () {
     gulp.start('buildCSS', 'buildHTML', 'buildPrimaryJS', 'buildDebugJS', 'buildModels', 'buildImages');
-})
+});
 
-gulp.task('run-build', function() {
+gulp.task('run-build', function () {
     gulp.start('buildCSS', 'buildHTML', 'buildPrimaryJS', 'buildModels', 'buildImages');
-})
+});
+
+gulp.task('run-clean', function () {
+	gulp.src('./' + path[pathSwitcher] + '/*')
+		.pipe(clean({force: true}));
+});
 
 /* /Task helpers */
 
 /* Main tasks
 --------------------------------------------------------------------------------------*/
 
-gulp.task('default', function() {
+gulp.task('default', function () {
 	debug = false;
 	minify = false;
 	pathSwitcher = 'dev';
 
-	gulp.start('run-default')
+	gulp.start('run-default');
 
 });
 
-gulp.task('debug', function() {
+gulp.task('debug', function () {
 	debug = true;
 	minify = false;
 	pathSwitcher = 'dev';
@@ -175,7 +175,7 @@ gulp.task('debug', function() {
 	gulp.start('run-debug');
 });
 
-gulp.task('build', function() {
+gulp.task('build', function () {
 	debug = false;
 	minify = true;
 	pathSwitcher = 'build';
@@ -183,20 +183,21 @@ gulp.task('build', function() {
 	gulp.start('run-build');
 });
 
-gulp.task('clean-dev', function() {
-	debug = false;
-	minify = false;
+gulp.task('clean-dev', function () {
 	pathSwitcher = 'dev';
 
-	gulp.start('clean');
+	gulp.start('run-clean');
 });
 
-gulp.task('clean-build', function() {
-	debug = false;
-	minify = true;
+gulp.task('clean-build', function () {
 	pathSwitcher = 'build';
 
-	gulp.start('clean');
+	gulp.start('run-clean');
+});
+
+gulp.task('clean', function () {
+	gulp.start('clean-dev');
+	gulp.start('clean-build');
 });
 
 /* /Main tasks */

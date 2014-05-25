@@ -1,4 +1,6 @@
-var pathfinder = (function() {
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var pathfinder = (function () {
 
 	// Прохождение по массиву путей
 	// У промежуточных путей targetChain считается конечной точкой,
@@ -6,13 +8,16 @@ var pathfinder = (function() {
 	function processPaths( p ) {
 		var servicePoints,
 			step = p.currentObject.step,
-			resultPath = [];
+			resultPath = [],
+			pathId,
+			objectAnimation,
+			i;
 
 		function getAnimation( p ) {
 			var resultAnimation = {
 				animation: p.animation,
 				speed: p.speed
-			}
+			};
 
 			// Приоритет анимаций —
 			// 1. Задана явно
@@ -28,44 +33,44 @@ var pathfinder = (function() {
 		// возникающий после достижения этого targetChain
 		function getServicePoint(path0, path1) {
 			var serviceChain,
-				serviceStep;
+				serviceStep,
 
-			var path0point1 = {
+			path0point1 = {
 				x: globals.paths[ path0 ].dots[0].mainHandle.x,
 				y: globals.paths[ path0 ].dots[0].mainHandle.y
-			}
+			},
 
-			var path0point2 = {
+			path0point2 = {
 				x: globals.paths[ path0 ].dots[ globals.paths[ path0 ].dots.length-1 ].mainHandle.x,
 				y: globals.paths[ path0 ].dots[ globals.paths[ path0 ].dots.length-1 ].mainHandle.y
-			}
+			},
 
-			var path1point1 = {
+			path1point1 = {
 				x: globals.paths[ path1 ].dots[0].mainHandle.x,
-				y: globals.paths[ path1 ].dots[0].mainHandle.y,
-			}
+				y: globals.paths[ path1 ].dots[0].mainHandle.y
+			},
 
-			var path1point2 = {
+			path1point2 = {
 				x: globals.paths[ path1 ].dots[ globals.paths[ path1 ].dots.length-1 ].mainHandle.x,
 				y: globals.paths[ path1 ].dots[ globals.paths[ path1 ].dots.length-1 ].mainHandle.y
-			}
+			};
 
-			if ( (path0point1.x == path1point1.x) && (path0point1.y == path1point1.y) ) {
+			if ( (path0point1.x === path1point1.x) && (path0point1.y === path1point1.y) ) {
 				serviceChain = 0;
 				serviceStep = 0;
 			}
 
-			if ( (path0point1.x == path1point2.x) && (path0point1.y == path1point2.y) ) {
+			if ( (path0point1.x === path1point2.x) && (path0point1.y === path1point2.y) ) {
 				serviceChain = 0;
 				serviceStep = globals.paths[ path1 ].steps.length;
 			}
 
-			if ( (path0point2.x == path1point1.x) && (path0point2.y == path1point1.y) ) {
+			if ( (path0point2.x === path1point1.x) && (path0point2.y === path1point1.y) ) {
 				serviceChain = globals.paths[ path0 ].controlPath.length-1;
 				serviceStep = 0;
 			}
 
-			if ( (path0point2.x == path1point2.x) && (path0point2.y == path1point2.y) ) {
+			if ( (path0point2.x === path1point2.x) && (path0point2.y === path1point2.y) ) {
 				serviceChain = globals.paths[ path0 ].controlPath.length-1;
 				serviceStep = globals.paths[ path1 ].steps.length;
 			}
@@ -73,18 +78,18 @@ var pathfinder = (function() {
 			return {
 				serviceChain: serviceChain,
 				serviceStep: serviceStep
-			}
+			};
 		}
 
 		if (p.pathArray.length > 1) {
-			for (var i = 1; i < p.pathArray.length; i++) {
-				var pathId = p.pathArray[i-1],
-					objectAnimation = getAnimation({
-						obj: p.currentObject.id,
-						pathId: pathId,
-						animation: p.animationName,
-						speed: p.speedValue
-					});
+			for (i = 1; i < p.pathArray.length; i++) {
+				pathId = p.pathArray[i-1];
+				objectAnimation = getAnimation({
+					obj: p.currentObject.id,
+					pathId: pathId,
+					animation: p.animationName,
+					speed: p.speedValue
+				});
 
 				servicePoints = getServicePoint( p.pathArray[i-1], p.pathArray[i] );
 
@@ -94,19 +99,19 @@ var pathfinder = (function() {
 					animation: objectAnimation.animation,
 					speed: objectAnimation.speed,
 					step: step
-				})
+				});
 
 				step = servicePoints.serviceStep;
 			}
 		}
 
-		var pathId = p.pathArray[ p.pathArray.length-1 ],
-			objectAnimation = getAnimation({
-				obj: p.currentObject.id,
-				pathId: pathId,
-				animation: p.animationName,
-				speed: p.speedValue
-			});
+		pathId = p.pathArray[ p.pathArray.length-1 ];
+		objectAnimation = getAnimation({
+			obj: p.currentObject.id,
+			pathId: pathId,
+			animation: p.animationName,
+			speed: p.speedValue
+		});
 
 		resultPath.push({
 			pathId: pathId,
@@ -120,16 +125,17 @@ var pathfinder = (function() {
 			objectId: p.currentObject.id,
 			paths: resultPath,
 			callback: p.callback
-		})
+		});
 	}
 
 	function buildPathArray( p ) {
 		// Построение списка путей, необходимых для достижения конечной вершины графа
-		if ( p.resultPath.graphIdEnd == null) return false;
+		if ( p.resultPath.graphIdEnd === null || !globals.graph[ p.resultPath.graphIdStart]) { return false; }
 		var targetPath = globals.graph[ p.resultPath.graphIdStart].targets[ p.resultPath.graphIdEnd],
-			pathArray = [];
+			pathArray = [],
+			pathSteps;
 
-		for (var pathSteps = 1; pathSteps < targetPath.path.length; pathSteps++ ) {
+		for (pathSteps = 1; pathSteps < targetPath.path.length; pathSteps++ ) {
 			pathArray.push(globals.graph[ targetPath.path[pathSteps-1] ].targets[ targetPath.path[pathSteps] ].pathName );
 		}
 
@@ -150,7 +156,7 @@ var pathfinder = (function() {
 	}
 
 	function findPathToChain( p ) {
-		if (!p.currentObject || !globals.paths[p.path] || !globals.paths[ p.currentObject.path ]) return false;
+		if (!p.currentObject || !globals.paths[p.path] || !globals.paths[ p.currentObject.path ]) { return false; }
 
 		var path = p.path,
 			chain = p.chain,
@@ -187,23 +193,27 @@ var pathfinder = (function() {
 					steps: globals.paths[ currentObject.path ].steps.length - currentObject.step,
 					graphId: globals.paths[ currentObject.path ].dots[ globals.paths[ currentObject.path ].dots.length-1 ].graphId
 				}
-			];
+			],
+
+			currentPathVar,
+			candidatePathVar,
+			tDistance;
 
 		// Пары кратчайших путей (2*2)
-		for (var currentPathVar = 0 ; currentPathVar < 2; currentPathVar++) {
-			for (var candidatePathVar = 0 ; candidatePathVar < 2; candidatePathVar++) {
+		for (currentPathVar = 0 ; currentPathVar < 2; currentPathVar++) {
+			for (candidatePathVar = 0 ; candidatePathVar < 2; candidatePathVar++) {
 
-				var tDistance = currentPath[currentPathVar].steps +
+				tDistance = currentPath[currentPathVar].steps +
 					candidatePath[candidatePathVar].steps +
 					globals.graph[ currentPath[currentPathVar].graphId ].targets[ candidatePath[candidatePathVar].graphId ].distance;
 
-				if ( (tDistance) < minPath.steps ) {
+				if ( tDistance < minPath.steps ) {
 
 					minPath = {
 						steps: tDistance,
 						graphIdStart: currentPath[currentPathVar].graphId,
 						graphIdEnd: candidatePath[candidatePathVar].graphId
-					}
+					};
 				}
 
 			}
@@ -218,44 +228,38 @@ var pathfinder = (function() {
 				graphIdEnd: minPath.graphIdEnd,
 				path: path,
 				chain: chain
-			}
-		} else {
-			return resultPath;
+			};
 		}
+
+		return resultPath;
 	}
 
 	/**
 	* Перемещает объект точку, заданную координатами клика
-	* @param
 	*/
 	function moveObjectByCoords( p ) {
-		var currentObject = globals.objects[p.id];
-		if (!currentObject) return false;
+		var currentObject = globals.objects[p.id],
+			resultPath = {},
+			path,
+			chain;
 
-		// Анимации для перемещения
-		/* var animations = globals.hero.image.state.data.skeletonData.animations,
-			animationName = 'new';*/
-
-		// Скорость перехода между анимациями
-		//globals.hero.image.stateData.setMixByName("new", "stop", 0.8);
+		if (!currentObject) { return false; }
 
 		// Поиск шага, сопоставленного с областью клика
-
-		var resultPath = {};
-
 		// перебрать все траектории, понять, на которых из них может лежать целевая точка
 		for (path in globals.paths) {
-			if ( !globals.paths[path].controlPath || globals.paths[path].breakpath ) continue;
+			if ( globals.paths[path].controlPath && !globals.paths[path].breakpath ) {
 
-			for (var chain = 0; chain < globals.paths[path].controlPath.length; chain++) {
-				if (globals.paths[path].controlPath[chain].rect.contains( p.x * globals.scale, p.y * globals.scale )) {
+				for (chain = 0; chain < globals.paths[path].controlPath.length; chain++) {
+					if (globals.paths[path].controlPath[chain].rect.contains( p.x * globals.scale, p.y * globals.scale )) {
 
-					// Поиск ближайшей вершины графа из попадающих в область клика
-					resultPath = JSON.parse(JSON.stringify(findPathToChain( {
-						currentObject: currentObject,
-						path: path,
-						chain: chain
-					})));
+						// Поиск ближайшей вершины графа из попадающих в область клика
+						resultPath = JSON.parse(JSON.stringify(findPathToChain( {
+							currentObject: currentObject,
+							path: path,
+							chain: chain
+						})));
+					}
 				}
 			}
 		}
@@ -263,14 +267,16 @@ var pathfinder = (function() {
 		buildPathArray( {
 			resultPath: resultPath,
 			currentObject: currentObject
-		} )
+		} );
 	}
 
 	function moveObjectByChain( p ) {
-		var currentObject = globals.objects[p.id];
-		if (!currentObject) return false;
+		var currentObject = globals.objects[p.id],
+			resultPath;
 
-		var resultPath = findPathToChain( {
+		if (!currentObject) { return false; }
+
+		resultPath = findPathToChain( {
 				currentObject: currentObject,
 				path: p.path,
 				chain: p.chain
@@ -282,14 +288,14 @@ var pathfinder = (function() {
 			animationName: p.animationName,
 			speedValue: p.speedValue,
 			callback: p.callback
-		} )
+		} );
 	}
 
 	function attachPathFinderListeners() {
 
-		if ('ontouchend' in document) {
+		if (document.ontouchend !== undefined) {
 
-			window.addEventListener('touchend', function(e) {
+			window.addEventListener('touchend', function (e) {
 				if (globals.objectClicked || globals.viewport.resize) {
 					globals.objectClicked = false;
 					globals.viewport.resize = false;
@@ -304,12 +310,12 @@ var pathfinder = (function() {
 					id: 'hero',
 					x: (e.changedTouches[0].pageX - (scene.playGround.position.x / globals.scale)) / globals.viewport.scale ,
 					y: (e.changedTouches[0].pageY - (scene.playGround.position.y / globals.scale)) / globals.viewport.scale
-				})
-			})
+				});
+			});
 
 		} else {
 
-			window.addEventListener('click', function(e) {
+			window.addEventListener('click', function (e) {
 				if (globals.objectClicked || globals.viewport.resize) {
 					globals.objectClicked = false;
 					globals.viewport.resize = false;
@@ -324,28 +330,28 @@ var pathfinder = (function() {
 					id: 'hero',
 					x: (e.pageX - (scene.playGround.position.x / globals.scale)) / globals.viewport.scale,
 					y: (e.pageY - (scene.playGround.position.y / globals.scale)) / globals.viewport.scale
-				})
+				});
 
 
-			})
+			});
 
 		}
 
 	}
 
 	return {
-		start: function() {
+		start: function () {
 			attachPathFinderListeners();
 		},
 
 		// p.id
 		// p.path
 		// p.chain
-		moveObjectByChain: function( p ) {
+		moveObjectByChain: function ( p ) {
 			moveObjectByChain( p );
 		}
-	}
+	};
 
-})();
+}());
 
 

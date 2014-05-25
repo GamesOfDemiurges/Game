@@ -1,17 +1,17 @@
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
 var repaint = false,
 	debugPanel,
 	canvas,
 	ctx;
 
-var debugTraect = function debugTraect() {
-
-	var _this = this;
+var debugTraect = (function debugTraect() {
 
 	// Перерисовка служебного холста
 	function render() {
 		if (repaint) {
 			utils.processPaths({
-				callback: function() {
+				callback: function () {
 					paint();
 					repaint = false;
 				}
@@ -25,9 +25,10 @@ var debugTraect = function debugTraect() {
 	function getCurrentPath() {
 		var pathListItem = document.querySelectorAll('.debug__control-traects option'),
 			currentPathId,
-			currentPath = false;
+			currentPath = false,
+			i;
 
-		for (var i = 0; i < pathListItem.length; i++) {
+		for (i = 0; i < pathListItem.length; i++) {
 			if (!!pathListItem[i].selected) {
 				currentPathId = pathListItem[i].getAttribute('value');
 				break;
@@ -44,9 +45,10 @@ var debugTraect = function debugTraect() {
 	function getCurrentObject() {
 		var objectsListItem = document.querySelectorAll('.debug__control-objects-list option'),
 			objectId,
-			currentObject = false;
+			currentObject = false,
+			i;
 
-		for (var i = 0; i < objectsListItem.length; i++) {
+		for (i = 0; i < objectsListItem.length; i++) {
 			if (!!objectsListItem[i].selected) {
 				objectId = objectsListItem[i].getAttribute('value');
 				break;
@@ -62,9 +64,10 @@ var debugTraect = function debugTraect() {
 
 	function getCurrentAnimation() {
 		var animationListItem = document.querySelectorAll('.debug__control-objects-anim option'),
-			animationId = false;
+			animationId = false,
+			i;
 
-		for (var i = 0; i < animationListItem.length; i++) {
+		for (i = 0; i < animationListItem.length; i++) {
 			if (!!animationListItem[i].selected) {
 				animationId = animationListItem[i].getAttribute('value');
 				break;
@@ -94,15 +97,16 @@ var debugTraect = function debugTraect() {
 			currentObject = getCurrentObject(),
 			detachButton = document.querySelector('.debug__button_remove-object'),
 			animationListItem = document.querySelectorAll('.debug__control-objects-anim option'),
-			animationSpeedInput = document.querySelector('.debug__control-traects-speed');
+			animationSpeedInput = document.querySelector('.debug__control-traects-speed'),
+			i;
 
 		if ( (!!currentPath.objects) && (currentPath.objects[currentObject.id]) ) {
 			detachButton.disabled = false;
 
 			animationSpeedInput.value = 0;
-			for (var i = 0; i < animationListItem.length; i++) {
+			for (i = 0; i < animationListItem.length; i++) {
 
-				if (animationListItem[i].getAttribute('value') == currentPath.objects[currentObject.id].animation ) {
+				if (animationListItem[i].getAttribute('value') === currentPath.objects[currentObject.id].animation ) {
 					animationListItem[i].selected = true;
 
 					animationSpeedInput.value = currentPath.objects[currentObject.id].speed;
@@ -118,9 +122,10 @@ var debugTraect = function debugTraect() {
 	function buildInterfaceFromPaths() {
 		var newItem,
 			tempPoint,
-			pathList = document.querySelector('.debug__control-traects .debug__control-traects-list');
+			pathList = document.querySelector('.debug__control-traects .debug__control-traects-list'),
+			path, dot;
 
-		for (var path in globals.paths) {
+		for (path in globals.paths) {
 			newItem = document.createElement('option');
 
 			newItem.textContent = globals.paths[path].name;
@@ -131,7 +136,7 @@ var debugTraect = function debugTraect() {
 
 			checkForBreakpath();
 
-			for (var dot = 0; dot < globals.paths[path].dots.length; dot++) {
+			for (dot = 0; dot < globals.paths[path].dots.length; dot++) {
 
 				// создаем DOM-представление для новой точки
 
@@ -176,6 +181,7 @@ var debugTraect = function debugTraect() {
 	}
 
 	function paint() {
+		var path, i, j;
 
 		// Возвращает координаты точки на холсте,
 		// взятые от координаты DOM-узла токи и нормированные на масштаб
@@ -184,8 +190,8 @@ var debugTraect = function debugTraect() {
 			return {
 				x: dom.style.left.replace('px', '') * globals.scale,
 				y: dom.style.top.replace('px', '') * globals.scale
-			}
-		};
+			};
+		}
 
 		// Ощищаем холст
 		ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -244,7 +250,7 @@ var debugTraect = function debugTraect() {
 
 				// Отрисовка точек, начиная со второй
 				// отдельно, потому что между двумя точками уже можно провести линию
-				for (var i = 1; i < globals.paths[path].dots.length; i++) {
+				for (i = 1; i < globals.paths[path].dots.length; i++) {
 					// обновить координаты точки из DOM
 					globals.paths[path].dots[i].mainHandle.x = getCoordsFromCss( globals.paths[path].dots[i].mainHandle.dom ).x;
 					globals.paths[path].dots[i].mainHandle.y = getCoordsFromCss( globals.paths[path].dots[i].mainHandle.dom ).y;
@@ -270,20 +276,20 @@ var debugTraect = function debugTraect() {
 					if (globals.paths[path].dots[i].nextHandle !== null) {
 
 						// нарисовать его
-						ctx.moveTo( globals.paths[path].dots[i].mainHandle.x, globals.paths[path].dots[i].mainHandle.y )
+						ctx.moveTo( globals.paths[path].dots[i].mainHandle.x, globals.paths[path].dots[i].mainHandle.y );
 						ctx.lineTo(globals.paths[path].dots[i].nextHandle.x, globals.paths[path].dots[i].nextHandle.y);
 
 						// вернуть перо в точку завершения отрисовки кривой
-						ctx.moveTo( globals.paths[path].dots[i].mainHandle.x, globals.paths[path].dots[i].mainHandle.y )
+						ctx.moveTo( globals.paths[path].dots[i].mainHandle.x, globals.paths[path].dots[i].mainHandle.y );
 					}
 
 					// Отрисовка шагов
-					for (var j = 0; j < globals.paths[path].steps.length; j++) {
+					for (j = 0; j < globals.paths[path].steps.length; j++) {
 						ctx.rect( globals.paths[path].steps[j].x, globals.paths[path].steps[j].y, 1, 1 );
 					}
 
 					// Активные области
-					for (var j = 0; j < globals.paths[path].controlPath.length; j++) {
+					for (j = 0; j < globals.paths[path].controlPath.length; j++) {
 							// Визуализация
 						ctx.rect( globals.paths[path].controlPath[ j ].rect.x, globals.paths[path].controlPath[ j ].rect.y, globals.paths[path].controlPath[ j ].rect.width, globals.paths[path].controlPath[ j ].rect.height );
 						ctx.rect( globals.paths[path].steps[ globals.paths[path].controlPath[ j ].step ].x, globals.paths[path].steps[ globals.paths[path].controlPath[ j ].step ].y,  6, 6 );
@@ -298,23 +304,6 @@ var debugTraect = function debugTraect() {
 						ctx.font="30px Arial";
 						ctx.strokeText( globals.paths[path].dots[i].graphId, globals.paths[path].dots[i].mainHandle.x, globals.paths[path].dots[i].mainHandle.y-10 );
 					}
-
-
-					// Проверка на плотность шагов
-					/*console.clear();
-					for (var j = 1; j < stepsArray.length; j++) {
-						var d =  getDistance({
-							x1: stepsArray[j-1].x,
-							y1: stepsArray[j-1].y,
-							x2: stepsArray[j].x,
-							y2: stepsArray[j].y
-						})
-
-						if (d >= 1.4) {
-							console.log(j);
-						}
-					}*/
-
 
 				}
 
@@ -331,7 +320,7 @@ var debugTraect = function debugTraect() {
 			dots: [],
 			steps: [],
 			name: p.name
-		}
+		};
 	}
 
 	// Добавляет точку на холст с заданными координатами
@@ -340,10 +329,13 @@ var debugTraect = function debugTraect() {
 	function addPoint(p) {
 		var pathList = document.querySelectorAll('.debug__control-traects option'),
 			currentPathId,
-			currentPath,
+			name,
+			newItem,
 			preLastPathPoint,
 			lastPathPoint,
 			tempPoint,
+			i,
+			addBezierPoint,
 			newPoint = {
 				mainHandle: {
 					x: p.x * globals.scale - scene.playGround.position.x,
@@ -351,11 +343,11 @@ var debugTraect = function debugTraect() {
 				},
 				prevHandle: null,
 				nextHandle: null
-			}
+			};
 
 		if (!pathList.length) {
-			var name = Math.random(),
-				newItem = document.createElement('option');
+			name = Math.random();
+			newItem = document.createElement('option');
 
 			newItem.textContent = name;
 			newItem.setAttribute('value', name);
@@ -372,7 +364,7 @@ var debugTraect = function debugTraect() {
 			// Поиск по списку созданных траекторий
 			// активная та, что имеет свойство .selected
 			// Как только находим её, забираем её идентификатор и выходим из списка
-			for (var i = 0; i < pathList.length; i++) {
+			for (i = 0; i < pathList.length; i++) {
 				if (!!pathList[i].selected) {
 					currentPathId = pathList[i].getAttribute('value');
 					break;
@@ -382,7 +374,7 @@ var debugTraect = function debugTraect() {
 		}
 
 		// Если вообще ничего не выделено, не добавляем точку
-		if (!globals.paths[currentPathId]) return false;
+		if (!globals.paths[currentPathId]) { return false; }
 
 		// Если в траектории уже есть точки,
 		// значит добавление новой точки неявно повлечет создание кривой между ними,
@@ -403,12 +395,12 @@ var debugTraect = function debugTraect() {
 		if (!!preLastPathPoint) {
 
 			// (x1, y1) и (x2, y2) — координаты управлящих точек
-			var addBezierPoint = utils.getAdditionalBezierPointsCoords({
+			addBezierPoint = utils.getAdditionalBezierPointsCoords({
 				x1: preLastPathPoint.mainHandle.x / globals.scale,
 				y1: preLastPathPoint.mainHandle.y / globals.scale,
 				x2: lastPathPoint.mainHandle.x / globals.scale,
 				y2: lastPathPoint.mainHandle.y / globals.scale
-			})
+			});
 
 			// Создаем DOM-представление для рычага предыдущей точки
 			tempPoint = document.createElement('div');
@@ -420,7 +412,7 @@ var debugTraect = function debugTraect() {
 				x: addBezierPoint.ax1 * globals.scale,
 				y: addBezierPoint.ay1 * globals.scale
 
-			}
+			};
 
 			debugPanel.appendChild(tempPoint);
 
@@ -433,13 +425,13 @@ var debugTraect = function debugTraect() {
 				dom: tempPoint,
 				x: addBezierPoint.ax2 * globals.scale,
 				y: addBezierPoint.ay2 * globals.scale
-			}
+			};
 
 			debugPanel.appendChild(tempPoint);
 		}
 
 		// создаем DOM-представление для новой точки
-		var tempPoint = document.createElement('div');
+		tempPoint = document.createElement('div');
 		tempPoint.className = 'debug__point';
 		tempPoint.style.top = p.y - scene.playGround.position.y / globals.scale + 'px';
 		tempPoint.style.left = p.x - scene.playGround.position.x / globals.scale + 'px';
@@ -449,11 +441,11 @@ var debugTraect = function debugTraect() {
 
 		// Построить траектории
 		utils.processPaths({
-			callback: function() {
+			callback: function () {
 
 				// Построить граф
 				graph.buildGraph({
-					callback: function() {
+					callback: function () {
 
 						// нужна перерисовка сцены
 						repaint = true;
@@ -480,15 +472,14 @@ var debugTraect = function debugTraect() {
 			panelDragged,
 			originalPanel = {},
 			tempPointPanel = {},
-			debugWrap = document.querySelector('.debug__wrap');
-
-		var pathList = document.querySelector('.debug__control-traects .debug__control-traects-list'),
+			debugWrap = document.querySelector('.debug__wrap'),
+			pathList = document.querySelector('.debug__control-traects .debug__control-traects-list'),
 			tempPoint = {
 				x: 0,
 				y: 0
-			}
+			};
 
-		debugPanel.addEventListener("mousedown", function(e) {
+		debugPanel.addEventListener("mousedown", function (e) {
 			e.stopPropagation();
 
 			// Событие начала перетаскивания
@@ -524,9 +515,9 @@ var debugTraect = function debugTraect() {
 				panelDragged = true;
 			}
 
-		})
+		});
 
-		debugPanel.addEventListener("mouseup", function(e) {
+		debugPanel.addEventListener("mouseup", function (e) {
 			e.stopPropagation();
 
 			// Событие завершение перетаскивания
@@ -541,9 +532,9 @@ var debugTraect = function debugTraect() {
 			if ( e.target.classList.contains('debug__control' )) {
 				panelDragged = false;
 			}
-		})
+		});
 
-		debugPanel.addEventListener("mousemove", function(e) {
+		debugPanel.addEventListener("mousemove", function (e) {
 
 			// Событие факта перетаскивания
 			if (currentTarget !== undefined) {
@@ -559,20 +550,21 @@ var debugTraect = function debugTraect() {
 				// При перетаскивании точки её рычаги переносятся аналогично
 				if (currentTarget.classList.contains('debug__point')) {
 					var d = {
-						x: Number(currentTarget.style.left.replace('px', '')) - tempPoint.x,
-						y: Number(currentTarget.style.top.replace('px', '')) - tempPoint.y,
-					}
+							x: Number(currentTarget.style.left.replace('px', '')) - tempPoint.x,
+							y: Number(currentTarget.style.top.replace('px', '')) - tempPoint.y
+						};
+
 					tempPoint = {
 						x: e.pageX - scene.playGround.position.x / globals.scale,
 						y: e.pageY - scene.playGround.position.y / globals.scale
-					}
+					};
 
-					if ( (currentTarget.nextSibling !== null) && (currentTarget.nextSibling.className == 'debug__point-handle') ) {
+					if ( (currentTarget.nextSibling !== null) && (currentTarget.nextSibling.className === 'debug__point-handle') ) {
 						currentTarget.nextSibling.style.top = Number(currentTarget.nextSibling.style.top.replace('px', '')) + d.y + 'px';
 						currentTarget.nextSibling.style.left = Number(currentTarget.nextSibling.style.left.replace('px', '')) + d.x + 'px';
 					}
 
-					if ( (currentTarget.previousSibling !== null) && (currentTarget.previousSibling.className == 'debug__point-handle') ) {
+					if ( (currentTarget.previousSibling !== null) && (currentTarget.previousSibling.className === 'debug__point-handle') ) {
 						currentTarget.previousSibling.style.top = Number(currentTarget.previousSibling.style.top.replace('px', '')) + d.y + 'px';
 						currentTarget.previousSibling.style.left = Number(currentTarget.previousSibling.style.left.replace('px', '')) + d.x + 'px';
 					}
@@ -580,11 +572,11 @@ var debugTraect = function debugTraect() {
 
 				// Построить траектории
 				utils.processPaths({
-					callback: function() {
+					callback: function () {
 
 						// Построить граф
 						graph.buildGraph({
-							callback: function() {
+							callback: function () {
 
 								// нужна перерисовка сцены
 								repaint = true;
@@ -595,19 +587,17 @@ var debugTraect = function debugTraect() {
 			}
 
 			// Панель
-			if ( (panelDragged) && (e.target.className == 'debug__control') ) {
+			if ( panelDragged && (e.target.className === 'debug__control') ) {
 				e.target.style.left = originalPanel.x + (e.pageX - tempPointPanel.x) + 'px';
 				e.target.style.top = originalPanel.y + (e.pageY - tempPointPanel.y) + 'px';
 			}
-		})
+		});
 
-		debugPanel.addEventListener("dblclick", function(e) {
-			if (e.target.classList.contains('debug__point') ) {
-				e.stopPropagation();
+		debugPanel.addEventListener("dblclick", function (e) {
 
-				// TODO: удаление точки
-				console.log('point dbl click');
-			}
+			var obj,
+				oldTraectName,
+				newTraectName;
 
 			// Даблклик по холсту создает новую точку
 			if (e.target.classList.contains('debug__view') ) {
@@ -616,14 +606,14 @@ var debugTraect = function debugTraect() {
 				addPoint({
 					x: e.pageX,
 					y: e.pageY
-				})
+				});
 			}
 
-			if (e.target.parentNode.className == 'debug__control-traects-list') {
+			if (e.target.parentNode.className === 'debug__control-traects-list') {
 				e.stopPropagation();
 
-				var oldTraectName = e.target.getAttribute('value'),
-					newTraectName = window.prompt('Новое имя траектории: ', oldTraectName);
+				oldTraectName = e.target.getAttribute('value');
+				newTraectName = window.prompt('Новое имя траектории: ', oldTraectName);
 
 				console.log(newTraectName);
 
@@ -637,19 +627,19 @@ var debugTraect = function debugTraect() {
 				delete globals.paths[oldTraectName];
 
 				// Заменить id у всех объектов
-				for (var obj in globals.objects) {
-					if (globals.objects[obj].path == oldTraectName) {
+				for (obj in globals.objects) {
+					if (globals.objects[obj].path === oldTraectName) {
 						globals.objects[obj].path = newTraectName;
 					}
 				}
 
 				// Перестроить траектории
 				utils.processPaths({
-					callback: function() {
+					callback: function () {
 
 						// Построить граф
 						graph.buildGraph({
-							callback: function() {
+							callback: function () {
 								//callback();
 								pathfinder.start();
 							}
@@ -658,28 +648,46 @@ var debugTraect = function debugTraect() {
 					}
 				});
 			}
-		})
+		});
 
-		debugPanel.addEventListener("click", function(e) {
+		debugPanel.addEventListener("click", function (e) {
+
+			var name,
+				newItem,
+				currentPath,
+				currentObject,
+				currentAnimation,
+				animationName,
+				pathListItem,
+				currentPathId,
+				smallPaths,
+				path,
+				dot,
+				prevHandle,
+				nextHandle,
+				mainHandle,
+				req,
+				param,
+				i;
 
 			if (e.target.classList.contains('debug__control-traects-label') || e.target.classList.contains('debug__control-traects-break')) {
 				e.stopPropagation();
 
 				if (e.target.classList.contains('debug__control-traects-break')) {
-					var currentPath = getCurrentPath();
+					currentPath = getCurrentPath();
 					currentPath.breakpath = (currentPath.breakpath)
 						? false
-						: true
+						: true;
 
 					checkForBreakpath();
 
 					// Построить траектории
 					utils.processPaths({
-						callback: function() {
+						callback: function () {
 
 							// Построить граф
 							graph.buildGraph({
-								callback: function() {
+								callback: function () {
 
 									// нужна перерисовка сцены
 									repaint = true;
@@ -706,8 +714,8 @@ var debugTraect = function debugTraect() {
 			if (e.target.classList.contains('debug__button_add')) {
 				e.stopPropagation();
 
-				var name = Math.random(),
-					newItem = document.createElement('option');
+				name = Math.random();
+				newItem = document.createElement('option');
 
 				newItem.textContent = name;
 				newItem.setAttribute('value', name);
@@ -723,35 +731,35 @@ var debugTraect = function debugTraect() {
 			}
 
 			// Переключение траектории, выбор объектов, анимаций
-			if (e.target.tagName == 'OPTION') {
+			if (e.target.tagName === 'OPTION') {
 				e.stopPropagation();
 
-				if (e.target.parentNode.className == 'debug__control-traects-list') {
+				if (e.target.parentNode.className === 'debug__control-traects-list') {
 					checkForBreakpath();
 					setDetachButtonStatus();
 					repaint = true;
 				}
 
-				if (e.target.parentNode.className == 'debug__control-objects-list') {
+				if (e.target.parentNode.className === 'debug__control-objects-list') {
 					readObjectAnimations( e.target );
 					setDetachButtonStatus();
 				}
 
-				if (e.target.parentNode.className == 'debug__control-objects-anim') {
-					var currentObject = getCurrentObject(),
-						animationName = e.target.getAttribute('value');
+				if (e.target.parentNode.className === 'debug__control-objects-anim') {
+					currentObject = getCurrentObject();
+					animationName = e.target.getAttribute('value');
 
 					if (currentObject !== false) {
 						currentObject.animate({
 							animation: animationName
-						})
+						});
 					}
 				}
 
 
 			}
 
-			if (e.target.tagName == 'SELECT') {
+			if (e.target.tagName === 'SELECT') {
 				e.stopPropagation();
 			}
 
@@ -759,11 +767,10 @@ var debugTraect = function debugTraect() {
 			if (e.target.classList.contains('debug__button_remove')) {
 				e.stopPropagation();
 
-				var pathListItem = document.querySelectorAll('.debug__control-traects option'),
-					currentPathId,
-					currentPath = false;
+				pathListItem = document.querySelectorAll('.debug__control-traects option');
+				currentPath = false;
 
-				for (var i = 0; i < pathListItem.length; i++) {
+				for (i = 0; i < pathListItem.length; i++) {
 					if (!!pathListItem[i].selected) {
 						currentPathId = pathListItem[i].getAttribute('value');
 						break;
@@ -774,7 +781,7 @@ var debugTraect = function debugTraect() {
 
 				if (!!globals.paths[currentPathId]) {
 
-					for (var i = 0; i < globals.paths[currentPathId].dots.length; i++) {
+					for (i = 0; i < globals.paths[currentPathId].dots.length; i++) {
 
 						if ( globals.paths[currentPathId].dots[i].mainHandle !== null  ) {
 							debugPanel.removeChild( globals.paths[currentPathId].dots[i].mainHandle.dom );
@@ -800,58 +807,58 @@ var debugTraect = function debugTraect() {
 				e.stopPropagation();
 
 				// Создаем упрощенную версию пути без ссылок на DOM-узлы
-				var smallPaths = {};
+				smallPaths = {};
 
-				for (var path in globals.paths) {
+				for (path in globals.paths) {
 					smallPaths[path] = {
 						name: path,
 						dots: [],
-						breakpath: globals.paths[path].breakpath || false,
+						breakpath: globals.paths[path].breakpath || false
 					};
 
-					for (var dot = 0; dot < globals.paths[path].dots.length; dot++) {
-						var prevHandle = null,
-							nextHandle = null;
+					for (dot = 0; dot < globals.paths[path].dots.length; dot++) {
+						prevHandle = null;
+						nextHandle = null;
 
-						var mainHandle = {
+						mainHandle = {
 							x: globals.paths[path].dots[dot].mainHandle.x,
 							y: globals.paths[path].dots[dot].mainHandle.y
-						}
+						};
 
 						if (globals.paths[path].dots[dot].prevHandle !== null) {
 							prevHandle = {
 								x: globals.paths[path].dots[dot].prevHandle.x,
 								y: globals.paths[path].dots[dot].prevHandle.y
-							}
+							};
 						}
 
 						if (globals.paths[path].dots[dot].nextHandle !== null) {
 							nextHandle = {
 								x: globals.paths[path].dots[dot].nextHandle.x,
 								y: globals.paths[path].dots[dot].nextHandle.y
-							}
+							};
 						}
 
 						smallPaths[path].dots.push({
 							mainHandle: mainHandle,
 							nextHandle: nextHandle,
 							prevHandle: prevHandle
-						})
+						});
 					}
 
 					if ( (!!globals.paths[path].objects) && (Object.keys(globals.paths[path].objects).length) ) {
-						smallPaths[path].objects = JSON.parse( JSON.stringify(globals.paths[path].objects) )
+						smallPaths[path].objects = JSON.parse( JSON.stringify(globals.paths[path].objects) );
 					}
 				}
 
 				// Создаем XHR
-				var req = new XMLHttpRequest;
-				var param = 'data=' + JSON.stringify(smallPaths);
+				req = new XMLHttpRequest();
+				param = 'data=' + JSON.stringify(smallPaths);
 				req.open("POST", '/tools/writeTraectToFile.php');
-				req.onreadystatechange = function() {
+				req.onreadystatechange = function () {
 
-					if ((req.status == 200) && (req.readyState==4)) {
-						console.log(req.responseText)
+					if ((req.status === 200) && (req.readyState === 4)) {
+						console.log(req.responseText);
 					}
 				};
 
@@ -868,15 +875,15 @@ var debugTraect = function debugTraect() {
 			if (e.target.classList.contains('debug__button_remember-animation')) {
 				e.stopPropagation();
 
-				var currentPath = getCurrentPath(),
-					currentObject = getCurrentObject(),
-					currentAnimation = getCurrentAnimation();
+				currentPath = getCurrentPath();
+				currentObject = getCurrentObject();
+				currentAnimation = getCurrentAnimation();
 
 				if (currentPath && currentObject && currentAnimation) {
 					currentPath.objects = currentPath.objects || {};
 					currentPath.objects[currentObject.id] = {
 						animation: currentAnimation,
-						speed: parseInt(document.querySelector('.debug__control-traects-speed').value)
+						speed: parseInt(document.querySelector('.debug__control-traects-speed').value, 10)
 					};
 				}
 
@@ -888,8 +895,8 @@ var debugTraect = function debugTraect() {
 			if (e.target.classList.contains('debug__button_remove-object')) {
 				e.stopPropagation();
 
-				var currentPath = getCurrentPath(),
-					currentObject = getCurrentObject()
+				currentPath = getCurrentPath();
+				currentObject = getCurrentObject();
 
 				delete currentPath.objects[currentObject.id];
 
@@ -905,23 +912,24 @@ var debugTraect = function debugTraect() {
 				e.stopPropagation();
 			}
 
-		})
+		});
 
-		debugWrap.onscroll = function(e) {
+		debugWrap.onscroll = function () {
 			scene.playGround.position.x = (-1) * globals.scale * debugWrap.scrollLeft;
-		}
+		};
 
 	}
 
 	function readObjectAnimations( option ) {
 		var heroId = option.getAttribute('value'),
-			animationList = document.querySelector('.debug__control-objects-anim');
+			animationList = document.querySelector('.debug__control-objects-anim'),
+			animation, newObject;
 
 		animationList.innerHTML = '';
 
 		if (!!globals.objects[heroId].image.spineData) {
-			for (var animation in globals.objects[heroId].image.spineData.animations) {
-				var newObject = document.createElement('option');
+			for (animation in globals.objects[heroId].image.spineData.animations) {
+				newObject = document.createElement('option');
 				newObject.innerHTML = globals.objects[heroId].image.spineData.animations[animation].name;
 				newObject.setAttribute('value', globals.objects[heroId].image.spineData.animations[animation].name);
 
@@ -931,25 +939,26 @@ var debugTraect = function debugTraect() {
 	}
 
 	function readObjects() {
-		var objectList = document.querySelector('.debug__control-objects-list');
+		var objectList = document.querySelector('.debug__control-objects-list'),
+			object, newObject, firstElement;
 
-		for (var object in globals.objects) {
-			var newObject = document.createElement('option');
+		for (object in globals.objects) {
+			newObject = document.createElement('option');
 			newObject.innerHTML = globals.objects[object].id;
 			newObject.setAttribute('value', globals.objects[object].id);
 
 			objectList.appendChild(newObject);
 		}
 
-		var firstElement = document.querySelector('.debug__control-objects-list option');
+		firstElement = document.querySelector('.debug__control-objects-list option');
 
 		if (firstElement !== null) {
-			firstElement.selected = true;;
+			firstElement.selected = true;
 			readObjectAnimations(firstElement);
 		}
 	}
 
-	/* Init */;
+	/* Init */
 	function resizeViewPort() {
 		var attrWidth = document.getElementById('view').getAttribute('width');
 		document.querySelector('.debug').style.width = ( 3828 / attrWidth ) * document.getElementById('view').clientWidth + 'px';
@@ -958,16 +967,16 @@ var debugTraect = function debugTraect() {
 	function startDebugger() {
 		var attrWidth = document.getElementById('view').getAttribute('width');
 
-		if (attrWidth == null) {
-			setTimeout(function() {
+		if (attrWidth === null) {
+			setTimeout(function () {
 				startDebugger();
-			}, 1000)
+			}, 1000);
 			return false;
 		}
 
-		window.addEventListener('resize', function() {
+		window.addEventListener('resize', function () {
 			resizeViewPort();
-		})
+		});
 		resizeViewPort();
 
 		defineDOMVars();
@@ -979,27 +988,27 @@ var debugTraect = function debugTraect() {
 	/* /Init */
 
 	return {
-		init: function() {
+		init: function () {
 			startDebugger();
 			return this;
 		},
 
-		addPath: function(p) {
+		addPath: function (p) {
 			addPath(p);
 
 			return this;
 		},
 
-		addPoint: function(p) {
+		addPoint: function (p) {
 			addPoint(p);
 
 			return this;
 		},
 
-		paint: function() {
+		paint: function () {
 			paint();
 
 			return this;
 		}
-	}
-}()
+	};
+}());

@@ -1,20 +1,24 @@
-var queue = (function() {
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var queue = (function () {
 
 	var objects = {};
 
 	function processQueue() {
-		var removedObjects = [];
+		var removedObjects = [],
+			objectPathsLength,
+			i, obj;
 
 		// Очистка исполненных объектов
 		function removeObjects() {
-			for (var i = 0; i < removedObjects.length; i++) {
+			for (i = 0; i < removedObjects.length; i++) {
 				delete objects[removedObjects[i]];
 			}
 		}
 
 		// Перебираются все анимируемые объекты (всё, что есть в очереди)
-		for (var obj in objects) {
-			var objectPathsLength = objects[obj].length;
+		for (obj in objects) {
+			objectPathsLength = objects[obj].length;
 
 			// Если у текущего объекта в очереди есть цепочки анимаций на исполнение,
 			// обрабатывается текущая первая из них
@@ -35,7 +39,7 @@ var queue = (function() {
 					if (!objects[obj][0].playingNow) {
 						globals.objects[obj].animate({
 							animation: objects[obj][0].animation,
-							callback: function() {
+							callback: function () {
 								// Сохраняем путь
 								globals.objects[obj].path = objects[obj][0].pathId;
 
@@ -60,10 +64,8 @@ var queue = (function() {
 									type: 'stop'
 								});
 							}
-						})
+						});
 						objects[obj][0].playingNow = true;
-					} else {
-						continue;
 					}
 
 				} else {
@@ -75,7 +77,7 @@ var queue = (function() {
 						chain: objects[obj][0].targetChain,
 						animation: objects[obj][0].animation,
 						speed: objects[obj][0].speed,
-						callback: function() {
+						callback: function () {
 							// Если только что завершенная анимация объекта не последняя в его цепочке,
 							// значение текущего шага устанавливается на первое из следующей анимации в цепочке
 							globals.objects[obj].step = objects[obj][1]
@@ -83,13 +85,13 @@ var queue = (function() {
 								: globals.objects[obj].step;
 
 							// После завершения исполнения анимации выкинуть её из цепочки объекта
-							var objectCallback = objects[obj].callback || function() {},
+							var objectCallback = objects[obj].callback || function () {},
 								oldPath = objects[obj].shift();
 
 							if (!objects[obj].length) {
 								// Цепочка анимаций закончилась, нужно остановиться
 
-								if (obj == 'hero') {
+								if (obj === 'hero') {
 									globals.objects[ obj ].image.state.setAnimationByName("stop", false); // STOP
 								}
 
@@ -117,7 +119,7 @@ var queue = (function() {
 								});
 							}
 						}
-					})
+					});
 
 				}
 
@@ -133,7 +135,7 @@ var queue = (function() {
 		removeObjects();
 
 		// Запустить цикл очереди заново
-		requestAnimationFrame( function() {
+		requestAnimationFrame( function () {
 			processQueue();
 		} );
 	}
@@ -148,7 +150,7 @@ var queue = (function() {
 		//
 		// p.objectId
 		// p.paths
-		addToObjPaths: function( p ) {
+		addToObjPaths: function ( p ) {
 			objects[p.objectId] = p.paths;
 			objects[p.objectId].callback = p.callback;
 
@@ -167,11 +169,11 @@ var queue = (function() {
 		// Запускает агент очереди;
 		// Агент крутится в фоне и следит за добавлением объектов в очереди
 		// Как только в очередь добавляется объект, начинается исполнение его анимации
-		startQueue: function() {
+		startQueue: function () {
 			processQueue();
 
 			return this;
 		}
-	}
+	};
 
-})()
+}());

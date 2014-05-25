@@ -1,10 +1,11 @@
-var scene = function scene() {
+/*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
+
+var scene = (function () {
 
 	/* Private */
 	var stage, // сцена
 		renderer, // оператор рендеринга
 		masterCanvas, // Физический канвас на вьюпорте
-		playGround,
 		x = 0, y = 0; // точки отсчета для сцены
 
 	function repaintCanvas() {
@@ -21,7 +22,8 @@ var scene = function scene() {
 
 		// p.canvasSelector
 		init: function ( p ) {
-			var _this = this;
+			var _this = this,
+				playGround;
 
 			// Обертка над оператором рендера PIXI
 			masterCanvas = document.getElementById(p.canvasId); // указатель на DOM
@@ -33,7 +35,7 @@ var scene = function scene() {
 
 			renderer = new PIXI.CanvasRenderer(_this.width, globals.sceneHeight, masterCanvas, false);
 
-			window.addEventListener('resize', function() {
+			window.addEventListener('resize', function () {
 				_this.scale = globals.sceneHeight/masterCanvas.clientHeight;
 				_this.width = _this.scale * masterCanvas.clientWidth;
 				_this.height = _this.scale * masterCanvas.clientHeight;
@@ -46,17 +48,17 @@ var scene = function scene() {
 					globals.objects.hero.move({
 						x: globals.objects.hero.image.position.x,
 						y: globals.objects.hero.image.position.y
-					})
+					});
 				}
 
 				if (!!graph) {
 					graph.buildGraph({});
 				}
-			})
+			});
 
 			// Контейнер сцены
 			// его будем двигать для смещения сцены относительно вьюпорта
-			var playGround = new PIXI.DisplayObjectContainer();
+			playGround = new PIXI.DisplayObjectContainer();
 			playGround.position.x = x;
 			playGround.position.y = y;
 
@@ -120,5 +122,5 @@ var scene = function scene() {
 
 			return _this;
 		}
-	}
-}();
+	};
+}());
