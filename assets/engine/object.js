@@ -1,33 +1,53 @@
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс игрового объекта
+ *
+ * @class obj
+ */
 function obj() {
 
-	/* Private */
-	var x = -9999,
+	var x = -9999, // координаты на сцене
 		y = -9999,
-		z = 1,
-		pz = 1,
-		step = null,
-		path = null;
-	/* Public */
+		z = 1, // слой
+		pz = 1, // приоритет объекта на слое
+		step = null, // текущий шаг объекта на пути
+		path = null; // текущий путь объекта
 
 	return {
 
-		// Создает объект из заданного ресурса
-		// в заданную точку (необязательно)
-		// с заданной анимацией (необязательно)
-
-		// p.image
-		// p.x
-		// p.y
-		// p.z
-		// p.animation
+		/**
+		 * Конструктор объекта
+		 *
+		 * @constructor
+		 * @param p {Object}
+		 * @param p.name {String} имя объекта
+		 * @param p.src {String} источник модели объекта
+		 * @param p.x {Number} координаты на плоскости
+		 * @param p.y {Number}
+		 * @param p.z {Number} слой
+		 * @param p.pz {Number} приоритет слоя
+		 * @param p.step {number} шаг на траектории
+		 * @param p.path {String} идентификатор траектории
+		 * @param p.scale {Number} масштаб модели
+		 * @param p.reverse {Boolean} факт прямого/обратного направления
+		 * @param p.animation {Object} набор анимаций и связанных данных
+		 * @param p.interactive {Boolean} факт возможности пользовательского взаимодействия с объектом
+		 * @param p.ai {Object} данные экземпляра ИИ
+		 * @param p.ai.probMatrix {Array} вероятностная матрица состояний
+		 * @param p.ai.moveAnimation {String} анимация при движении
+		 * @param p.ai.stayAnimation {String} анимация при нахождении на месте
+		 * @param p.ai.availablesPaths {String} доступные пути для перемещения
+		 * @param p.ai.lookDistance {Number} расстояние, на котором объект замечает главного героя
+		 * @returns obj
+		 */
 		create: function ( p ) {
 			var _this = this,
 				id;
 
 			if (p.src === undefined) { return false; }
 
+			// расположение на сцене
 			function setObjectPosition() {
 				_this.image.position.x = (p.x !== undefined) ? p.x : x;
 				_this.image.position.y = (p.y !== undefined) ? p.y : y;
@@ -46,18 +66,21 @@ function obj() {
 				}
 			}
 
+			// Задание масштаба
 			function setObjectScale() {
 				_this.image.scale.x = _this.image.scale.y = (p.scale !== undefined)
 					? p.scale
 					: 1;
 			}
 
+			// Разворот объекта
 			function setReverse() {
 				if (p.reverse) {
 					_this.image.scale.x *= -1;
 				}
 			}
 
+			// Генерация идентификатора, если не задан
 			function generateRandomObjectId() {
 				var objectId = Math.random().toString();
 
@@ -68,6 +91,7 @@ function obj() {
 				return objectId;
 			}
 
+			// Анимации и связанные мультимедиа-события
 			function setAnimation() {
 				var animationName;
 
@@ -88,6 +112,7 @@ function obj() {
 				}
 			}
 
+			// Обработка событий взаимодействия пользователя с объектом
 			function setInteractive() {
 				if (p.interactive) {
 					_this.image.setInteractive(true);
@@ -114,6 +139,7 @@ function obj() {
 				}
 			}
 
+			// обпределение экземпляра класса ИИ для объекта
 			function setAI() {
 				if (p.ai) {
 
@@ -163,16 +189,18 @@ function obj() {
 			return _this;
 		},
 
-		// Двигает объект по горизонтали/вертикали, коэффициенту удаления
-		// На первом этапе принимаем, что коэффициент удаления не оказывает влияния
-		// на скорость движения и размер (перспективу), а только лишь на порядок отрисовки
-		// аналог z-index
-
-		// Скорость движения будет зависеть от текущей анимации
-
-		// p.x
-		// p.y
-		// p.z
+		/**
+		 * Перемещает объект в пространстве
+		 * Скорость движения будет зависеть от текущей анимации
+		 *
+		 * @method move
+		 * @public
+		 * @param p {Object}
+		 * @param p.x
+		 * @param p.y
+		 * @param p.z
+		 * @returns obj
+		 */
 		move: function ( p ) {
 			var _this = this,
 				dx,
@@ -233,6 +261,19 @@ function obj() {
 			return _this;
 		},
 
+		/**
+		 * Обертка для пермещения объекта в заданную точку траектории
+		 *
+		 * @method moveTo
+		 * @public
+		 * @param p {Object}
+		 * @param p.path {String} идентификатор траектории
+		 * @param p.chain {Number} целевое звено
+		 * @param p.animationName {String} проигрываемая при движении анимация
+		 * @param p.speedValue {Number} скорость перемещения
+		 * @param p.callback {Function} выполнится по завершении
+		 * @returns obj
+		 */
 		moveTo: function ( p ) {
 			var _this = this;
 
@@ -248,7 +289,16 @@ function obj() {
 			return _this;
 		},
 
-		//p.animation
+		/**
+		 * Воспроизводит анимации объекта без перемещения его в пространстве
+		 *
+		 * @method animate
+		 * @public
+		 * @param p {Object}
+		 * @param p.animation {String} идентификатор анимации
+		 * @param p.callback {Function} выполнится по завершении
+		 * @returns obj
+		 */
 		animate: function ( p ) {
 			var _this = this,
 				callback = p.callback || function () {},
@@ -285,6 +335,13 @@ function obj() {
 			return _this;
 		},
 
+		/**
+		 * Возвращает информацию о нахождении объекта
+		 *
+		 * @method getPosition
+		 * @public
+		 * @returns {Object}
+		 */
 		getPosition: function () {
 
 			var _this = this,

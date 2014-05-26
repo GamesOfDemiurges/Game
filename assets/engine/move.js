@@ -1,7 +1,24 @@
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Реализует перемещение объектов по траекториям
+ *
+ * @class move
+ */
 var move = (function () {
 
+	/**
+	 * Перемещает заданный объект в заданную точку заданной траектории
+	 *
+	 * @method move
+	 * @private
+	 * @param p {Object}
+	 * @param p.id {String} идентификатор объекта
+	 * @param p.path {String} идентификатор пути
+	 * @param p.chain {Number} целевое звено
+	 * @param p.speed {Number} скорость перемещения
+	 * @param p.callback {Function} выполнится по завершении
+	 */
 	function move( p ) {
 		var modelStep = globals.objects[p.id].step,
 			currentPath = globals.paths[ p.path ],
@@ -50,6 +67,19 @@ var move = (function () {
 	}
 
 	return {
+
+		/**
+		 * Публичная обертка для перемещения объекта
+		 *
+		 * @method setMovement
+		 * @method public
+		 * @param p {Object}
+		 * @param p.id {String} идентификатор объекта
+		 * @param p.path {String} идентификатор пути
+		 * @param p.chain {Number} целевое звено
+		 * @param p.speed {Number} скорость перемещения
+		 * @param p.callback {Function} выполнится по завершении
+		 */
 		setMovement: function ( p ) {
 			move( p );
 		}

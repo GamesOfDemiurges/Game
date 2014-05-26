@@ -12540,42 +12540,54 @@ requireModule('promise/polyfill').polyfill();
 
 var globals = {
 
-	paths: {},
-	graph: {},
-	objects: {},
-	triggers: {},
-	objectClicked: false,
-	viewport: {
-		resize: false,
-		scale: 1
+	paths: {}, // Неймспейс для путей
+	graph: {}, // Неймспейс для путевого графа
+	objects: {}, // Неймспейс для объектов
+	triggers: {}, // Неймспейс для сценария
+	objectClicked: false, // Факт клика по объекту
+	viewport: { // Объект вьюпорта
+		resize: false, // Факт процесса ресайза
+		scale: 1 // Локальный масштаб
 	},
-	scale: 1,
-	volume: 0.5,
-	locale: 'ru'
+	scale: 1, // Глобальный масштаб
+	volume: 0.5, // Уровень громкости по умолчанию
+	locale: 'ru' // Локаль по умолчанию
 };
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс сцены
+ *
+ * @class scene
+ */
 var scene = (function () {
 
-	/* Private */
 	var stage, // сцена
 		renderer, // оператор рендеринга
 		masterCanvas, // Физический канвас на вьюпорте
 		x = 0, y = 0; // точки отсчета для сцены
 
+	/**
+	 * Обновление холста
+	 *
+	 * @method repaintCanvas
+	 * @private
+	 */
 	function repaintCanvas() {
 		requestAnimFrame(repaintCanvas);
 		renderer.render(stage);
 	}
 
-	/* Public */
-
 	return {
 
-		// Инициализация сцены
-		// Передается селектор физического канваса
-
-		// p.canvasSelector
+		/**
+		 * Инициализация сцены
+		 *
+		 * @constructor
+		 * @param p {Object}
+		 * @param p.canvasId {Node} селектор физического канваса
+		 * @returns scene
+		 */
 		init: function ( p ) {
 			var _this = this,
 				playGround;
@@ -12630,8 +12642,15 @@ var scene = (function () {
 			return _this;
 		},
 
-		// На сцену в произвольный момент может быть добавлен один из существующих объектов
-		// p.image
+		/**
+		 * Добавляет объект на сцену
+		 *
+		 * @method addObj
+		 * @public
+		 * @param p {Object}
+		 * @param p.ai {Object} параметры экземпляра ИИ
+		 * @returns scene
+		 */
 		addObj: function ( p ) {
 			var _this = this;
 
@@ -12644,9 +12663,16 @@ var scene = (function () {
 			return _this;
 		},
 
-		// Смещение сцены (не путать со смещением объекта)
-		// p.dx
-		// p.dy
+		/**
+		 * Смещение сцены (не путать со смещением объекта)
+		 *
+		 * @method move
+		 * @public
+		 * @param p {Object}
+		 * @param p.dx
+		 * @param p.dy
+		 * @returns scene
+		 */
 		move: function ( p ) {
 			var _this = this,
 				maxYShift = ( _this.height / globals.scale - (_this.height / globals.scale ) * (globals.viewport.scale ) ) * globals.scale,
@@ -12679,9 +12705,13 @@ var scene = (function () {
 		}
 	};
 }());
-
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс для перемещения объектов в плоскости Z
+ *
+ * @class Z
+ */
 var Z = (function () {
 
 	var zindex = {
@@ -12693,9 +12723,29 @@ var Z = (function () {
 		};
 
 	return {
+
+		/**
+		 * Возвращает структуру всех слоев
+		 *
+		 * @method getZindex
+		 * @public
+		 * @returns {Object}
+		 */
 		getZindex: function () {
 			return zindex;
 		},
+
+		/**
+		 * Добавляет новую плоскость в структуру всех слоев
+		 *
+		 * @method addZindex
+		 * @public
+		 * @param p {Object}
+		 * @param p.z {Number} плоскость
+		 * @param p.pz {Number} приоритет плоскости
+		 * @param p.priorityZindex {Number}
+		 * @param p.stackZindex {Number}
+		 */
 		addZindex: function ( p ) {
 			function addChild(next ) {
 				var child = Math.random();
@@ -12826,8 +12876,17 @@ var Z = (function () {
 			}
 			p.stackZindex = stackIndex; // отражает позицию в стеке на отрисовку
 
-			Z.drawZindex(scene.playGround);
+			Z.drawZindex();
 		},
+
+		/**
+		 * Изменить значение z-плоскости для объекта
+		 *
+		 * @method changeZindex
+		 * @public
+		 * @param p {Object}
+		 * @param p.obj {obj} Объект-владелец плоскости
+		 */
 		changeZindex: function ( p ) {
 			// Оч. грубо — удалим приоритет из списка
 			// плоскость можно не трогать — вдруг понадобится?
@@ -12847,6 +12906,13 @@ var Z = (function () {
 
 			Z.addZindex(p.obj);
 		},
+
+		/**
+		 * Изменить порядок построения z-плоскостей
+		 *
+		 * @method drawZindex
+		 * @public
+		 */
 		drawZindex: function () {
 			var currentPlain = zindex.base.next,
 				currentPriorityPlain;
@@ -12872,10 +12938,25 @@ var Z = (function () {
 }());
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс вьюпорта
+ *
+ * @class viewport
+ */
 var viewport = (function () {
 	var magicYHeroShift = 0;
 
-
+	/**
+	 * Инициализация переменных при начае масштабирования
+	 *
+	 * @method viewportInitScale
+	 * @private
+	 * @param p {Object}
+	 * @param p.x1 {Number}
+	 * @param p.y1 {Number}
+	 * @param p.x2 {Number}
+	 * @param p.y2 {Number}
+	 */
 	function viewportInitScale( p ) {
 		globals.viewport.resize = true;
 		globals.viewport.distance = Math.sqrt( ( p.x1 - p.x2 )*( p.x1 - p.x2 ) + ( p.y1 - p.y2 )*( p.y1 - p.y2 ) );
@@ -12884,6 +12965,17 @@ var viewport = (function () {
 		globals.viewport.sceneY = scene.playGround.position.y - (globals.objects.hero.image.position.y + magicYHeroShift) * (1 - globals.viewport.scale);
 	}
 
+	/**
+	 * Процесс масштабирования вьюпорта
+	 *
+	 * @method viewportProcessScale
+	 * @private
+	 * @param p {Object}
+	 * @param p.x1 {Number}
+	 * @param p.y1 {Number}
+	 * @param p.x2 {Number}
+	 * @param p.y2 {Number}
+	 */
 	function viewportProcessScale( p ) {
 		var newDistance = Math.sqrt( ( p.x1 - p.x2 )*( p.x1 - p.x2 ) + ( p.y1 - p.y2 )*( p.y1 - p.y2 ) ),
 			k = globals.viewport.scale * (newDistance / globals.viewport.distance),
@@ -12935,6 +13027,12 @@ var viewport = (function () {
 		globals.viewport.y = y;
 	}
 
+	/**
+	 * Завершение масштабирования вьюпорта
+	 *
+	 * @method viewportSaveScale
+	 * @private
+	 */
 	function viewportSaveScale() {
 		setTimeout(function () {
 			globals.viewport.resize = false;
@@ -12943,6 +13041,12 @@ var viewport = (function () {
 		globals.viewport.scale = scene.playGround.scale.x;
 	}
 
+	/**
+	 * Добавление обработчиков событий
+	 *
+	 * @method attachEvents
+	 * @private
+	 */
 	function attachEvents() {
 
 		if (document.ontouchend !== undefined) {
@@ -13012,6 +13116,12 @@ var viewport = (function () {
 
 	return {
 
+		/**
+		 * Инициализация
+		 *
+		 * @method init
+		 * @public
+		 */
 		init: function () {
 			attachEvents();
 		}
@@ -13020,12 +13130,30 @@ var viewport = (function () {
 }());
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс прокладки путей
+ *
+ * @class pathfinder
+ */
 var pathfinder = (function () {
 
-	// Прохождение по массиву путей
-	// У промежуточных путей targetChain считается конечной точкой,
-	// у последнего пути — берется из параметра
+	/**
+	 * Прохождение по массиву путей
+	 *
+	 * @method processPaths
+	 * @private
+	 * @param p {Object}
+	 * @param p.currentObject {obj} перемещаемый объект
+	 * @param p.animationName {String} анимация, проигрываемая при перемещении
+	 * @param p.targetChain {Number} целевое звено
+	 * @param p.speedValue {Number} скорость перемещения
+	 * @param p.pathArray {Array} массив траекторий, чере которые проходит объект
+	 * @param p.callback {Function} выполнится по завершении
+	 */
 	function processPaths( p ) {
+		// У промежуточных путей targetChain считается конечной точкой,
+		// у последнего пути — берется из параметра
+
 		var servicePoints,
 			step = p.currentObject.step,
 			resultPath = [],
@@ -13148,6 +13276,18 @@ var pathfinder = (function () {
 		});
 	}
 
+	/**
+	 * Построение массива путей
+	 *
+	 * @method buildPathArray
+	 * @private
+	 * @param p {Object}
+	 * @param p.resultPath {String} идентификатор конечного пути
+	 * @param p.currentObject {obj} перемещаемый объект
+	 * @param p.animationName {String} анимация, проигрываемая при перемещении
+	 * @param p.speedValue {Number} скорость перемещения
+	 * @param p.callback {Function} выполнится по завершении
+	 */
 	function buildPathArray( p ) {
 		// Построение списка путей, необходимых для достижения конечной вершины графа
 		if ( p.resultPath.graphIdEnd === null || !globals.graph[ p.resultPath.graphIdStart]) { return false; }
@@ -13175,6 +13315,18 @@ var pathfinder = (function () {
 		} );
 	}
 
+	/**
+	 * Ищет кратчайший путь до заданного звена
+	 *
+	 * @method findPathToChain
+	 * @private
+	 * @param p {Object}
+	 * @param p.currentObject {obj} перемещаемый объект
+	 * @param p.path {String} траектория, до которой нужно дойти
+	 * @param p.chain {Number} звено, до которого нужно дойти
+	 * @param p.resultPath {Object} путь, с которым будет сравниваться выбранная траектория
+	 * @returns {Object} самый короткий путь
+	 */
 	function findPathToChain( p ) {
 		if (!p.currentObject || !globals.paths[p.path] || !globals.paths[ p.currentObject.path ]) { return false; }
 
@@ -13255,8 +13407,15 @@ var pathfinder = (function () {
 	}
 
 	/**
-	* Перемещает объект точку, заданную координатами клика
-	*/
+	 * Перемещает объект в точку, заданную координатами клика
+	 *
+	 * @method moveObjectByCoords
+	 * @private
+	 * @param p {Object}
+	 * @param p.id {String} Идентификатор объекта
+	 * @param p.x {Number}
+	 * @param p.y {number}
+	 */
 	function moveObjectByCoords( p ) {
 		var currentObject = globals.objects[p.id],
 			resultPath = {},
@@ -13290,6 +13449,19 @@ var pathfinder = (function () {
 		} );
 	}
 
+	/**
+	 * Перемещает объект в заданное звено
+	 *
+	 * @method moveObjectByChain
+	 * @private
+	 * @param p {Object}
+	 * @param p.id {String} Идентификатор объекта
+	 * @param p.path {String} траектория, до которой нужно дойти
+	 * @param p.chain {Number} звено, до которого нужно дойти
+	 * @param p.animationName {String} анимация, проигрываемая при перемещении
+	 * @param p.speedValue {Number} скорость перемещения
+	 * @param p.callback {Function} выполнится по завершении
+	 */
 	function moveObjectByChain( p ) {
 		var currentObject = globals.objects[p.id],
 			resultPath;
@@ -13311,6 +13483,12 @@ var pathfinder = (function () {
 		} );
 	}
 
+	/**
+	 * Добавляет обработчики кликов в зависимости от типа устройства
+	 *
+	 * @method attachPathFinderListeners
+	 * @private
+	 */
 	function attachPathFinderListeners() {
 
 		if (document.ontouchend !== undefined) {
@@ -13360,13 +13538,30 @@ var pathfinder = (function () {
 	}
 
 	return {
+
+		/**
+		 * Публичная обертка дл инициализации обработчиков событий
+		 *
+		 * @method start
+		 * @public
+		 */
 		start: function () {
 			attachPathFinderListeners();
 		},
 
-		// p.id
-		// p.path
-		// p.chain
+		/**
+		 * Публичная обертка для перемещения объекта в заданную точку
+		 *
+		 * @method moveObjectByChain
+		 * @public
+		 * @param p {Object}
+		 * @param p.id {String} Идентификатор объекта
+		 * @param p.path {String} траектория, до которой нужно дойти
+		 * @param p.chain {Number} звено, до которого нужно дойти
+		 * @param p.animationName {String} анимация, проигрываемая при перемещении
+		 * @param p.speedValue {Number} скорость перемещения
+		 * @param p.callback {Function} выполнится по завершении
+		 */
 		moveObjectByChain: function ( p ) {
 			moveObjectByChain( p );
 		}
@@ -13378,8 +13573,23 @@ var pathfinder = (function () {
 
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс ИИ
+ *
+ * @class ai
+ */
 function ai() {
 
+	// Матрица вероятностей перехода из одного состояния в другое.
+	// Суммарная вероятность отнормирована по 10
+	// yes — факт нахождения героя в поле зрения ИИ
+	// no — ИИ не видит героя
+	// Состояния:
+	// 1 — стоит на месте
+	// 2 — разворачивается на месте
+	// 3 — перемещается в точку
+	// 4 — анимируется на месте
+	// 5 — оценивает расстояние до героя
 	var probMatrix = [
 		[
 			{yes: 1, no: 1},
@@ -13417,16 +13627,22 @@ function ai() {
 			{yes: 0, no: 0}
 		]
 	],
-	obj,
-	moveAnimation,
-	stayAnimation,
-	availablesPaths,
-	lookDistance,
-	stayTime,
-	currentState,
-	heroIsVisible = false,
-	stop = false;
+	obj, // Объект-родитель экземпляра класса
+	moveAnimation, // Поле для значения анимации, проигрываемой при движении
+	stayAnimation, // Поле для значения анимации, проигрываемой при стоянии на месте
+	availablesPaths, // Путь, доступный для перемещения ИИ
+	lookDistance, // Расстояние, на котором ИИ замечает героя
+	stayTime, // Максимальное время, в течение которого ИИ может неподвижно стоять на месте
+	currentState, // Текущее состояние ИИ
+	heroIsVisible = false, // Факт видимости героя
+	stop = false; // Факт прекращения работы ИИ
 
+	/**
+	 * Состояние нахождения на месте
+	 *
+	 * @method stayOnPlace
+	 * @private
+	 */
 	function stayOnPlace() {
 		currentState = 0;
 
@@ -13435,6 +13651,12 @@ function ai() {
 		}, utils.getRandomValue(stayTime) );
 	}
 
+	/**
+	 * Состояние разворота на месте
+	 *
+	 * @method rotateObject
+	 * @private
+	 */
 	function rotateObject() {
 		currentState = 1;
 
@@ -13443,6 +13665,12 @@ function ai() {
 		processAction();
 	}
 
+	/**
+	 * Состояние перемещения в точку
+	 *
+	 * @method moveToPoint
+	 * @private
+	 */
 	function moveToPoint() {
 		currentState = 2;
 
@@ -13464,6 +13692,12 @@ function ai() {
 		}
 	}
 
+	/**
+	 * Состояние воспроизведения анимации на месте
+	 *
+	 * @method playAnimation
+	 * @private
+	 */
 	function playAnimation() {
 		currentState = 3;
 
@@ -13479,6 +13713,12 @@ function ai() {
 		}
 	}
 
+	/**
+	 * Состояние оценки расстояния до героя
+	 *
+	 * @method lookAround
+	 * @private
+	 */
 	function lookAround() {
 
 		currentState = 4;
@@ -13497,6 +13737,12 @@ function ai() {
 		processAction();
 	}
 
+	/**
+	 * Менеджер состояний
+	 *
+	 * @method processAction
+	 * @private
+	 */
 	function processAction() {
 		if (stop) { return; }
 
@@ -13537,6 +13783,20 @@ function ai() {
 
 	}
 
+	/**
+	 * Инициализирует экземпляр
+	 *
+	 * @method initParams
+	 * @private
+	 * @param p {Object}
+	 * @param p.probMatrix {Object} матрица вероятностей состояний
+	 * @param p.moveAnimation {String} название анимации, проигрываемой при движении
+	 * @param p.stayAnimaton {String} название анимации, проигрываемой при нахождении на месте
+	 * @param p.availablesPaths {String} доступная для движения траектория
+	 * @param p.lookDistance {Integer} расстояние, на котором ИИ видит героя
+	 * @param p.stayTime {Integer} максимальное время, которое ИИ может стоять на месте без движения
+	 * @param p.obj {Object} объкт, к которому принадлежит ИИ
+	 */
 	function initParams( p ) {
 
 		probMatrix = p.probMatrix || probMatrix;
@@ -13550,6 +13810,21 @@ function ai() {
 
 	return {
 
+		/**
+		 * Конструктор экземпляра ИИ
+		 *
+		 * @method init
+		 * @public
+		 * @param p {Object}
+		 * @param p.probMatrix {Object} матрица вероятностей состояний
+		 * @param p.moveAnimation {String} название анимации, проигрываемой при движении
+		 * @param p.stayAnimaton {String} название анимации, проигрываемой при нахождении на месте
+		 * @param p.availablesPaths {String} доступная для движения траектория
+		 * @param p.lookDistance {Integer} расстояние, на котором ИИ видит героя
+		 * @param p.stayTime {Integer} максимальное время, которое ИИ может стоять на месте без движения
+		 * @param p.obj {Object} объкт, к которому принадлежит ИИ
+		 * @returns ai
+		 */
 		init: function ( p ) {
 
 			initParams( p );
@@ -13557,47 +13832,85 @@ function ai() {
 			return this;
 		},
 
+		/**
+		 * Запуск работы ИИ
+		 *
+		 * @method play
+		 * @public
+		 * @returns ai
+		 */
 		start: function () {
 			stop = false;
 			currentState = 4;
 			processAction();
+
+			return this;
 		},
 
+		/**
+		 * Остановка работы ИИ
+		 *
+		 * @method stop
+		 * @public
+		 * @returns ai
+		 */
 		stop: function () {
 			stop = true;
+
+			return this;
 		}
 	};
 }
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс игрового объекта
+ *
+ * @class obj
+ */
 function obj() {
 
-	/* Private */
-	var x = -9999,
+	var x = -9999, // координаты на сцене
 		y = -9999,
-		z = 1,
-		pz = 1,
-		step = null,
-		path = null;
-	/* Public */
+		z = 1, // слой
+		pz = 1, // приоритет объекта на слое
+		step = null, // текущий шаг объекта на пути
+		path = null; // текущий путь объекта
 
 	return {
 
-		// Создает объект из заданного ресурса
-		// в заданную точку (необязательно)
-		// с заданной анимацией (необязательно)
-
-		// p.image
-		// p.x
-		// p.y
-		// p.z
-		// p.animation
+		/**
+		 * Конструктор объекта
+		 *
+		 * @constructor
+		 * @param p {Object}
+		 * @param p.name {String} имя объекта
+		 * @param p.src {String} источник модели объекта
+		 * @param p.x {Number} координаты на плоскости
+		 * @param p.y {Number}
+		 * @param p.z {Number} слой
+		 * @param p.pz {Number} приоритет слоя
+		 * @param p.step {number} шаг на траектории
+		 * @param p.path {String} идентификатор траектории
+		 * @param p.scale {Number} масштаб модели
+		 * @param p.reverse {Boolean} факт прямого/обратного направления
+		 * @param p.animation {Object} набор анимаций и связанных данных
+		 * @param p.interactive {Boolean} факт возможности пользовательского взаимодействия с объектом
+		 * @param p.ai {Object} данные экземпляра ИИ
+		 * @param p.ai.probMatrix {Array} вероятностная матрица состояний
+		 * @param p.ai.moveAnimation {String} анимация при движении
+		 * @param p.ai.stayAnimation {String} анимация при нахождении на месте
+		 * @param p.ai.availablesPaths {String} доступные пути для перемещения
+		 * @param p.ai.lookDistance {Number} расстояние, на котором объект замечает главного героя
+		 * @returns obj
+		 */
 		create: function ( p ) {
 			var _this = this,
 				id;
 
 			if (p.src === undefined) { return false; }
 
+			// расположение на сцене
 			function setObjectPosition() {
 				_this.image.position.x = (p.x !== undefined) ? p.x : x;
 				_this.image.position.y = (p.y !== undefined) ? p.y : y;
@@ -13616,18 +13929,21 @@ function obj() {
 				}
 			}
 
+			// Задание масштаба
 			function setObjectScale() {
 				_this.image.scale.x = _this.image.scale.y = (p.scale !== undefined)
 					? p.scale
 					: 1;
 			}
 
+			// Разворот объекта
 			function setReverse() {
 				if (p.reverse) {
 					_this.image.scale.x *= -1;
 				}
 			}
 
+			// Генерация идентификатора, если не задан
 			function generateRandomObjectId() {
 				var objectId = Math.random().toString();
 
@@ -13638,6 +13954,7 @@ function obj() {
 				return objectId;
 			}
 
+			// Анимации и связанные мультимедиа-события
 			function setAnimation() {
 				var animationName;
 
@@ -13658,6 +13975,7 @@ function obj() {
 				}
 			}
 
+			// Обработка событий взаимодействия пользователя с объектом
 			function setInteractive() {
 				if (p.interactive) {
 					_this.image.setInteractive(true);
@@ -13684,6 +14002,7 @@ function obj() {
 				}
 			}
 
+			// обпределение экземпляра класса ИИ для объекта
 			function setAI() {
 				if (p.ai) {
 
@@ -13733,16 +14052,18 @@ function obj() {
 			return _this;
 		},
 
-		// Двигает объект по горизонтали/вертикали, коэффициенту удаления
-		// На первом этапе принимаем, что коэффициент удаления не оказывает влияния
-		// на скорость движения и размер (перспективу), а только лишь на порядок отрисовки
-		// аналог z-index
-
-		// Скорость движения будет зависеть от текущей анимации
-
-		// p.x
-		// p.y
-		// p.z
+		/**
+		 * Перемещает объект в пространстве
+		 * Скорость движения будет зависеть от текущей анимации
+		 *
+		 * @method move
+		 * @public
+		 * @param p {Object}
+		 * @param p.x
+		 * @param p.y
+		 * @param p.z
+		 * @returns obj
+		 */
 		move: function ( p ) {
 			var _this = this,
 				dx,
@@ -13803,6 +14124,19 @@ function obj() {
 			return _this;
 		},
 
+		/**
+		 * Обертка для пермещения объекта в заданную точку траектории
+		 *
+		 * @method moveTo
+		 * @public
+		 * @param p {Object}
+		 * @param p.path {String} идентификатор траектории
+		 * @param p.chain {Number} целевое звено
+		 * @param p.animationName {String} проигрываемая при движении анимация
+		 * @param p.speedValue {Number} скорость перемещения
+		 * @param p.callback {Function} выполнится по завершении
+		 * @returns obj
+		 */
 		moveTo: function ( p ) {
 			var _this = this;
 
@@ -13818,7 +14152,16 @@ function obj() {
 			return _this;
 		},
 
-		//p.animation
+		/**
+		 * Воспроизводит анимации объекта без перемещения его в пространстве
+		 *
+		 * @method animate
+		 * @public
+		 * @param p {Object}
+		 * @param p.animation {String} идентификатор анимации
+		 * @param p.callback {Function} выполнится по завершении
+		 * @returns obj
+		 */
 		animate: function ( p ) {
 			var _this = this,
 				callback = p.callback || function () {},
@@ -13855,6 +14198,13 @@ function obj() {
 			return _this;
 		},
 
+		/**
+		 * Возвращает информацию о нахождении объекта
+		 *
+		 * @method getPosition
+		 * @public
+		 * @returns {Object}
+		 */
 		getPosition: function () {
 
 			var _this = this,
@@ -13894,10 +14244,24 @@ function obj() {
 }
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс утилит
+ *
+ * @class utils
+ */
 var utils = (function () {
 
 	return {
 
+		/**
+		 * Отдает случайное число в заданном интервале
+		 *
+		 * @method getRandomValue
+		 * @public
+		 * @param low {Number} нижняя граница
+		 * @param high {Number} верхняя граница
+		 * @returns {Number}
+		 */
 		getRandomValue: function ( low, high ) {
 			var innerLow = high
 					? low
@@ -13907,11 +14271,18 @@ var utils = (function () {
 			return innerLow + Math.round( Math.random()*(innerHigh-innerLow) );
 		},
 
-		// Возвращает Эвклидово расстояния
-		//p.x1
-		//p.y1
-		//p.x2
-		//p.y2
+		/**
+		 * Возвращает Эвклидово расстояния
+		 *
+		 * @method getDistance
+		 * @public
+		 * @param p {Object}
+		 * @param p.x1 {Number}
+		 * @param p.y1 {Number}
+		 * @param p.x2 {Number}
+		 * @param p.y2 {Number}
+		 * @returns {Number}
+		 */
 		getDistance: function ( p ) {
 			var xDistance = p.x2 - p.x1,
 				yDistance = p.y2 - p.y1;
@@ -13919,12 +14290,19 @@ var utils = (function () {
 			return Math.sqrt( xDistance*xDistance + yDistance*yDistance );
 		},
 
-		// Возвращает координаты точку на отрезке
-		//p.x1
-		//p.y1
-		//p.x2
-		//p.y2
-		//p.t
+		/**
+		 * Возвращает координаты точки на отрезке
+		 *
+		 * @method getLinePointCoords
+		 * @public
+		 * @param p {Object}
+		 * @param p.x1 {Number}
+		 * @param p.y1 {Number}
+		 * @param p.x2 {Number}
+		 * @param p.y2 {Number}
+		 * @param p.t {Number}
+		 * @returns {Object}
+		 */
 		getLinePointCoords: function ( p ) {
 			return {
 				x: (p.x2 - p.x1) * p.t + p.x1,
@@ -13932,16 +14310,23 @@ var utils = (function () {
 			};
 		},
 
-		// Возвращает координаты точки в кривой Безье
-		//p.x1
-		//p.y1
-		//p.ax1
-		//p.ay1
-		//p.ax2
-		//p.ay2
-		//p.x2
-		//p.y2
-		//p.t
+		/**
+		 * Возвращает координаты точки в кривой Безье
+		 *
+		 * @method getBezierPointCoords
+		 * @public
+		 * @param p {Object}
+		 * @param p.x1 {Number} Опорная точка
+		 * @param p.y1 {Number}
+		 * @param p.ax1 {Number} Управляющий рычаг
+		 * @param p.ay1 {Number}
+		 * @param p.ax2 {Number} Управляющий рычаг
+		 * @param p.ay2 {Number}
+		 * @param p.x2 {Number} Опорная точка
+		 * @param p.y2 {Number}
+		 * @param p.t {Number}
+		 * @returns {Object}
+		 */
 		getBezierPointCoords: function ( p ) {
 			function polynom(z) {
 				var at = (1 - p.t);
@@ -13955,11 +14340,18 @@ var utils = (function () {
 			};
 		},
 
-		// Возвращает позицию управляющих точек на кривой Безье
-		//p.x1
-		//p.y1
-		//p.x2
-		//p.y2
+		/**
+		 * Возвращает позицию управляющих точек на кривой Безье
+		 *
+		 * @method getAdditionalBezierPointsCoords
+		 * @public
+		 * @param p {Object}
+		 * @param p.x1 {Number}
+		 * @param p.y1 {Number}
+		 * @param p.x2 {Number}
+		 * @param p.y2 {Number}
+		 * @returns {Object}
+		 */
 		getAdditionalBezierPointsCoords: function ( p ) {
 			var a1 = utils.getLinePointCoords({
 					x1: p.x1,
@@ -13985,17 +14377,24 @@ var utils = (function () {
 			};
 		},
 
-		// Строит рекурсивно атомарные шаги по заданной кривой Безье длиной не более допустимого расстояния
-		//p.x1
-		//p.y1
-		//p.ax1
-		//p.ay1
-		//p.ax2
-		//p.ay2
-		//p.x2
-		//p.y2
-		//p.t1,
-		//p.t2
+		/**
+		 * Строит рекурсивно атомарные шаги по заданной кривой Безье длиной не более допустимого расстояния
+		 *
+		 * @method buildCurveSteps
+		 * @public
+		 * @param p {Object}
+		 * @param p.x1 {Number} опорная точка
+		 * @param p.y1 {Number}
+		 * @param p.ax1 {Number} управляющий рычаг
+		 * @param p.ay1 {Number}
+		 * @param p.ax2 {Number} управляющий рычаг
+		 * @param p.ay2 {Number}
+		 * @param p.x2 {Number} опорная точка
+		 * @param p.y2 {Number}
+		 * @param p.t1 {Number} границы интервала рекурсивного разбиения кривой
+		 * @param p.t2 {Number}
+		 * @returns {Object}
+		 */
 		buildCurveSteps: function ( p ) {
 			// максимально допустимое расстояние в пикселах
 			var maxDistance = 1.4,
@@ -14152,8 +14551,14 @@ var utils = (function () {
 			return path;
 		},
 
-		// Генерирует управляющий контур для траектории
-		// p.pathId
+		/**
+		 * Генерирует управляющий контур для траектории
+		 *
+		 * @method buildControlPoligon
+		 * @public
+		 * @param p {Object}
+		 * @param p.pathId {String} идентификатор пути
+		 */
 		buildControlPoligon: function ( p ) {
 
 			var touchRadiusDistance = 100,
@@ -14202,6 +14607,14 @@ var utils = (function () {
 			currentPath.controlPath = controlPath;
 		},
 
+		/**
+		 * Строит шаги и управляющую область для траекторий
+		 *
+		 * @method processPaths
+		 * @public
+		 * @param p {Object}
+		 * @param p.callback {Function} выполнится по завершении
+		 */
 		processPaths: function ( p ) {
 			var callback = p
 					? p.callback || function () {}
@@ -14250,10 +14663,22 @@ var utils = (function () {
 
 		},
 
+		/**
+		 * Плавно затемняет экран
+		 *
+		 * @method fadeIn
+		 * @public
+		 */
 		fadeIn: function () {
 			document.querySelector('.black-fade').className += ' black-fade_active';
 		},
 
+		/**
+		 * Плавно удаляет затемнение с экрана
+		 *
+		 * @method fadeOut
+		 * @public
+		 */
 		fadeOut: function () {
 			document.querySelector('.black-fade').className = document.querySelector('.black-fade').className.replace(/\sblack-fade_active/ig, '');
 		}
@@ -14268,18 +14693,43 @@ var utils = (function () {
 
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Реализует класс путевого графа
+ *
+ * @class graph
+ */
 var graph = (function () {
 
 	var serviceGraph,
 		adjacencyMatrix;
 
+	/**
+	 * Создает идентификатор вершины графа на основании координат на плоскости
+	 *
+	 * @method makeIdByCoords
+	 * @private
+	 * @param x {Number}
+	 * @param y {Number}
+	 * @returns String
+	 */
 	function makeIdByCoords(x, y) {
 
 		return Math.round(x).toString() + '_' + Math.round(y).toString();
 	}
 
-	// Добаввляет данные в структуру ServiceGraph, отражающую связь между вершинами графа, определенных координатами
-	// таким образом, две вершины разных отрезков, располашающихся в одной точке, образуют одну вершину
+	/**
+	 * Добавляет данные в структуру ServiceGraph, отражающую связь между вершинами графа, определенных координатами
+	 * таким образом, две вершины разных отрезков, располагающихся в одной точке, образуют одну вершину
+	 *
+	 * @method addToGraph
+	 * @private
+	 * @param pathName {String} название пути
+	 * @param linkToPathPoint1 {Object} указатель на структуру рассматриваемой точки
+	 * @param linkToPathPoint2 {Object}
+	 * @param point1 {String} идентификатор точки
+	 * @param point2 {String}
+	 * @param distance {Number} длина пути
+	 */
 	function addToGraph(pathName, linkToPathPoint1, linkToPathPoint2, point1, point2, distance) {
 
 		// Если таких координат еще вообще нет, создаем структуру данных
@@ -14324,7 +14774,12 @@ var graph = (function () {
 		}
 	}
 
-	// Вычисление кратчайшей дистанции
+	/**
+	 * Вычисляет кратчайшую дистанцию
+	 *
+	 * @method calculateShortestDistance
+	 * @private
+	 */
 	function calculateShortestDistance() {
 		var n = adjacencyMatrix[0].length,
 			k, i, j, e1, e2;
@@ -14357,7 +14812,14 @@ var graph = (function () {
 		}
 	}
 
-	// Построение матрицы достижимости
+	/**
+	 * Строит матрицу достижимости
+	 *
+	 * @method buildAdjacencyMatrix
+	 * @private
+	 * @param p {Object}
+	 * @param p.callback {Function} выполняется по завершении
+	 */
 	function buildAdjacencyMatrix( p ) {
 		var reference = [],
 			callback = (p && p.callback) || function () {},
@@ -14449,7 +14911,15 @@ var graph = (function () {
 
 
 	return {
-		// Строит граф
+
+		/**
+		 * Строит граф
+		 *
+		 * @method buildGraph
+		 * @public
+		 * @param p {Object}
+		 * @param p.callback {Function} выполняется по завершении
+		 */
 		buildGraph: function ( p ) {
 
 			var path,
@@ -14474,13 +14944,28 @@ var graph = (function () {
 			buildAdjacencyMatrix( p );
 		},
 
-		// Просто выводит матрицу достижимости
+		/**
+		 * Просто выводит матрицу достижимости
+		 *
+		 * @method getAdjacencyMatrix
+		 * @public
+		 * @returns adjacencyMatrix {Object}
+		*/
 		getAdjacencyMatrix: function () {
 
 			return adjacencyMatrix;
 		},
 
-		// Отдает вершину графа, если совпадает с заданным шагом
+		/**
+		 * Отдает вершину графа, если совпадает с заданным шагом
+		 *
+		 * @method getGraphIdByStep
+		 * @public
+		 * @param p {Object}
+		 * @param p.path {String} идентификатор пути
+		 * @param p.step {Number} номер шага на заданном пути
+		 * @returns result {Number}
+		*/
 		getGraphIdByStep: function ( p ) {
 			var result;
 
@@ -14497,8 +14982,25 @@ var graph = (function () {
 }());
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Реализует перемещение объектов по траекториям
+ *
+ * @class move
+ */
 var move = (function () {
 
+	/**
+	 * Перемещает заданный объект в заданную точку заданной траектории
+	 *
+	 * @method move
+	 * @private
+	 * @param p {Object}
+	 * @param p.id {String} идентификатор объекта
+	 * @param p.path {String} идентификатор пути
+	 * @param p.chain {Number} целевое звено
+	 * @param p.speed {Number} скорость перемещения
+	 * @param p.callback {Function} выполнится по завершении
+	 */
 	function move( p ) {
 		var modelStep = globals.objects[p.id].step,
 			currentPath = globals.paths[ p.path ],
@@ -14547,6 +15049,19 @@ var move = (function () {
 	}
 
 	return {
+
+		/**
+		 * Публичная обертка для перемещения объекта
+		 *
+		 * @method setMovement
+		 * @method public
+		 * @param p {Object}
+		 * @param p.id {String} идентификатор объекта
+		 * @param p.path {String} идентификатор пути
+		 * @param p.chain {Number} целевое звено
+		 * @param p.speed {Number} скорость перемещения
+		 * @param p.callback {Function} выполнится по завершении
+		 */
 		setMovement: function ( p ) {
 			move( p );
 		}
@@ -14555,10 +15070,21 @@ var move = (function () {
 }());
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс череди обработки перемещений объектов по траекториям
+ *
+ * @class queue
+ */
 var queue = (function () {
 
-	var objects = {};
+	var objects = {}; // Объекты, которые в данный момент времени перемещаются
 
+	/**
+	 * Обработчик очереди
+	 *
+	 * @method processQueue
+	 * @private
+	 */
 	function processQueue() {
 		var removedObjects = [],
 			objectPathsLength,
@@ -14697,14 +15223,20 @@ var queue = (function () {
 
 	return {
 
-		// Добавляет анимацию в очередь.
-		// Если такой объект уже есть в очереди,
-		// добавленная анимация будет выполнена сразу же после уже запланированных для данного объекта.
-		// Очередь обрабатывает все анимируемые объекты со скоростью ~ 60 раз в секунду.
-		// После того, как цепочка анимаций для объекта полностью выполнена, он автоматически выкидывается из очереди
-		//
-		// p.objectId
-		// p.paths
+		/**
+		 * Добавляет анимацию в очередь.
+		 *
+		 * Если такой объект уже есть в очереди,
+		 * добавленная анимация будет выполнена сразу же после уже запланированных для данного объекта.
+		 * После того, как цепочка анимаций для объекта полностью выполнена, он автоматически выкидывается из очереди
+		 *
+		 * @method addToObjPaths
+		 * @public
+		 * @param p {Object}
+		 * @param p.objectId {String} идентификатор объекта
+		 * @param p.paths {Array} массив путей, по которым перемещается объект, и характеристик перемещения
+		 * @returns queue
+		 */
 		addToObjPaths: function ( p ) {
 			objects[p.objectId] = p.paths;
 			objects[p.objectId].callback = p.callback;
@@ -14721,10 +15253,17 @@ var queue = (function () {
 			return this;
 		},
 
-		// Запускает агент очереди;
-		// Агент крутится в фоне и следит за добавлением объектов в очереди
-		// Как только в очередь добавляется объект, начинается исполнение его анимации
+		/**
+		 * Запускает агент очереди;
+		 *
+		 * @method startQueue
+		 * @public
+		 * @returns queue
+		 */
 		startQueue: function () {
+			// Агент крутится в фоне и следит за добавлением объектов в очереди
+			// Как только в очередь добавляется объект, начинается исполнение его анимации
+
 			processQueue();
 
 			return this;
@@ -14734,10 +15273,25 @@ var queue = (function () {
 }());
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс внутренних оповещений
+ *
+ * @class relay
+ */
 var relay = (function () {
 
 	return {
 
+		/**
+		 * Бросает событие
+		 *
+		 * @method drop
+		 * @public
+		 * @param p {Object}
+		 * @param p.type {String} тип события
+		 * @param p.obj {String} автор события
+		 * @returns relay
+		 */
 		drop: function ( p ) {
 			var _this = this,
 				evt, objEvt,
@@ -14763,6 +15317,14 @@ var relay = (function () {
 
 		},
 
+		/**
+		 * Слушает событие
+		 *
+		 * @method listen
+		 * @public
+		 * @param eventName {Event} объект события
+		 * @returns relay
+		 */
 		listen: function ( eventName ) {
 			var _this = this;
 
@@ -15471,14 +16033,25 @@ document.addEventListener('hero.breakpoint.inGraphId.13', function () {
 });
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Реализует класс аудио
+ *
+ * @class audio
+ */
 var audio = (function () {
 
-	var context,
-		gainNode,
-		fadeDuration = 1,
-		splashMusic = track(),
-		backgroundMusic = track();
+	var context, // аудиоконтекст
+		gainNode, // нода для регулировки громкости на выходе потока
+		fadeDuration = 1, // длительность fadeIn/fadeOut, с.
+		splashMusic = track(), // аудиотрек на заставке
+		backgroundMusic = track(); // аудиотрек в фоне игры
 
+	/**
+	 * Инициализирует аудиоконтекст
+	 *
+	 * @method initContext
+	 * @private
+	 */
 	function initContext() {
 		try {
 			window.AudioContext = window.AudioContext||window.webkitAudioContext;
@@ -15498,6 +16071,14 @@ var audio = (function () {
 
 	}
 
+	/**
+	 * Реализует 3d звучание в зависимости от взаимного расположения источника и получателя звука
+	 *
+	 * @method updateSound
+	 * @param p {Object}
+	 * @param p.id {String} id объекта
+	 * @private
+	 */
 	function updateSound( p ) {
 
 		var soundObj = globals.objects[p.id];
@@ -15511,6 +16092,12 @@ var audio = (function () {
 		}
 	}
 
+	/**
+	 * Запускает фоновый звук на заставке
+	 *
+	 * @method startSplashSound
+	 * @private
+	 */
 	function startSplashSound() {
 
 		splashMusic.load({
@@ -15527,6 +16114,12 @@ var audio = (function () {
 		});
 	}
 
+	/**
+	 *  Запускает фоновый звук в игре
+	 *
+	 *  @method startBackgroundSound
+	 *  @private
+	 */
 	function startBackgroundSound() {
 
 		backgroundMusic.load({
@@ -15542,14 +16135,25 @@ var audio = (function () {
 		});
 	}
 
+	/**
+	 *  Обновляет уровень звука в игре в соответствии со значением глобальной переменной globals.volume
+	 *
+	 *  @method updateVolume
+	 *  @private
+	 */
 	function updateVolume() {
 		if (context) {
 			var currTime  = audio.getContext().currentTime;
-
 			audio.getGainNode().gain.linearRampToValueAtTime(globals.volume, currTime);
 		}
 	}
 
+	/**
+	 *  Отключает/включает звук в приложении в зависимости от его состояния видимости
+	 *
+	 *  @method handleVisibilityChange
+	 *  @private
+	 */
 	function handleVisibilityChange() {
 
 		if (document.webkitHidden || document.hidden) {
@@ -15561,6 +16165,13 @@ var audio = (function () {
 
 	return {
 
+		/**
+		 * Инициализирует класс
+		 *
+		 * @method init
+		 * @public
+		 * @return audio
+		 */
 		init: function () {
 
 			initContext();
@@ -15577,18 +16188,39 @@ var audio = (function () {
 			return this;
 		},
 
+		/**
+		 * Публичная обертка для запуска фоновой музыки в игре
+		 *
+		 * @method initBackgroundSound
+		 * @public
+		 * @return audio
+		 */
 		initBackgroundSound: function () {
 			startBackgroundSound();
 
 			return this;
 		},
 
+		/**
+		 * Публичная обертка для запуска фоновой музыки в заставке
+		 *
+		 * @method initSplashSound
+		 * @public
+		 * @return audio
+		 */
 		initSplashSound: function () {
 			startSplashSound();
 
 			return this;
 		},
 
+		/**
+		 * Публичная обертка для остановки фоновой музыки в заставке
+		 *
+		 * @method finishSplashSound
+		 * @public
+		 * @return audio
+		 */
 		finishSplashSound: function () {
 
 			if (audio.getContext()) {
@@ -15606,18 +16238,41 @@ var audio = (function () {
 
 		},
 
+		/**
+		 * Публичная обертка для установки связи 3d звучания источника и получателя звука
+		 *
+		 * @method updateWorldSound
+		 * @public
+		 * @param p {Object}
+		 * @param p.id {String} id объекта
+		 * @return audio
+		 */
 		updateWorldSound: function ( p ) {
 			updateSound( p );
 
 			return this;
 		},
 
+		/**
+		 * Публичная обертка для установки уровня звука в игре
+		 *
+		 * @method setVolume
+		 * @public
+		 * @return audio
+		 */
 		setVolume: function () {
 			updateVolume();
 
 			return this;
 		},
 
+		/**
+		 * Публичная обертка для восстановления уровня звука в игре
+		 *
+		 * @method fadeIn
+		 * @public
+		 * @return audio
+		 */
 		fadeIn: function () {
 			if (context) {
 				var currTime  = audio.getContext().currentTime;
@@ -15627,6 +16282,13 @@ var audio = (function () {
 			}
 		},
 
+		/**
+		 * Публичная обертка для затихания уровня звука в игре
+		 *
+		 * @method fadeOut
+		 * @public
+		 * @return audio
+		 */
 		fadeOut:function () {
 			if (context) {
 				var currTime  = audio.getContext().currentTime;
@@ -15636,30 +16298,68 @@ var audio = (function () {
 			}
 		},
 
+		/**
+		 * Геттер музыкального контекста
+		 *
+		 * @method getContext
+		 * @public
+		 * @return AudioContext {Object}
+		 */
 		getContext: function () {
 			return context;
 		},
 
+		/**
+		 * Геттер ноды громкости
+		 *
+		 * @method getGainNode
+		 * @public
+		 * @return GainNode {Object}
+		 */
 		getGainNode: function () {
 			return gainNode;
 		}
 	};
 }());
 
+/**
+ * Класс музыкального трека
+ *
+ * @class track
+ */
 function track() {
 
-	var sound = false,
-		parentObject;
+	var sound = false, // декодированная дорожка
+		parentObject; // Объект-родитель, издающий звук
 
 	return {
 
+		/**
+		 * Класс дорожки музыкального трека
+		 *
+		 * @property source
+		 * @public
+		 */
 		source: false,
 
+		/**
+		 * Метод загрузки трека
+		 *
+		 * @method load
+		 * @public
+		 * @param p {Object}
+		 * @param p.callback {Function} Выполнится по завершении загрузки
+		 * @param p.obj {Object} Объект-родитель (источник звука)
+		 * @param p.obj.id {String} Идентификатор объекта-родителя
+		 * @param p.url {String} Адрес для загрузки трека
+		 * @returns track
+		 */
 		load: function ( p ) {
 
 			var _this = this,
 				callback = p.callback || function () {};
 
+			// Декодирует поток и инициализирует 3d-эффект
 			function useSound(arrayBuffer, cb) {
 				var callback = cb || function () {};
 
@@ -15681,15 +16381,13 @@ function track() {
 						}
 
 						callback();
-
-						return;
-
 					}, function () {
 						callback();
 					}
 				);
 			}
 
+			// Запрос трека из сети
 			function makeRequest(cb) {
 				var callback = cb || function () {},
 					xhr = new XMLHttpRequest();
@@ -15698,6 +16396,7 @@ function track() {
 				xhr.responseType = 'arraybuffer';
 				xhr.onload = function () {
 
+					// Мы не хотим использовать локальный кеш, если это webStorage — нам мало 5 мб
 					if (localforage._driver !== 'localStorageWrapper') {
 						localforage.setItem(p.url, xhr.response, function () {
 							useSound(xhr.response, callback);
@@ -15714,6 +16413,7 @@ function track() {
 
 				parentObject = p.obj;
 
+				// Попытка извлечь трек из кеша
 				localforage.getItem(p.url, function (audiobuffer) {
 					if (audiobuffer) {
 						console.log(p.url + ' was loaded from cache.');
@@ -15732,6 +16432,16 @@ function track() {
 			return _this;
 		},
 
+		/**
+		 * Метод воспроизведения трека
+		 *
+		 * @method play
+		 * @public
+		 * @param p {Object}
+		 * @param p.loop {Boolean} Факт закольцованного воспроизведения
+		 * @param p.callback {Function} Исполнится после завершения воспроизведения
+		 * @returns track
+		 */
 		play: function ( p ) {
 
 			var _this = this,
@@ -15755,6 +16465,13 @@ function track() {
 			return _this;
 		},
 
+		/**
+		 * Метод остановки трека
+		 *
+		 * @method stop
+		 * @public
+		 * @returns track
+		 */
 		stop: function () {
 			if (this.source) {
 				this.source.stop();
@@ -15766,12 +16483,24 @@ function track() {
 }
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс видео
+ *
+ * @class video
+ */
 var video = (function () {
 
-	var videoPlayer = false;
+	var videoPlayer = false; // объект видеоплеера
 
 	return {
 
+		/**
+		 * Инициализация видеоплеера
+		 *
+		 * @method init
+		 * @public
+		 * @returns video
+		 */
 		init: function () {
 			videoPlayer = document.querySelector('video');
 
@@ -15781,6 +16510,14 @@ var video = (function () {
 			return this;
 		},
 
+		/**
+		 * Воспроизведение видео
+		 *
+		 * @method play
+		 * @public
+		 * @param cb {Function} вызовется по завершении
+		 * @returns video
+		 */
 		play: function ( cb ) {
 
 			var callback = cb || function () {};
@@ -15791,6 +16528,7 @@ var video = (function () {
 				callback();
 			}
 
+			// Не проигрывать в оффлайне
 			if (videoPlayer && (navigator.onLine !== false)) {
 				videoPlayer.style.display = 'block';
 
@@ -15843,14 +16581,25 @@ var translations = {
 }
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Реализует класс подсказок
+ *
+ * @class hint
+ */
 var hint = (function () {
 
-	var hint,
-		currentTimeout,
-		messageStack = [],
-		showDuration = 5000,
-		isActive = false;
+	var hint, // DOM-элемент для вывода подсказок
+		currentTimeout, // таймер демонстрации подсказки
+		messageStack = [], // стек подсказок
+		showDuration = 5000, // время, через которое текущая подсказка исчезнет
+		isActive = false; // факт вывода подсказки
 
+	/**
+	 * Проверяет стек на наличие подсказок и выводит ближайшую
+	 *
+	 * @method check
+	 * @private
+	 */
 	function check() {
 		if (!messageStack.length) {
 			hint.className = hint.className.replace(/\shint_active/ig, '');
@@ -15874,6 +16623,15 @@ var hint = (function () {
 	}
 
 	return {
+
+		/**
+		 * Инициализирует класс
+		 *
+		 * @method init
+		 * @public
+		 * @param cb {Function} выполнится по завершении
+		 * @returns hint
+		 */
 		init: function ( cb ) {
 			var callback = cb || function () {};
 
@@ -15885,6 +16643,7 @@ var hint = (function () {
 				check();
 			};
 
+			// Проверим локаль — при повторном запуске она кешируется
 			localforage.getItem('locale', function (locale) {
 				if (locale) {
 					globals.locale = locale;
@@ -15901,6 +16660,14 @@ var hint = (function () {
 
 		},
 
+		/**
+		 * Выводит подсказку или ставит её в очередь
+		 *
+		 * @method message
+		 * @public
+		 * @param text {String} Текст подсказки
+		 * @returns hint
+		 */
 		message: function ( text ) {
 
 			if (translations[text] && translations[text][globals.locale]) {
@@ -15911,6 +16678,13 @@ var hint = (function () {
 			return this;
 		},
 
+		/**
+		 * Очищает очередь подсказок
+		 *
+		 * @method clearQueue
+		 * @public
+		 * @returns hint
+		 */
 		clearQueue: function () {
 
 			messageStack = [];

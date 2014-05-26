@@ -1,9 +1,23 @@
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс утилит
+ *
+ * @class utils
+ */
 var utils = (function () {
 
 	return {
 
+		/**
+		 * Отдает случайное число в заданном интервале
+		 *
+		 * @method getRandomValue
+		 * @public
+		 * @param low {Number} нижняя граница
+		 * @param high {Number} верхняя граница
+		 * @returns {Number}
+		 */
 		getRandomValue: function ( low, high ) {
 			var innerLow = high
 					? low
@@ -13,11 +27,18 @@ var utils = (function () {
 			return innerLow + Math.round( Math.random()*(innerHigh-innerLow) );
 		},
 
-		// Возвращает Эвклидово расстояния
-		//p.x1
-		//p.y1
-		//p.x2
-		//p.y2
+		/**
+		 * Возвращает Эвклидово расстояния
+		 *
+		 * @method getDistance
+		 * @public
+		 * @param p {Object}
+		 * @param p.x1 {Number}
+		 * @param p.y1 {Number}
+		 * @param p.x2 {Number}
+		 * @param p.y2 {Number}
+		 * @returns {Number}
+		 */
 		getDistance: function ( p ) {
 			var xDistance = p.x2 - p.x1,
 				yDistance = p.y2 - p.y1;
@@ -25,12 +46,19 @@ var utils = (function () {
 			return Math.sqrt( xDistance*xDistance + yDistance*yDistance );
 		},
 
-		// Возвращает координаты точку на отрезке
-		//p.x1
-		//p.y1
-		//p.x2
-		//p.y2
-		//p.t
+		/**
+		 * Возвращает координаты точки на отрезке
+		 *
+		 * @method getLinePointCoords
+		 * @public
+		 * @param p {Object}
+		 * @param p.x1 {Number}
+		 * @param p.y1 {Number}
+		 * @param p.x2 {Number}
+		 * @param p.y2 {Number}
+		 * @param p.t {Number}
+		 * @returns {Object}
+		 */
 		getLinePointCoords: function ( p ) {
 			return {
 				x: (p.x2 - p.x1) * p.t + p.x1,
@@ -38,16 +66,23 @@ var utils = (function () {
 			};
 		},
 
-		// Возвращает координаты точки в кривой Безье
-		//p.x1
-		//p.y1
-		//p.ax1
-		//p.ay1
-		//p.ax2
-		//p.ay2
-		//p.x2
-		//p.y2
-		//p.t
+		/**
+		 * Возвращает координаты точки в кривой Безье
+		 *
+		 * @method getBezierPointCoords
+		 * @public
+		 * @param p {Object}
+		 * @param p.x1 {Number} Опорная точка
+		 * @param p.y1 {Number}
+		 * @param p.ax1 {Number} Управляющий рычаг
+		 * @param p.ay1 {Number}
+		 * @param p.ax2 {Number} Управляющий рычаг
+		 * @param p.ay2 {Number}
+		 * @param p.x2 {Number} Опорная точка
+		 * @param p.y2 {Number}
+		 * @param p.t {Number}
+		 * @returns {Object}
+		 */
 		getBezierPointCoords: function ( p ) {
 			function polynom(z) {
 				var at = (1 - p.t);
@@ -61,11 +96,18 @@ var utils = (function () {
 			};
 		},
 
-		// Возвращает позицию управляющих точек на кривой Безье
-		//p.x1
-		//p.y1
-		//p.x2
-		//p.y2
+		/**
+		 * Возвращает позицию управляющих точек на кривой Безье
+		 *
+		 * @method getAdditionalBezierPointsCoords
+		 * @public
+		 * @param p {Object}
+		 * @param p.x1 {Number}
+		 * @param p.y1 {Number}
+		 * @param p.x2 {Number}
+		 * @param p.y2 {Number}
+		 * @returns {Object}
+		 */
 		getAdditionalBezierPointsCoords: function ( p ) {
 			var a1 = utils.getLinePointCoords({
 					x1: p.x1,
@@ -91,17 +133,24 @@ var utils = (function () {
 			};
 		},
 
-		// Строит рекурсивно атомарные шаги по заданной кривой Безье длиной не более допустимого расстояния
-		//p.x1
-		//p.y1
-		//p.ax1
-		//p.ay1
-		//p.ax2
-		//p.ay2
-		//p.x2
-		//p.y2
-		//p.t1,
-		//p.t2
+		/**
+		 * Строит рекурсивно атомарные шаги по заданной кривой Безье длиной не более допустимого расстояния
+		 *
+		 * @method buildCurveSteps
+		 * @public
+		 * @param p {Object}
+		 * @param p.x1 {Number} опорная точка
+		 * @param p.y1 {Number}
+		 * @param p.ax1 {Number} управляющий рычаг
+		 * @param p.ay1 {Number}
+		 * @param p.ax2 {Number} управляющий рычаг
+		 * @param p.ay2 {Number}
+		 * @param p.x2 {Number} опорная точка
+		 * @param p.y2 {Number}
+		 * @param p.t1 {Number} границы интервала рекурсивного разбиения кривой
+		 * @param p.t2 {Number}
+		 * @returns {Object}
+		 */
 		buildCurveSteps: function ( p ) {
 			// максимально допустимое расстояние в пикселах
 			var maxDistance = 1.4,
@@ -258,8 +307,14 @@ var utils = (function () {
 			return path;
 		},
 
-		// Генерирует управляющий контур для траектории
-		// p.pathId
+		/**
+		 * Генерирует управляющий контур для траектории
+		 *
+		 * @method buildControlPoligon
+		 * @public
+		 * @param p {Object}
+		 * @param p.pathId {String} идентификатор пути
+		 */
 		buildControlPoligon: function ( p ) {
 
 			var touchRadiusDistance = 100,
@@ -308,6 +363,14 @@ var utils = (function () {
 			currentPath.controlPath = controlPath;
 		},
 
+		/**
+		 * Строит шаги и управляющую область для траекторий
+		 *
+		 * @method processPaths
+		 * @public
+		 * @param p {Object}
+		 * @param p.callback {Function} выполнится по завершении
+		 */
 		processPaths: function ( p ) {
 			var callback = p
 					? p.callback || function () {}
@@ -356,10 +419,22 @@ var utils = (function () {
 
 		},
 
+		/**
+		 * Плавно затемняет экран
+		 *
+		 * @method fadeIn
+		 * @public
+		 */
 		fadeIn: function () {
 			document.querySelector('.black-fade').className += ' black-fade_active';
 		},
 
+		/**
+		 * Плавно удаляет затемнение с экрана
+		 *
+		 * @method fadeOut
+		 * @public
+		 */
 		fadeOut: function () {
 			document.querySelector('.black-fade').className = document.querySelector('.black-fade').className.replace(/\sblack-fade_active/ig, '');
 		}

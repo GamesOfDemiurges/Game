@@ -1,5 +1,10 @@
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс для перемещения объектов в плоскости Z
+ *
+ * @class Z
+ */
 var Z = (function () {
 
 	var zindex = {
@@ -11,9 +16,29 @@ var Z = (function () {
 		};
 
 	return {
+
+		/**
+		 * Возвращает структуру всех слоев
+		 *
+		 * @method getZindex
+		 * @public
+		 * @returns {Object}
+		 */
 		getZindex: function () {
 			return zindex;
 		},
+
+		/**
+		 * Добавляет новую плоскость в структуру всех слоев
+		 *
+		 * @method addZindex
+		 * @public
+		 * @param p {Object}
+		 * @param p.z {Number} плоскость
+		 * @param p.pz {Number} приоритет плоскости
+		 * @param p.priorityZindex {Number}
+		 * @param p.stackZindex {Number}
+		 */
 		addZindex: function ( p ) {
 			function addChild(next ) {
 				var child = Math.random();
@@ -144,8 +169,17 @@ var Z = (function () {
 			}
 			p.stackZindex = stackIndex; // отражает позицию в стеке на отрисовку
 
-			Z.drawZindex(scene.playGround);
+			Z.drawZindex();
 		},
+
+		/**
+		 * Изменить значение z-плоскости для объекта
+		 *
+		 * @method changeZindex
+		 * @public
+		 * @param p {Object}
+		 * @param p.obj {obj} Объект-владелец плоскости
+		 */
 		changeZindex: function ( p ) {
 			// Оч. грубо — удалим приоритет из списка
 			// плоскость можно не трогать — вдруг понадобится?
@@ -165,6 +199,13 @@ var Z = (function () {
 
 			Z.addZindex(p.obj);
 		},
+
+		/**
+		 * Изменить порядок построения z-плоскостей
+		 *
+		 * @method drawZindex
+		 * @public
+		 */
 		drawZindex: function () {
 			var currentPlain = zindex.base.next,
 				currentPriorityPlain;

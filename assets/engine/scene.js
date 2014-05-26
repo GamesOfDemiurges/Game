@@ -1,26 +1,38 @@
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс сцены
+ *
+ * @class scene
+ */
 var scene = (function () {
 
-	/* Private */
 	var stage, // сцена
 		renderer, // оператор рендеринга
 		masterCanvas, // Физический канвас на вьюпорте
 		x = 0, y = 0; // точки отсчета для сцены
 
+	/**
+	 * Обновление холста
+	 *
+	 * @method repaintCanvas
+	 * @private
+	 */
 	function repaintCanvas() {
 		requestAnimFrame(repaintCanvas);
 		renderer.render(stage);
 	}
 
-	/* Public */
-
 	return {
 
-		// Инициализация сцены
-		// Передается селектор физического канваса
-
-		// p.canvasSelector
+		/**
+		 * Инициализация сцены
+		 *
+		 * @constructor
+		 * @param p {Object}
+		 * @param p.canvasId {Node} селектор физического канваса
+		 * @returns scene
+		 */
 		init: function ( p ) {
 			var _this = this,
 				playGround;
@@ -75,8 +87,15 @@ var scene = (function () {
 			return _this;
 		},
 
-		// На сцену в произвольный момент может быть добавлен один из существующих объектов
-		// p.image
+		/**
+		 * Добавляет объект на сцену
+		 *
+		 * @method addObj
+		 * @public
+		 * @param p {Object}
+		 * @param p.ai {Object} параметры экземпляра ИИ
+		 * @returns scene
+		 */
 		addObj: function ( p ) {
 			var _this = this;
 
@@ -89,9 +108,16 @@ var scene = (function () {
 			return _this;
 		},
 
-		// Смещение сцены (не путать со смещением объекта)
-		// p.dx
-		// p.dy
+		/**
+		 * Смещение сцены (не путать со смещением объекта)
+		 *
+		 * @method move
+		 * @public
+		 * @param p {Object}
+		 * @param p.dx
+		 * @param p.dy
+		 * @returns scene
+		 */
 		move: function ( p ) {
 			var _this = this,
 				maxYShift = ( _this.height / globals.scale - (_this.height / globals.scale ) * (globals.viewport.scale ) ) * globals.scale,

@@ -1,9 +1,20 @@
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс череди обработки перемещений объектов по траекториям
+ *
+ * @class queue
+ */
 var queue = (function () {
 
-	var objects = {};
+	var objects = {}; // Объекты, которые в данный момент времени перемещаются
 
+	/**
+	 * Обработчик очереди
+	 *
+	 * @method processQueue
+	 * @private
+	 */
 	function processQueue() {
 		var removedObjects = [],
 			objectPathsLength,
@@ -142,14 +153,20 @@ var queue = (function () {
 
 	return {
 
-		// Добавляет анимацию в очередь.
-		// Если такой объект уже есть в очереди,
-		// добавленная анимация будет выполнена сразу же после уже запланированных для данного объекта.
-		// Очередь обрабатывает все анимируемые объекты со скоростью ~ 60 раз в секунду.
-		// После того, как цепочка анимаций для объекта полностью выполнена, он автоматически выкидывается из очереди
-		//
-		// p.objectId
-		// p.paths
+		/**
+		 * Добавляет анимацию в очередь.
+		 *
+		 * Если такой объект уже есть в очереди,
+		 * добавленная анимация будет выполнена сразу же после уже запланированных для данного объекта.
+		 * После того, как цепочка анимаций для объекта полностью выполнена, он автоматически выкидывается из очереди
+		 *
+		 * @method addToObjPaths
+		 * @public
+		 * @param p {Object}
+		 * @param p.objectId {String} идентификатор объекта
+		 * @param p.paths {Array} массив путей, по которым перемещается объект, и характеристик перемещения
+		 * @returns queue
+		 */
 		addToObjPaths: function ( p ) {
 			objects[p.objectId] = p.paths;
 			objects[p.objectId].callback = p.callback;
@@ -166,10 +183,17 @@ var queue = (function () {
 			return this;
 		},
 
-		// Запускает агент очереди;
-		// Агент крутится в фоне и следит за добавлением объектов в очереди
-		// Как только в очередь добавляется объект, начинается исполнение его анимации
+		/**
+		 * Запускает агент очереди;
+		 *
+		 * @method startQueue
+		 * @public
+		 * @returns queue
+		 */
 		startQueue: function () {
+			// Агент крутится в фоне и следит за добавлением объектов в очереди
+			// Как только в очередь добавляется объект, начинается исполнение его анимации
+
 			processQueue();
 
 			return this;

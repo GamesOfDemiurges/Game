@@ -1,17 +1,42 @@
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Реализует класс путевого графа
+ *
+ * @class graph
+ */
 var graph = (function () {
 
 	var serviceGraph,
 		adjacencyMatrix;
 
+	/**
+	 * Создает идентификатор вершины графа на основании координат на плоскости
+	 *
+	 * @method makeIdByCoords
+	 * @private
+	 * @param x {Number}
+	 * @param y {Number}
+	 * @returns String
+	 */
 	function makeIdByCoords(x, y) {
 
 		return Math.round(x).toString() + '_' + Math.round(y).toString();
 	}
 
-	// Добаввляет данные в структуру ServiceGraph, отражающую связь между вершинами графа, определенных координатами
-	// таким образом, две вершины разных отрезков, располашающихся в одной точке, образуют одну вершину
+	/**
+	 * Добавляет данные в структуру ServiceGraph, отражающую связь между вершинами графа, определенных координатами
+	 * таким образом, две вершины разных отрезков, располагающихся в одной точке, образуют одну вершину
+	 *
+	 * @method addToGraph
+	 * @private
+	 * @param pathName {String} название пути
+	 * @param linkToPathPoint1 {Object} указатель на структуру рассматриваемой точки
+	 * @param linkToPathPoint2 {Object}
+	 * @param point1 {String} идентификатор точки
+	 * @param point2 {String}
+	 * @param distance {Number} длина пути
+	 */
 	function addToGraph(pathName, linkToPathPoint1, linkToPathPoint2, point1, point2, distance) {
 
 		// Если таких координат еще вообще нет, создаем структуру данных
@@ -56,7 +81,12 @@ var graph = (function () {
 		}
 	}
 
-	// Вычисление кратчайшей дистанции
+	/**
+	 * Вычисляет кратчайшую дистанцию
+	 *
+	 * @method calculateShortestDistance
+	 * @private
+	 */
 	function calculateShortestDistance() {
 		var n = adjacencyMatrix[0].length,
 			k, i, j, e1, e2;
@@ -89,7 +119,14 @@ var graph = (function () {
 		}
 	}
 
-	// Построение матрицы достижимости
+	/**
+	 * Строит матрицу достижимости
+	 *
+	 * @method buildAdjacencyMatrix
+	 * @private
+	 * @param p {Object}
+	 * @param p.callback {Function} выполняется по завершении
+	 */
 	function buildAdjacencyMatrix( p ) {
 		var reference = [],
 			callback = (p && p.callback) || function () {},
@@ -181,7 +218,15 @@ var graph = (function () {
 
 
 	return {
-		// Строит граф
+
+		/**
+		 * Строит граф
+		 *
+		 * @method buildGraph
+		 * @public
+		 * @param p {Object}
+		 * @param p.callback {Function} выполняется по завершении
+		 */
 		buildGraph: function ( p ) {
 
 			var path,
@@ -206,13 +251,28 @@ var graph = (function () {
 			buildAdjacencyMatrix( p );
 		},
 
-		// Просто выводит матрицу достижимости
+		/**
+		 * Просто выводит матрицу достижимости
+		 *
+		 * @method getAdjacencyMatrix
+		 * @public
+		 * @returns adjacencyMatrix {Object}
+		*/
 		getAdjacencyMatrix: function () {
 
 			return adjacencyMatrix;
 		},
 
-		// Отдает вершину графа, если совпадает с заданным шагом
+		/**
+		 * Отдает вершину графа, если совпадает с заданным шагом
+		 *
+		 * @method getGraphIdByStep
+		 * @public
+		 * @param p {Object}
+		 * @param p.path {String} идентификатор пути
+		 * @param p.step {Number} номер шага на заданном пути
+		 * @returns result {Number}
+		*/
 		getGraphIdByStep: function ( p ) {
 			var result;
 

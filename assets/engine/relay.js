@@ -1,9 +1,24 @@
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс внутренних оповещений
+ *
+ * @class relay
+ */
 var relay = (function () {
 
 	return {
 
+		/**
+		 * Бросает событие
+		 *
+		 * @method drop
+		 * @public
+		 * @param p {Object}
+		 * @param p.type {String} тип события
+		 * @param p.obj {String} автор события
+		 * @returns relay
+		 */
 		drop: function ( p ) {
 			var _this = this,
 				evt, objEvt,
@@ -29,6 +44,14 @@ var relay = (function () {
 
 		},
 
+		/**
+		 * Слушает событие
+		 *
+		 * @method listen
+		 * @public
+		 * @param eventName {Event} объект события
+		 * @returns relay
+		 */
 		listen: function ( eventName ) {
 			var _this = this;
 

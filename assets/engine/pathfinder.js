@@ -1,11 +1,29 @@
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс прокладки путей
+ *
+ * @class pathfinder
+ */
 var pathfinder = (function () {
 
-	// Прохождение по массиву путей
-	// У промежуточных путей targetChain считается конечной точкой,
-	// у последнего пути — берется из параметра
+	/**
+	 * Прохождение по массиву путей
+	 *
+	 * @method processPaths
+	 * @private
+	 * @param p {Object}
+	 * @param p.currentObject {obj} перемещаемый объект
+	 * @param p.animationName {String} анимация, проигрываемая при перемещении
+	 * @param p.targetChain {Number} целевое звено
+	 * @param p.speedValue {Number} скорость перемещения
+	 * @param p.pathArray {Array} массив траекторий, чере которые проходит объект
+	 * @param p.callback {Function} выполнится по завершении
+	 */
 	function processPaths( p ) {
+		// У промежуточных путей targetChain считается конечной точкой,
+		// у последнего пути — берется из параметра
+
 		var servicePoints,
 			step = p.currentObject.step,
 			resultPath = [],
@@ -128,6 +146,18 @@ var pathfinder = (function () {
 		});
 	}
 
+	/**
+	 * Построение массива путей
+	 *
+	 * @method buildPathArray
+	 * @private
+	 * @param p {Object}
+	 * @param p.resultPath {String} идентификатор конечного пути
+	 * @param p.currentObject {obj} перемещаемый объект
+	 * @param p.animationName {String} анимация, проигрываемая при перемещении
+	 * @param p.speedValue {Number} скорость перемещения
+	 * @param p.callback {Function} выполнится по завершении
+	 */
 	function buildPathArray( p ) {
 		// Построение списка путей, необходимых для достижения конечной вершины графа
 		if ( p.resultPath.graphIdEnd === null || !globals.graph[ p.resultPath.graphIdStart]) { return false; }
@@ -155,6 +185,18 @@ var pathfinder = (function () {
 		} );
 	}
 
+	/**
+	 * Ищет кратчайший путь до заданного звена
+	 *
+	 * @method findPathToChain
+	 * @private
+	 * @param p {Object}
+	 * @param p.currentObject {obj} перемещаемый объект
+	 * @param p.path {String} траектория, до которой нужно дойти
+	 * @param p.chain {Number} звено, до которого нужно дойти
+	 * @param p.resultPath {Object} путь, с которым будет сравниваться выбранная траектория
+	 * @returns {Object} самый короткий путь
+	 */
 	function findPathToChain( p ) {
 		if (!p.currentObject || !globals.paths[p.path] || !globals.paths[ p.currentObject.path ]) { return false; }
 
@@ -235,8 +277,15 @@ var pathfinder = (function () {
 	}
 
 	/**
-	* Перемещает объект точку, заданную координатами клика
-	*/
+	 * Перемещает объект в точку, заданную координатами клика
+	 *
+	 * @method moveObjectByCoords
+	 * @private
+	 * @param p {Object}
+	 * @param p.id {String} Идентификатор объекта
+	 * @param p.x {Number}
+	 * @param p.y {number}
+	 */
 	function moveObjectByCoords( p ) {
 		var currentObject = globals.objects[p.id],
 			resultPath = {},
@@ -270,6 +319,19 @@ var pathfinder = (function () {
 		} );
 	}
 
+	/**
+	 * Перемещает объект в заданное звено
+	 *
+	 * @method moveObjectByChain
+	 * @private
+	 * @param p {Object}
+	 * @param p.id {String} Идентификатор объекта
+	 * @param p.path {String} траектория, до которой нужно дойти
+	 * @param p.chain {Number} звено, до которого нужно дойти
+	 * @param p.animationName {String} анимация, проигрываемая при перемещении
+	 * @param p.speedValue {Number} скорость перемещения
+	 * @param p.callback {Function} выполнится по завершении
+	 */
 	function moveObjectByChain( p ) {
 		var currentObject = globals.objects[p.id],
 			resultPath;
@@ -291,6 +353,12 @@ var pathfinder = (function () {
 		} );
 	}
 
+	/**
+	 * Добавляет обработчики кликов в зависимости от типа устройства
+	 *
+	 * @method attachPathFinderListeners
+	 * @private
+	 */
 	function attachPathFinderListeners() {
 
 		if (document.ontouchend !== undefined) {
@@ -340,13 +408,30 @@ var pathfinder = (function () {
 	}
 
 	return {
+
+		/**
+		 * Публичная обертка дл инициализации обработчиков событий
+		 *
+		 * @method start
+		 * @public
+		 */
 		start: function () {
 			attachPathFinderListeners();
 		},
 
-		// p.id
-		// p.path
-		// p.chain
+		/**
+		 * Публичная обертка для перемещения объекта в заданную точку
+		 *
+		 * @method moveObjectByChain
+		 * @public
+		 * @param p {Object}
+		 * @param p.id {String} Идентификатор объекта
+		 * @param p.path {String} траектория, до которой нужно дойти
+		 * @param p.chain {Number} звено, до которого нужно дойти
+		 * @param p.animationName {String} анимация, проигрываемая при перемещении
+		 * @param p.speedValue {Number} скорость перемещения
+		 * @param p.callback {Function} выполнится по завершении
+		 */
 		moveObjectByChain: function ( p ) {
 			moveObjectByChain( p );
 		}

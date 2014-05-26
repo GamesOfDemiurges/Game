@@ -1,9 +1,24 @@
 /*jshint camelcase:true, curly:true, eqeqeq:true, immed:true, newcap:true, noarg:true, noempty:true, nonew:true, trailing:true, laxbreak:true, loopfunc:true, browser:true */
 
+/**
+ * Класс вьюпорта
+ *
+ * @class viewport
+ */
 var viewport = (function () {
 	var magicYHeroShift = 0;
 
-
+	/**
+	 * Инициализация переменных при начае масштабирования
+	 *
+	 * @method viewportInitScale
+	 * @private
+	 * @param p {Object}
+	 * @param p.x1 {Number}
+	 * @param p.y1 {Number}
+	 * @param p.x2 {Number}
+	 * @param p.y2 {Number}
+	 */
 	function viewportInitScale( p ) {
 		globals.viewport.resize = true;
 		globals.viewport.distance = Math.sqrt( ( p.x1 - p.x2 )*( p.x1 - p.x2 ) + ( p.y1 - p.y2 )*( p.y1 - p.y2 ) );
@@ -12,6 +27,17 @@ var viewport = (function () {
 		globals.viewport.sceneY = scene.playGround.position.y - (globals.objects.hero.image.position.y + magicYHeroShift) * (1 - globals.viewport.scale);
 	}
 
+	/**
+	 * Процесс масштабирования вьюпорта
+	 *
+	 * @method viewportProcessScale
+	 * @private
+	 * @param p {Object}
+	 * @param p.x1 {Number}
+	 * @param p.y1 {Number}
+	 * @param p.x2 {Number}
+	 * @param p.y2 {Number}
+	 */
 	function viewportProcessScale( p ) {
 		var newDistance = Math.sqrt( ( p.x1 - p.x2 )*( p.x1 - p.x2 ) + ( p.y1 - p.y2 )*( p.y1 - p.y2 ) ),
 			k = globals.viewport.scale * (newDistance / globals.viewport.distance),
@@ -63,6 +89,12 @@ var viewport = (function () {
 		globals.viewport.y = y;
 	}
 
+	/**
+	 * Завершение масштабирования вьюпорта
+	 *
+	 * @method viewportSaveScale
+	 * @private
+	 */
 	function viewportSaveScale() {
 		setTimeout(function () {
 			globals.viewport.resize = false;
@@ -71,6 +103,12 @@ var viewport = (function () {
 		globals.viewport.scale = scene.playGround.scale.x;
 	}
 
+	/**
+	 * Добавление обработчиков событий
+	 *
+	 * @method attachEvents
+	 * @private
+	 */
 	function attachEvents() {
 
 		if (document.ontouchend !== undefined) {
@@ -140,6 +178,12 @@ var viewport = (function () {
 
 	return {
 
+		/**
+		 * Инициализация
+		 *
+		 * @method init
+		 * @public
+		 */
 		init: function () {
 			attachEvents();
 		}
